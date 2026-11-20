@@ -4,7 +4,7 @@ Made for Laura (Mexico City) and Andrés (Paris). An exact optimiser for a long-
 city in between) and **for how long**. It stays within both people's leave and blocked dates, and trades days together
 against fares, hotels and long gaps apart.
 
-- **Web app** (no install, runs in the browser): https://aladinoster.github.io/paris-cdmx-planner/
+- **Web app** (no install, runs in the browser): https://aladinoster.github.io/paris-cdmx-planne/
 - **Python package** `meetplan`: the same model as a CLI and library, managed with [uv](https://docs.astral.sh/uv/).
 
 Both implementations give identical results; `tests/` checks this.
@@ -38,8 +38,8 @@ Both implementations give identical results; `tests/` checks this.
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # 2. clone and install dependencies (creates .venv automatically)
-git clone https://github.com/aladinoster/paris-cdmx-planner.git
-cd paris-cdmx-planner
+git clone https://github.com/aladinoster/paris-cdmx-planne.git
+cd paris-cdmx-planne
 uv sync
 
 # 3. solve
