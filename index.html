@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Todo contigo · 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a love letter that is also a planner. Dusk banner and a scroll scene up top, then one column of
+   highlights, the trips, the calendar with fares, places to meet, and the knobs folded away at the bottom. */
+:root {
+  color-scheme: light;
+  --bg: #f7f4f6;
+  --surface: #ffffff;
+  --ink: #1b1620;
+  --ink-2: #4f4756;
+  --ink-3: #847b8a;
+  --line: #e9e2e8;
+  --rose: #c2185b;          /* accent: love notes, title, hearts */
+  --me: #2a78d6;            /* Andrés flies Paris → CDMX */
+  --her: #eb6834;           /* she flies CDMX → Paris */
+  --meet: #1baf7a;          /* together in a third city */
+  --me-soft: #d6e6f8;
+  --her-soft: #fbe1d6;
+  --block: #cfc6cf;
+  --sky-1: #2b2350; --sky-2: #8a3d6b; --sky-3: #f2a07b;
+  --font-script: "Great Vibes", "Snell Roundhand", "Apple Chancery", cursive;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #141116; --surface: #1d1920; --ink: #f3eef3; --ink-2: #c4bcc6; --ink-3: #91889a; --line: #2f2934;
+    --rose: #f06292; --me: #3987e5; --her: #d95926; --meet: #199e70; --me-soft: #1d3350; --her-soft: #4a2617; --block: #463e48;
+    --sky-1: #120f26; --sky-2: #4d2245; --sky-3: #a4566a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141116; --surface: #1d1920; --ink: #f3eef3; --ink-2: #c4bcc6; --ink-3: #91889a; --line: #2f2934;
+  --rose: #f06292; --me: #3987e5; --her: #d95926; --meet: #199e70; --me-soft: #1d3350; --her-soft: #4a2617; --block: #463e48;
+  --sky-1: #120f26; --sky-2: #4d2245; --sky-3: #a4566a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 72px; display: flex; flex-direction: column; gap: 18px; }
+h2 { font: 700 20px/1.2 var(--font-display); margin: 0; text-wrap: balance; }
+h3 { margin: 0; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.num { font-variant-numeric: tabular-nums; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.script { font-family: var(--font-script); font-weight: 400; }
+
+/* ---------- Banner ---------- */
+.banner { position: relative; color: #fff; text-align: center; overflow: hidden;
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 58%, var(--sky-3) 100%); padding: 28px 16px 0; }
+.banner h1 { font: 400 clamp(56px, 16vw, 104px)/1 var(--font-script); margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,.25); }
+.banner .sub { margin: 6px 0 0; font: 500 14px/1.4 var(--font-body); letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.banner svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 4px auto 0; }
+.stars circle { fill: #fff; }
+
+/* ---------- Highlights ---------- */
+.hero { margin-top: -6px; }
+.big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.big .n { font: 700 56px/1 var(--font-display); color: var(--rose); font-variant-numeric: tabular-nums; }
+.big .l { font: 400 34px/1 var(--font-script); color: var(--ink); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fact { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.fact .k { font-size: 11.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+.fact .v { font: 700 21px/1.15 var(--font-display); font-variant-numeric: tabular-nums; }
+.fact .d { font-size: 12.5px; color: var(--ink-2); }
+.meter { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 5px; }
+.meter > i { display: block; height: 100%; border-radius: 3px; }
+.next { display: flex; gap: 12px; align-items: center; border-radius: 12px; padding: 12px; background: color-mix(in srgb, var(--rose) 9%, transparent); }
+.next .icon { font-size: 22px; }
+.notes { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: var(--ink-2); }
+.notes b { color: var(--ink); }
+.yearbar { position: relative; height: 34px; border-radius: 8px; background: var(--line); overflow: hidden; }
+.yearbar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.yearbar-axis { display: grid; grid-template-columns: repeat(12, 1fr); font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
+
+/* ---------- Scroll scene ---------- */
+.scene { height: 210vh; position: relative; }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+.stage .panel { border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, var(--sky-1), var(--sky-2) 65%, var(--sky-3)); color: #fff; padding: 18px 12px 8px; text-align: center; }
+.stage .caption { font: 400 clamp(30px, 8vw, 44px)/1.1 var(--font-script); min-height: 1.2em; }
+.stage .small { font-size: 13px; opacity: .85; min-height: 1.4em; }
+.stage svg { width: 100%; height: auto; display: block; }
+.scroll-hint { text-align: center; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---------- Pills, tags ---------- */
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+.pill.me { background: var(--me-soft); }
+.pill.her { background: var(--her-soft); }
+.pill.meet { background: color-mix(in srgb, var(--meet) 22%, transparent); }
+.tag { display: inline-block; font-size: 11px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+
+/* ---------- Trips timeline ---------- */
+.trips { display: flex; flex-direction: column; gap: 10px; }
+.trip { display: grid; grid-template-columns: 6px 1fr; gap: 12px; }
+.trip .bar { border-radius: 3px; }
+.trip .body { display: flex; flex-direction: column; gap: 6px; padding: 2px 0 10px; border-bottom: 1px solid var(--line); }
+.trip:last-child .body { border-bottom: 0; }
+.trip .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.trip .dates { font: 700 17px/1.2 var(--font-display); }
+.trip .stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-2); }
+.trip .stats b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------- Scenario ---------- */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { font: 600 13px/1.25 var(--font-body); border: 0; background: transparent; color: var(--ink-2); padding: 8px 6px; border-radius: 9px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.scen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.scen div { border: 1px solid var(--line); border-radius: 10px; padding: 8px; font-size: 12.5px; color: var(--ink-2); }
+.scen div.win { border-color: var(--rose); }
+.scen b { display: block; font: 700 18px/1.2 var(--font-display); color: var(--ink); }
+
+/* ---------- Calendar ---------- */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.months { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px 12px; }
+.month h3 { font: 600 13px/1 var(--font-body); color: var(--ink); display: flex; justify-content: space-between; align-items: baseline; }
+.mprice { font: 500 10.5px/1.3 var(--font-mono); color: var(--ink-3); margin: 3px 0 6px; display: flex; gap: 8px; }
+.mprice .cheap { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+.grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.grid7 .dh { font-size: 10px; color: var(--ink-3); text-align: center; }
+.day { aspect-ratio: 1; border-radius: 5px; font-size: 10.5px; display: flex; align-items: center; justify-content: center; color: var(--ink-2);
+  background: transparent; border: 0; padding: 0; font-family: var(--font-mono); position: relative; cursor: pointer; min-width: 0; }
+.day.blk { background-image: repeating-linear-gradient(135deg, var(--block) 0 2px, transparent 2px 5px); }
+.day.me { background: var(--me); color: #fff; }
+.day.her { background: var(--her); color: #fff; }
+.day.meet { background: var(--meet); color: #fff; }
+.day.me.hw { background: var(--me-soft); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--me); }
+.day.her.hw { background: var(--her-soft); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--her); }
+.day.hol::after { content: ""; position: absolute; bottom: 2px; left: 50%; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: currentColor; }
+.day.sel { outline: 2px solid var(--rose); outline-offset: 1px; }
+.dayinfo { border-radius: 12px; background: var(--bg); padding: 10px 12px; font-size: 13.5px; color: var(--ink-2); min-height: 44px; }
+.dayinfo b { color: var(--ink); }
+
+/* ---------- Where to meet ---------- */
+.places { display: flex; flex-direction: column; }
+.place { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.place:last-child { border-bottom: 0; }
+.place .nm { font-weight: 600; }
+.place .tot { font: 700 17px/1.2 var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
+.place .br { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.place.best .tot { color: var(--rose); }
+.place.off { opacity: .5; }
+.place .ctl { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+.place .ctl label { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.place .ctl input[type=number] { width: 64px; padding: 3px 6px; font-size: 16px; }
+
+/* ---------- Chart ---------- */
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 12.5px; box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; display: none; }
+
+/* ---------- Settings ---------- */
+details.card > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::after { content: "＋"; color: var(--ink-3); font-size: 18px; }
+details.card[open] > summary::after { content: "－"; }
+.form { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 13px; font-weight: 500; }
+.field small { color: var(--ink-3); font-size: 12px; }
+input, select, textarea { font: inherit; font-size: 16px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; width: 100%; }
+textarea { font-family: var(--font-mono); font-size: 13px; min-height: 110px; }
+.chk { flex-direction: row; align-items: center; gap: 8px; }
+.chk input { width: auto; }
+.fixed { display: flex; flex-direction: column; gap: 12px; }
+.fx { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fx .full { grid-column: 1 / -1; }
+.fx label { font-size: 11.5px; color: var(--ink-3); display: flex; flex-direction: column; gap: 3px; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+button.btn { font: 600 14px var(--font-body); border-radius: 10px; padding: 9px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+button.btn.primary { background: var(--rose); color: #fff; border-color: var(--rose); }
+button.x { border: 0; background: transparent; color: var(--ink-3); font-size: 13px; cursor: pointer; text-align: left; padding: 0; }
+.status { font-size: 12.5px; color: var(--ink-3); }
+.status.bad { color: var(--rose); font-weight: 600; }
+.prose { color: var(--ink-2); font-size: 14px; }
+.prose code { font-family: var(--font-mono); font-size: 12.5px; }
+footer { text-align: center; color: var(--ink-3); font-size: 12.5px; }
+footer .script { font-size: 28px; color: var(--rose); display: block; }
+:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+@media (min-width: 620px) { .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: no-preference) { .meter > i { transition: width .4s; } }
+</style>
+</head>
+<body>
+
+<header class="banner" aria-label="Todo contigo">
+  <h1>Todo contigo</h1>
+  <p class="sub"><span id="nm-her-b">Laura</span> &amp; <span id="nm-me-b">Andrés</span> · Ciudad de México ⇄ Paris · 2027</p>
+  <svg id="bannerSvg" viewBox="0 0 400 130" aria-hidden="true"></svg>
+</header>
+
+<div class="wrap">
+  <section class="card hero" aria-label="Highlights">
+    <div class="card-head"><span class="muted" id="status">Solving…</span><span class="muted" id="modeLabel"></span></div>
+    <div class="big"><span class="n" id="hDays">–</span><span class="l">días juntos</span></div>
+    <div class="next" id="hNext"></div>
+    <div>
+      <div class="yearbar" id="yearbar" role="img" aria-label="Trips across the year"></div>
+      <div class="yearbar-axis"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div>
+    </div>
+    <div class="facts" id="facts"></div>
+    <ul class="notes" id="notes"></ul>
+  </section>
+
+  <section class="scene" id="scene" aria-label="Animation: the two of you meeting">
+    <div class="stage">
+      <div class="panel">
+        <div class="caption" id="sceneCaption">9,200 km apart…</div>
+        <div class="small" id="sceneSmall">Keep scrolling</div>
+        <svg id="sceneSvg" viewBox="0 0 400 170" aria-hidden="true"></svg>
+      </div>
+      <div class="scroll-hint">↓ the plan</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>The trips</h2><span class="muted">Fares are estimated return tickets, economy</span></div>
+    <div class="trips" id="trips"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Where free trips may go</h2></div>
+    <div class="seg" role="group" aria-label="Scenario">
+      <button type="button" data-mode="home">Only home</button>
+      <button type="button" data-mode="both">Home or elsewhere</button>
+      <button type="button" data-mode="meet">Only elsewhere</button>
+    </div>
+    <div class="scen" id="scen"></div>
+    <span class="muted">“Home” is Paris or Mexico City. Fixed trips keep their own setting. The best score is outlined.</span>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>The year</h2></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--me)"></i><span class="nm-me">Andrés</span> in CDMX</span>
+      <span><i class="sw" style="background:var(--her)"></i><span class="nm-her">Laura</span> in Paris</span>
+      <span><i class="sw" style="background:var(--meet)"></i>Together elsewhere</span>
+      <span><i class="sw" style="background:var(--me-soft);box-shadow:inset 0 0 0 1.5px var(--ink-3)"></i>Host at work</span>
+      <span><i class="sw" style="background-image:repeating-linear-gradient(135deg,var(--block) 0 2px,transparent 2px 5px);border:1px solid var(--line)"></i><span class="nm-her">Laura</span> can’t take leave</span>
+      <span>• holiday</span>
+    </div>
+    <div class="muted">Under each month: average return fare if <span class="nm-me">Andrés</span> flies (A) or <span class="nm-her">Laura</span> flies (E). The cheaper one is underlined.</div>
+    <div class="months" id="months"></div>
+    <div class="dayinfo" id="dayinfo">Tap any day to see who’s where and what flights departing that day would cost.</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Where to meet</h2>
+      <label class="muted" for="wmMonth">10 nights from the 15th of
+        <select id="wmMonth" style="width:auto;display:inline-block;margin-left:4px;font-size:14px;padding:4px 6px"></select></label></div>
+    <span class="muted">Ranked by total cost. “€/night” is the hotel for two; “+€/day” is how much extra a holiday day there is worth to you. Elsewhere means two tickets, a hotel, and leave for both of you. Home means one ticket, no hotel, and the host can keep working.</span>
+    <div class="places" id="where"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Fares through the year</h2><span class="muted">10-night return, by departure date</span></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--me)"></i><span class="nm-me">Andrés</span> flies Paris → CDMX</span>
+      <span><i class="sw" style="background:var(--her)"></i><span class="nm-her">Laura</span> flies CDMX → Paris</span>
+      <span><i class="sw" style="background:var(--ink);border-radius:50%"></i>Real Kiwi.com quote</span>
+    </div>
+    <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+  </section>
+
+  <details class="card" id="adjust">
+    <summary><h2>Adjust the plan</h2></summary>
+    <div class="form">
+      <div class="field"><label for="f-nameMe">Your name</label><input id="f-nameMe" autocomplete="off"></div>
+      <div class="field"><label for="f-nameHer">Her name</label><input id="f-nameHer" autocomplete="off"></div>
+    </div>
+    <h3 style="font:600 15px var(--font-body)">Fixed trips</h3>
+    <span class="muted">Give a date range to let the optimiser slide a trip. Equal dates lock it.</span>
+    <div class="fixed" id="reqs"></div>
+    <div class="btns"><button class="btn" id="addReq" type="button">Add a fixed trip</button></div>
+    <h3 style="font:600 15px var(--font-body)">Constraints and preferences</h3>
+    <div class="form" id="form"></div>
+    <div class="form">
+      <div class="field"><label for="holidaysMe">Your days off (France)</label><textarea id="holidaysMe"></textarea><small>One date per line, YYYY-MM-DD</small></div>
+      <div class="field"><label for="holidaysHer">Her days off (Mexico)</label><textarea id="holidaysHer"></textarea><small>Federal holidays, Holy Thursday and Friday, Día de Muertos</small></div>
+      <div class="field"><label for="blackoutHerExtra">Extra dates she can’t take off</label><textarea id="blackoutHerExtra"></textarea><small>On top of month-ends and August</small></div>
+    </div>
+    <div class="btns"><button class="btn primary" id="run" type="button">Re-optimise</button><button class="btn" id="reset" type="button">Reset to defaults</button></div>
+  </details>
+
+  <details class="card prose">
+    <summary><h2>How the optimiser works</h2></summary>
+    <p>Every candidate trip has a start day, an end day, a place (Paris, Mexico City or a third city) and whether the host takes leave. It is worth <code>V</code> € per day together, × <code>β</code> on days the host works, × ½ on the two travel days, plus a city’s extra €/day. From that we subtract the fares, the hotel and a fixed overhead <code>C</code>. A gap of <code>g</code> days between trips costs <code>λ·max(0, g − target)²</code>, so long silences hurt more than proportionally.</p>
+    <p>A dynamic programme over the 365 days tracks your remaining leave, her remaining leave and which fixed trips are done. The result is the true optimum for these inputs, not a heuristic. The same model ships as a Python package (<code>meetplan</code>) in the repository, with tests that check the two agree.</p>
+    <p>Fares come from a seasonal curve calibrated on Kiwi.com quotes collected in November 2026 for 2027 dates. Third cities are scaled from May and March quotes. Treat every figure as an estimate and use “Fare level” once you see live prices.</p>
+  </details>
+
+  <footer><span class="script">Todo contigo</span>Made for the two of you.</footer>
+</div>
+
+<script>
+// Long-distance meeting planner: exact DP over trips + Lagrangian relaxation of the two leave budgets.
+(function (root) {
+  const DAY = 86400000;
+  function ymd(d) { return d.toISOString().slice(0, 10); }
+  function parseD(s) { return new Date(s + "T00:00:00Z"); }
+
+  // Daily round-trip price curves (EUR, 1 adult economy), calibrated on Kiwi.com quotes (Nov 2026).
+  // Each entry: [from MM-DD, price]. Piecewise constant, then lightly smoothed.
+  const CURVE = {
+    me: [ // Paris -> Mexico City (he travels)
+      ["01-01", 1250], ["01-06", 880], ["02-01", 900], ["03-01", 940], ["03-20", 1000], ["04-05", 960],
+      ["04-17", 1050], ["05-03", 900], ["06-01", 980], ["06-25", 1250], ["07-03", 1380], ["08-16", 1250],
+      ["09-01", 1080], ["10-01", 950], ["10-22", 1050], ["11-08", 880], ["12-01", 950], ["12-15", 1400]
+    ],
+    her: [ // Mexico City -> Paris (she travels)
+      ["01-01", 1350], ["01-06", 950], ["02-01", 950], ["03-01", 1000], ["03-18", 1080], ["04-05", 950],
+      ["05-01", 950], ["06-01", 930], ["06-28", 1150], ["07-05", 1300], ["08-10", 1200], ["08-25", 1000],
+      ["10-01", 950], ["11-01", 950], ["12-01", 1000], ["12-12", 1350]
+    ]
+  };
+  const QUOTES = [ // real Kiwi.com cheapest return quotes used for calibration
+    { dir: "me", start: "2027-02-04", end: "2027-02-15", price: 914 },
+    { dir: "me", start: "2027-03-18", end: "2027-03-29", price: 936 },
+    { dir: "her", start: "2027-03-18", end: "2027-03-29", price: 1065 },
+    { dir: "her", start: "2027-06-12", end: "2027-06-27", price: 922 },
+    { dir: "me", start: "2027-09-10", end: "2027-09-20", price: 1106 }
+  ];
+
+  // Third-city meetups. Fares = Kiwi.com cheapest return (EUR) for 13–23 May 2027 and, where marked, 18–28 Mar 2027.
+  // ref.me / ref.her = normalised midweek fare from Paris / Mexico City at the reference date (13 May).
+  const CITIES = [
+    { id: "nyc", name: "New York", beach: false, ref: { me: 610, her: 470 }, lodging: 230, q: "May 762 / 514 · Mar 567 / 507" },
+    { id: "mia", name: "Miami", beach: true, ref: { me: 690, her: 400 }, lodging: 190, q: "May 649 / 342 · Mar 723 / 595" },
+    { id: "cun", name: "Cancún", beach: true, ref: { me: 800, her: 180 }, lodging: 120, q: "May 959 / 176 · Mar 749 / 181" },
+    { id: "puj", name: "Punta Cana", beach: true, ref: { me: 890, her: 426 }, lodging: 150, q: "May 890 / 426" },
+    { id: "sju", name: "San Juan", beach: true, ref: { me: 932, her: 578 }, lodging: 170, q: "May 932 / 578" },
+    { id: "fdf", name: "Martinique", beach: true, ref: { me: 632, her: 1228 }, lodging: 130, q: "May 632 / 1228" },
+    { id: "yul", name: "Montréal", beach: false, ref: { me: 439, her: 540 }, lodging: 150, q: "May 439 / 540" },
+    { id: "mad", name: "Madrid", beach: false, ref: { me: 135, her: 841 }, lodging: 120, q: "May 135 / 841" }
+  ];
+  const REF_DAY = "05-13";
+
+  function buildCalendar(p) {
+    const y = p.year, start = Date.UTC(y, 0, 1);
+    const N = (Date.UTC(y + 1, 0, 1) - start) / DAY;
+    const days = [];
+    const hFR = new Set(p.holidaysMe), hMX = new Set(p.holidaysHer);
+    const blackHer = new Set(p.blackoutHerExtra || []);
+    for (let i = 0; i < N; i++) {
+      const d = new Date(start + i * DAY), iso = ymd(d), dow = d.getUTCDay();
+      const wk = dow === 0 || dow === 6;
+      const m = d.getUTCMonth(), dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      const herBlocked = (p.blockAugust && m === 7) || (dim - d.getUTCDate() < p.monthEndDays) || blackHer.has(iso);
+      days.push({ i, iso, dow, m, wk, workMe: !wk && !hFR.has(iso), workHer: !wk && !hMX.has(iso), herBlocked,
+        holMe: hFR.has(iso), holHer: hMX.has(iso) });
+    }
+    // price curves per departure day
+    const curve = {};
+    for (const dir of ["me", "her"]) {
+      const raw = days.map(d => {
+        let v = CURVE[dir][0][1];
+        for (const [md, pr] of CURVE[dir]) if (d.iso.slice(5) >= md) v = pr;
+        return v;
+      });
+      // 5-day moving average for smooth transitions
+      curve[dir] = raw.map((_, i) => {
+        let s = 0, n = 0;
+        for (let k = -2; k <= 2; k++) if (raw[i + k] != null) { s += raw[i + k]; n++; }
+        return s / n;
+      });
+    }
+    const ri = days.findIndex(d => d.iso.slice(5) === REF_DAY);
+    const refCurve = { me: curve.me[ri], her: curve.her[ri] };
+    return { N, days, curve, refCurve };
+  }
+
+  function tripPrice(cal, p, s, e, dir) {
+    const c = cal.curve[dir];
+    const dowS = cal.days[s].dow, dowE = cal.days[e].dow;
+    let f = 1;
+    if (dowS === 5 || dowS === 6) f += 0.04;   // weekend departures cost a bit more
+    if (dowE === 0) f += 0.03;                 // Sunday returns too
+    return p.priceScale * (0.6 * c[s] + 0.4 * c[e]) * f;
+  }
+
+  function cityPrice(cal, p, s, e, city, who) {
+    const c = cal.curve[who], ref = cal.refCurve[who];
+    const dowS = cal.days[s].dow;
+    let f = 1; if (dowS === 5 || dowS === 6) f += 0.04;
+    return p.priceScale * city.ref[who] * ((0.6 * c[s] + 0.4 * c[e]) / ref) * f;
+  }
+
+  // Evaluate one trip option. dir: "me" (he flies to Mexico) | "her" (she flies to Paris). hostLeave: host takes leave.
+  function tripStats(cal, p, s, e, dir, hostLeave) {
+    let la = 0, lg = 0, value = 0, ok = true;
+    if (dir.startsWith("meet:")) {
+      const city = p._cityMap[dir.slice(5)];
+      const bonus = (p.cityBonus && p.cityBonus[city.id] != null) ? p.cityBonus[city.id] : 0;
+      for (let i = s; i <= e; i++) {
+        const d = cal.days[i], edge = (i === s || i === e) ? p.travelDayValue : 1;
+        if (d.workMe) la++;
+        if (d.workHer) { lg++; if (d.herBlocked) ok = false; }
+        value += (p.V + bonus) * edge;
+      }
+      const priceMe = cityPrice(cal, p, s, e, city, "me"), priceHer = cityPrice(cal, p, s, e, city, "her");
+      const lodging = (p.lodging && p.lodging[city.id] != null ? p.lodging[city.id] : city.lodging) * (e - s);
+      const price = priceMe + priceHer;
+      return { ok, la, lg, value, price, priceMe, priceHer, lodging, city: city.id, net: value - price - lodging - p.C };
+    }
+    for (let i = s; i <= e; i++) {
+      const d = cal.days[i];
+      const edge = (i === s || i === e) ? p.travelDayValue : 1; // travel days count partially
+      if (dir === "me") {
+        if (d.workMe) la++;
+        let hostWorking = d.workHer && !hostLeave;
+        if (d.workHer && hostLeave) { lg++; if (d.herBlocked) ok = false; }
+        value += p.V * edge * (hostWorking ? p.beta : 1);
+      } else {
+        if (d.workHer) { lg++; if (d.herBlocked) ok = false; }
+        let hostWorking = d.workMe && !hostLeave;
+        if (d.workMe && hostLeave) la++;
+        value += p.V * edge * (hostWorking ? p.beta : 1);
+      }
+    }
+    const price = tripPrice(cal, p, s, e, dir);
+    return { ok, la, lg, value, price, priceMe: dir === "me" ? price : 0, priceHer: dir === "her" ? price : 0, lodging: 0, city: null, net: value - price - p.C };
+  }
+
+  function solve(p) {
+    const cal = buildCalendar(p);
+    const N = cal.N;
+    const idx = iso => Math.round((parseD(iso) - Date.UTC(p.year, 0, 1)) / DAY);
+    const reqs = p.required.map(r => ({
+      ...r, sMin: idx(r.sMin), sMax: idx(r.sMax), eMin: idx(r.eMin), eMax: idx(r.eMax)
+    })).sort((a, b) => a.sMin - b.sMin);
+    const R = reqs.length;
+
+    // Pre-compute all trip options: per start s, list of {e, dir, hl, la, lg, net, req}
+    p._cityMap = Object.fromEntries(CITIES.map(c => [c.id, c]));
+    const enabled = CITIES.filter(c => !p.citiesOff || !p.citiesOff.includes(c.id)).map(c => "meet:" + c.id);
+    const opts = Array.from({ length: N }, () => []);
+    const homeDirs = ["me", "her"];
+    const freeDirs = p.mode === "home" ? homeDirs : p.mode === "meet" ? enabled : homeDirs.concat(enabled);
+    const dirsFor = d => d === "any" ? homeDirs : d === "meet:any" ? enabled : d === "anywhere" ? homeDirs.concat(enabled) : [d];
+    for (let s = 0; s < N; s++) {
+      for (let L = p.Lmin; L <= p.Lmax; L++) {
+        const e = s + L - 1; if (e >= N) break;
+        for (const dir of freeDirs) for (const hl of (dir.startsWith("meet:") ? [false] : [false, true])) {
+          const t = tripStats(cal, p, s, e, dir, hl);
+          if (t.ok) opts[s].push({ s, e, dir, hl, ...t, req: -1 });
+        }
+      }
+    }
+    reqs.forEach((r, k) => {
+      for (let s = r.sMin; s <= r.sMax; s++) for (let e = Math.max(r.eMin, s); e <= r.eMax; e++) {
+        for (const dir of dirsFor(r.dir)) for (const hl of (dir.startsWith("meet:") ? [false] : [false, true])) {
+          const t = tripStats(cal, p, s, e, dir, hl);
+          if (t.ok) opts[s].push({ s, e, dir, hl, ...t, req: k });
+        }
+      }
+    });
+
+    const pen = g => p.lambda * Math.max(0, g - p.gapTarget) ** 2;
+    const A1 = p.leaveMe + 1, G1 = p.leaveHer + 1, S = A1 * G1, RS = (R + 1) * S;
+    const NEG = -1e30;
+    // flatten all options
+    const all = []; for (let s = 0; s < N; s++) for (const o of opts[s]) all.push(o);
+    const V = new Float32Array((N + 1) * RS).fill(NEG);
+    const Vch = new Int16Array((N + 1) * RS).fill(-1);
+    const B = new Float32Array(N * RS).fill(NEG);
+    const Bch = new Int32Array(N * RS).fill(-1);
+    const oIdx = new Map(); all.forEach((o, k) => oIdx.set(o, k));
+    const rLo = r => (r === 0 ? 0 : reqs[r - 1].eMin + 1);
+    const rHi = r => (r === R ? N : reqs[r].sMax);
+    for (let t = N; t >= 0; t--) {
+      if (t < N) {
+        for (const o of opts[t]) {
+          const k = oIdx.get(o), nt = o.e + 1;
+          for (let r = 0; r <= R; r++) {
+            if (t < rLo(r) || t > rHi(r)) continue;
+            let nr;
+            if (o.req >= 0) { if (o.req !== r) continue; nr = r + 1; }
+            else { if (r < R && o.e + 1 + p.minGap > reqs[r].sMax) continue; nr = r; }
+            const vb = (nt * (R + 1) + nr) * S, bb = (t * (R + 1) + r) * S;
+            for (let a = o.la; a < A1; a++) {
+              const rowV = vb + (a - o.la) * G1 - o.lg, rowB = bb + a * G1;
+              for (let g = o.lg; g < G1; g++) {
+                const v = o.net + V[rowV + g];
+                if (v > B[rowB + g]) { B[rowB + g] = v; Bch[rowB + g] = k; }
+              }
+            }
+          }
+        }
+      }
+      for (let r = 0; r <= R; r++) {
+        if (t < rLo(r) - 1 || t > rHi(r)) continue;
+        const base = (t * (R + 1) + r) * S;
+        const endV = r === R ? -pen(N - t) : NEG;
+        for (let x = 0; x < S; x++) V[base + x] = endV;
+        const s0 = t === 0 ? 0 : t + p.minGap, s1 = Math.min(N - 1, t + p.maxGap);
+        for (let s = s0; s <= s1; s++) {
+          const pg = pen(s - t), bb = (s * (R + 1) + r) * S;
+          for (let x = 0; x < S; x++) {
+            const v = B[bb + x] - pg;
+            if (v > V[base + x]) { V[base + x] = v; Vch[base + x] = s - t; }
+          }
+        }
+      }
+    }
+    let best = null;
+    const root0 = (p.leaveMe) * G1 + p.leaveHer;
+    if (V[root0] > NEG / 2) {
+      const trips = []; let t = 0, r = 0, a = p.leaveMe, g = p.leaveHer, guard = 0;
+      while (guard++ < 200 && t < N) {
+        const off = Vch[(t * (R + 1) + r) * S + a * G1 + g]; if (off < 0) break;
+        const s = t + off, o = all[Bch[(s * (R + 1) + r) * S + a * G1 + g]];
+        trips.push(o); if (o.req >= 0) r++; a -= o.la; g -= o.lg; t = o.e + 1;
+      }
+      let la = 0, lg = 0, price = 0, days = 0, prev = 0, maxGap = 0, gapPen = 0, net = 0, lodging = 0, payMe = 0, payHer = 0;
+      for (const o of trips) {
+        la += o.la; lg += o.lg; price += o.price; lodging += o.lodging; payMe += o.priceMe; payHer += o.priceHer; days += o.e - o.s + 1; net += o.net;
+        const gg = o.s - prev; maxGap = Math.max(maxGap, gg); gapPen += pen(gg); prev = o.e + 1;
+      }
+      maxGap = Math.max(maxGap, N - prev); gapPen += pen(N - prev);
+      best = { trips, ev: { la, lg, price, lodging, payMe, payHer, days, maxGap, gapPen, objective: net - gapPen } };
+    }
+    // price comparison per free window: cheapest way to fill each month
+    return { cal, reqs, best, quotes: QUOTES };
+  }
+
+  const api = { solve, buildCalendar, tripPrice, cityPrice, CURVE, QUOTES, CITIES };
+  if (typeof module !== "undefined") module.exports = api; else root.Planner = api;
+})(this);
+
+</script>
+<script>
+(function () {
+  "use strict";
+  const DEFAULTS = {
+    nameMe: "Andrés", nameHer: "Laura",
+    year: 2027, leaveMe: 45, leaveHer: 22, Lmin: 7, Lmax: 16, minGap: 14, maxGap: 200,
+    V: 120, beta: 0.6, travelDayValue: 0.5, C: 150, priceScale: 1, gapTarget: 45, lambda: 0.15,
+    monthEndDays: 5, blockAugust: true,
+    holidaysMe: ["2027-01-01","2027-03-29","2027-05-01","2027-05-06","2027-05-08","2027-05-17","2027-07-14","2027-08-15","2027-11-01","2027-11-11","2027-12-25"],
+    holidaysHer: ["2027-01-01","2027-02-01","2027-03-15","2027-03-25","2027-03-26","2027-05-01","2027-09-16","2027-11-02","2027-11-15","2027-12-25"],
+    blackoutHerExtra: [],
+    mode: "both", citiesOff: [],
+    cityBonus: { nyc: 25, mia: 25, cun: 25, puj: 25, sju: 25, fdf: 25, yul: 25, mad: 25 },
+    lodging: { nyc: 230, mia: 190, cun: 120, puj: 150, sju: 170, fdf: 130, yul: 150, mad: 120 },
+    required: [
+      { label: "February", sMin: "2027-02-04", sMax: "2027-02-04", eMin: "2027-02-15", eMax: "2027-02-15", dir: "me" },
+      { label: "New York together", sMin: "2027-03-18", sMax: "2027-03-18", eMin: "2027-03-28", eMax: "2027-03-28", dir: "meet:nyc" },
+      { label: "June, Marseille", sMin: "2027-06-12", sMax: "2027-06-12", eMin: "2027-06-27", eMax: "2027-06-27", dir: "her" },
+      { label: "Late Oct to early Nov", sMin: "2027-10-22", sMax: "2027-10-31", eMin: "2027-11-01", eMax: "2027-11-10", dir: "me" }
+    ]
+  };
+  const KEY = "todo-contigo-v4";
+  let P;
+  try { P = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { P = null; }
+  if (!P) P = JSON.parse(JSON.stringify(DEFAULTS));
+  for (const k in DEFAULTS) if (P[k] === undefined) P[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
+  const CITY = Object.fromEntries(Planner.CITIES.map(c => [c.id, c]));
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const k = v => "€" + (v >= 1000 ? (v / 1000).toFixed(1) + "k" : Math.round(v));
+  const eur = v => "€" + Math.round(v).toLocaleString("en-GB");
+  const fmtD = iso => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+  const fmtW = iso => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function names() {
+    document.querySelectorAll(".nm-me").forEach(e => e.textContent = P.nameMe);
+    document.querySelectorAll(".nm-her").forEach(e => e.textContent = P.nameHer);
+    document.getElementById("nm-me-b").textContent = P.nameMe;
+    document.getElementById("nm-her-b").textContent = P.nameHer;
+  }
+
+  /* ================= Figures (SVG) ================= */
+  // Each figure is drawn facing right, feet at (0,0), about 72 units tall. Running and standing legs are separate groups.
+  function figure(kind) {
+    // Laura: runner — cap, high ponytail, t-shirt, shorts, running shoes. Andrés: shirt, trousers, scarf.
+    const isHer = kind === "her";
+    const skin = isHer ? "#c98b65" : "#e2ad86";
+    const hairC = isHer ? "#2a1810" : "#33241a";
+    const top = isHer ? "var(--her)" : "var(--me)";
+    const rot = (vals, dur) => `<animateTransform attributeName="transform" type="rotate" values="${vals}" dur="${dur}s" repeatCount="indefinite"/>`;
+    const hipY = -28, shY = -50;
+    // legs: thigh/shin in one line; her bare legs + bright shoes, his trousers + dark shoes
+    const legC = isHer ? skin : "#2f3542", shoe = isHer ? "#ff4f9a" : "#1e1e24";
+    const leg = r => `<g>${r}<line x1="0" y1="${hipY}" x2="0" y2="-3" stroke="${legC}" stroke-width="${isHer ? 4.5 : 5.5}" stroke-linecap="round"/><path d="M-2,-3 L6,-3 L6,0 L-2,0 Z" fill="${shoe}"/></g>`;
+    // arms: short sleeve for her, full sleeve for him
+    const arm = r => isHer
+      ? `<g>${r}<line x1="0" y1="${shY}" x2="0" y2="-45" stroke="${top}" stroke-width="5.5" stroke-linecap="round"/><line x1="0" y1="-45" x2="0" y2="-36" stroke="${skin}" stroke-width="3.8" stroke-linecap="round"/></g>`
+      : `<g>${r}<line x1="0" y1="${shY}" x2="0" y2="-38" stroke="${top}" stroke-width="5" stroke-linecap="round"/><circle cx="0" cy="-36" r="2" fill="${skin}"/></g>`;
+    const torso = isHer
+      ? `<rect x="-6.5" y="-53" width="13" height="22" rx="4" fill="${top}"/>
+         <path d="M-7,-33 L7,-33 L7.5,-24 L1,-24 L0,-27 L-1,-24 L-7.5,-24 Z" fill="#26304a"/>`
+      : `<rect x="-6.5" y="-54" width="13" height="25" rx="4" fill="${top}"/>`;
+    const head = isHer
+      ? `<g class="pony"><path d="M-6,-68 C-14,-68 -18,-62 -20,-54" stroke="${hairC}" stroke-width="5.5" stroke-linecap="round" fill="none">${rot("-10 -6 -68;12 -6 -68;-10 -6 -68", 0.5)}</path></g>
+         <circle cx="0" cy="-61" r="8.5" fill="${skin}"/>
+         <path d="M-8.5,-61 C-8.5,-58 -7,-55 -5.5,-54 L-5,-61 Z" fill="${hairC}"/>
+         <path d="M-8.8,-62 A8.8,8.8 0 0 1 8.8,-62 Z" fill="#fff"/>
+         <path d="M6,-63 L15,-62.5 Q15,-60.5 13,-60.5 L6,-61 Z" fill="#fff"/>
+         <circle cx="0" cy="-69.6" r="1.2" fill="${top}"/><path d="M-8.8,-62 L8.8,-62" stroke="${top}" stroke-width="1.6"/>
+         <circle cx="4.5" cy="-59.5" r="1" fill="#2a1810"/>`
+      : `<circle cx="0" cy="-62" r="8.5" fill="${skin}"/>
+         <path d="M-8.9,-57 C-10.5,-63 -9.5,-70 -4,-73 C0,-75.5 5,-77 10,-75 C11.5,-74.5 11.6,-72.5 10.2,-71.5 C11,-69.5 10,-67.5 8.6,-66.5 C6,-67.5 3,-67.2 0.5,-66.8 C-2,-66 -3.5,-64.5 -4.5,-62.5 C-5.5,-60.5 -6.5,-58.5 -8.9,-57 Z" fill="${hairC}"/>
+         <path d="M-2,-72.5 C1.5,-74.5 5,-75 8.5,-74" stroke="#5a4232" stroke-width="1" fill="none" stroke-linecap="round"/>
+         <circle cx="4.5" cy="-61" r="1" fill="#2a1810"/>`;
+    const scarf = isHer ? "" : (running) =>
+      `<rect x="-7" y="-55.5" width="14" height="5" rx="2.5" fill="var(--rose)"/>
+       <path d="M-5,-53 C-12,-52 -16,-48 -21,-49" stroke="var(--rose)" stroke-width="4" stroke-linecap="round" fill="none">${running ? rot("-8 -5 -53;10 -5 -53;-8 -5 -53", 0.35) : ""}</path>`;
+    const scarfRun = isHer ? "" : scarf(true), scarfStand = isHer ? "" : scarf(false).replace("C-12,-52 -16,-48 -21,-49", "C-8,-50 -8,-44 -7,-40");
+    return `
+      <g class="run">
+        ${arm(rot(`40 0 ${shY};-40 0 ${shY};40 0 ${shY}`, 0.5))}
+        ${leg(rot(`-34 0 ${hipY};34 0 ${hipY};-34 0 ${hipY}`, 0.5))}
+        ${leg(rot(`34 0 ${hipY};-34 0 ${hipY};34 0 ${hipY}`, 0.5))}
+        ${torso}${scarfRun}
+        ${arm(rot(`-40 0 ${shY};40 0 ${shY};-40 0 ${shY}`, 0.5))}
+        ${head}
+      </g>
+      <g class="stand" style="display:none">
+        <g transform="translate(-2.5,0)">${leg("")}</g><g transform="translate(2.5,0)">${leg("")}</g>
+        ${torso}${scarfStand}
+        <path d="M0,${shY} Q9,-45 14,-49" stroke="${isHer ? skin : top}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        ${head.replace(/<animateTransform[^>]*\/>/g, "")}
+      </g>`;
+  }
+  const HEART = `<path d="M0,6 C-14,-4 -10,-16 0,-9 C10,-16 14,-4 0,6 Z" fill="var(--rose)" stroke="#fff" stroke-width="1.2"/>`;
+
+  function landmarks(groundY) {
+    // CDMX on the left (pyramid + Ángel), Paris on the right (Eiffel tower)
+    return `<g opacity=".55" fill="#1a1230">
+      <path d="M8,${groundY} L18,${groundY - 10} L28,${groundY - 10} L36,${groundY - 18} L46,${groundY - 18} L54,${groundY - 10} L64,${groundY - 10} L74,${groundY} Z"/>
+      <rect x="86" y="${groundY - 44}" width="3" height="44"/><circle cx="87.5" cy="${groundY - 48}" r="4"/>
+      <path d="M352,${groundY} L362,${groundY - 22} L364,${groundY - 62} L366,${groundY - 62} L368,${groundY - 22} L378,${groundY} L373,${groundY} Q365,${groundY - 14} 357,${groundY} Z"/>
+      <rect x="358" y="${groundY - 24}" width="14" height="2.5"/>
+    </g>
+    <text x="40" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">CDMX</text>
+    <text x="365" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">PARIS</text>
+    <line x1="0" y1="${groundY}" x2="400" y2="${groundY}" stroke="#fff" stroke-opacity=".35"/>`;
+  }
+  function stars(n, h) {
+    let s = `<g class="stars">`, seed = 7;
+    const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    for (let i = 0; i < n; i++) s += `<circle cx="${(rnd() * 400).toFixed(1)}" cy="${(rnd() * h).toFixed(1)}" r="${(rnd() * 0.9 + 0.3).toFixed(2)}" opacity="${(rnd() * 0.6 + 0.3).toFixed(2)}"/>`;
+    return s + `</g>`;
+  }
+
+  function makeScene(svg, groundY, scale) {
+    svg.innerHTML = stars(40, groundY - 50) + landmarks(groundY) +
+      `<g id="${svg.id}-her">${figure("her")}</g><g id="${svg.id}-me">${figure("me")}</g><g id="${svg.id}-heart" opacity="0">${HEART}</g>`;
+    const her = svg.querySelector(`#${svg.id}-her`), me = svg.querySelector(`#${svg.id}-me`), heart = svg.querySelector(`#${svg.id}-heart`);
+    let state = null;
+    return function pose(xHer, xMe, met, heartT) {
+      her.setAttribute("transform", `translate(${xHer},${groundY}) scale(${scale})${met ? " rotate(4)" : ""}`);
+      me.setAttribute("transform", `translate(${xMe},${groundY}) scale(${-scale},${scale})${met ? " rotate(4)" : ""}`);
+      if (state !== met) {
+        state = met;
+        [her, me].forEach(g => { g.querySelector(".run").style.display = met ? "none" : ""; g.querySelector(".stand").style.display = met ? "" : "none"; });
+      }
+      const k = Math.max(0, Math.min(1, heartT));
+      heart.setAttribute("opacity", k);
+      heart.setAttribute("transform", `translate(${(xHer + xMe) / 2},${groundY - 80 * scale - 10 - 22 * k}) scale(${0.4 + 0.9 * k})`);
+    };
+  }
+
+  // Banner: loop — she runs in from the left, he from the right, they meet, a heart rises, repeat.
+  const bannerPose = makeScene(document.getElementById("bannerSvg"), 112, 0.95);
+  const CYCLE = 7000, RUN = 3800;
+  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  function bannerFrame(now) {
+    const t = now % CYCLE;
+    if (t < RUN) {
+      const k = ease(t / RUN);
+      bannerPose(-20 + (188 - -20) * k, 420 - (420 - 212) * k, false, 0);
+    } else {
+      const h = (t - RUN) / 1400;
+      const fade = t > CYCLE - 500 ? (CYCLE - t) / 500 : 1;
+      bannerPose(188, 212, true, Math.min(1, h) * fade);
+    }
+    requestAnimationFrame(bannerFrame);
+  }
+  if (reduceMotion) bannerPose(188, 212, true, 1); else requestAnimationFrame(bannerFrame);
+
+  // Scroll scene: progress through the tall section moves them together; at the end they kiss.
+  const scenePose = makeScene(document.getElementById("sceneSvg"), 142, 1.15);
+  const scene = document.getElementById("scene"), cap = document.getElementById("sceneCaption"), small = document.getElementById("sceneSmall");
+  let lastCap = "";
+  function onScroll() {
+    const r = scene.getBoundingClientRect();
+    const total = scene.offsetHeight - window.innerHeight;
+    let p = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 1;
+    if (reduceMotion) p = 1;
+    const run = Math.min(1, p / 0.78);
+    const k = ease(run);
+    const met = p >= 0.78;
+    scenePose(met ? 186 : 20 + (186 - 20) * k, met ? 214 : 380 - (380 - 214) * k, met, (p - 0.8) / 0.15);
+    const km = Math.round(9200 * (1 - k));
+    const days = last && last.best ? last.best.ev.days : 0;
+    const c = met ? "Todo contigo" : km > 6000 ? "9,200 km apart…" : km > 2000 ? "…getting closer…" : "almost…";
+    const sm = met ? `${days} days together in 2027` : `${km.toLocaleString("en-GB")} km to go`;
+    if (c !== lastCap) { cap.textContent = c; lastCap = c; }
+    small.textContent = sm;
+  }
+  window.addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
+  window.addEventListener("resize", onScroll);
+
+  /* ================= Controls ================= */
+  const FIELDS = [
+    ["leaveMe", "Your leave days", "45 per year", 1], ["leaveHer", "Her leave days", "22 per year", 1],
+    ["Lmin", "Shortest trip (days)", "Long-haul: a week is a sensible floor", 1], ["Lmax", "Longest free trip (days)", "Fixed trips may run longer", 1],
+    ["minGap", "Min. days between trips", "", 1], ["V", "Value of a day together (€)", "How much a day together is worth", 5],
+    ["beta", "Value when host works (×)", "0.6 = evenings and weekends", 0.05], ["C", "Overhead per trip (€)", "Transfers, jet lag, logistics", 10],
+    ["gapTarget", "Comfortable gap (days)", "Longer gaps are penalised", 1], ["lambda", "Gap penalty strength", "€ per day² beyond the target", 0.01],
+    ["monthEndDays", "Her month-end blackout (days)", "Last N days of every month", 1], ["priceScale", "Fare level (×)", "1.0 = calibrated estimate", 0.05]
+  ];
+  const form = document.getElementById("form");
+  for (const [k, label, help, step] of FIELDS) {
+    const d = document.createElement("div"); d.className = "field";
+    d.innerHTML = `<label for="f-${k}">${label}</label><input id="f-${k}" type="number" step="${step}" inputmode="decimal"><small>${help}</small>`;
+    form.appendChild(d);
+    const inp = d.querySelector("input"); inp.value = P[k];
+    inp.addEventListener("change", () => { const v = parseFloat(inp.value); if (!isNaN(v)) { P[k] = v; schedule(); } });
+  }
+  const aug = document.createElement("div"); aug.className = "field chk";
+  aug.innerHTML = `<input id="f-blockAugust" type="checkbox"><label for="f-blockAugust">She can’t take leave in August</label>`;
+  form.appendChild(aug);
+  const augI = aug.querySelector("input"); augI.checked = P.blockAugust;
+  augI.addEventListener("change", () => { P.blockAugust = augI.checked; schedule(); });
+  for (const k of ["nameMe", "nameHer"]) {
+    const i = document.getElementById("f-" + k); i.value = P[k];
+    i.addEventListener("input", () => { P[k] = i.value.trim() || DEFAULTS[k]; names(); save(); if (last) render(last); });
+  }
+  for (const k of ["holidaysMe", "holidaysHer", "blackoutHerExtra"]) {
+    const ta = document.getElementById(k); ta.value = (P[k] || []).join("\n");
+    ta.addEventListener("change", () => { P[k] = ta.value.split(/[\s,]+/).filter(s => /^\d{4}-\d\d-\d\d$/.test(s)); schedule(); });
+  }
+  const dirOpts = () => `<option value="me">${esc(P.nameMe)} flies to CDMX</option><option value="her">${esc(P.nameHer)} flies to Paris</option><option value="any">Home, optimiser picks who</option>` +
+    Planner.CITIES.map(c => `<option value="meet:${c.id}">Both to ${c.name}</option>`).join("") +
+    `<option value="meet:any">Both, optimiser picks city</option><option value="anywhere">Anywhere</option>`;
+  function renderReqs() {
+    const box = document.getElementById("reqs"); box.innerHTML = "";
+    P.required.forEach((r, i) => {
+      const el = document.createElement("div"); el.className = "fx";
+      el.innerHTML = `<label class="full">Name<input value="${esc(r.label)}" data-k="label"></label>
+        <label>Earliest start<input type="date" value="${r.sMin}" data-k="sMin"></label>
+        <label>Latest start<input type="date" value="${r.sMax}" data-k="sMax"></label>
+        <label>Earliest end<input type="date" value="${r.eMin}" data-k="eMin"></label>
+        <label>Latest end<input type="date" value="${r.eMax}" data-k="eMax"></label>
+        <label class="full">Where<select data-k="dir">${dirOpts()}</select></label>
+        <button class="x full" type="button">Remove this trip</button>`;
+      el.querySelector("select").value = r.dir;
+      el.querySelectorAll("[data-k]").forEach(x => x.addEventListener("change", () => { r[x.dataset.k] = x.value; schedule(); }));
+      el.querySelector("button").addEventListener("click", () => { P.required.splice(i, 1); renderReqs(); schedule(); });
+      box.appendChild(el);
+    });
+  }
+  renderReqs();
+  document.getElementById("addReq").addEventListener("click", () => {
+    P.required.push({ label: "New trip", sMin: "2027-12-10", sMax: "2027-12-15", eMin: "2027-12-20", eMax: "2027-12-28", dir: "anywhere" });
+    renderReqs(); schedule();
+  });
+  document.getElementById("run").addEventListener("click", run);
+  document.getElementById("reset").addEventListener("click", () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => { P.mode = b.dataset.mode; syncSeg(); schedule(); }));
+  function syncSeg() { document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === P.mode))); }
+  syncSeg();
+  const wm = document.getElementById("wmMonth");
+  MONTHS.forEach((m, i) => { const o = document.createElement("option"); o.value = i; o.textContent = m; wm.appendChild(o); });
+  wm.value = 8; wm.addEventListener("change", () => last && renderWhere(last));
+
+  let timer = null;
+  function schedule() { clearTimeout(timer); document.getElementById("status").textContent = "Solving…"; timer = setTimeout(run, 250); }
+
+  /* ================= Solve + render ================= */
+  let last = null;
+  function run() {
+    save();
+    const st = document.getElementById("status");
+    const t0 = performance.now();
+    let res;
+    try {
+      for (const r of P.required) if (!(r.sMin <= r.sMax && r.eMin <= r.eMax && r.sMin <= r.eMax)) throw new Error(`“${r.label}” has its dates in the wrong order.`);
+      res = Planner.solve(P);
+    } catch (e) { st.className = "status bad"; st.textContent = e.message; return; }
+    last = res;
+    if (!res.best) {
+      st.className = "status bad";
+      st.textContent = "No plan fits: the fixed trips need more leave than you have, or one lands on her blocked days.";
+      return;
+    }
+    st.className = "status";
+    st.textContent = `Optimal plan · ${Math.round(performance.now() - t0)} ms`;
+    render(res);
+    setTimeout(renderScenarios, 30);
+  }
+  function render(res) {
+    renderHighlights(res); renderTrips(res); renderCalendar(res); renderWhere(res); renderChart(res); onScroll();
+  }
+
+  const whereText = o => o.city ? `Together in ${CITY[o.city].name}` : o.dir === "me" ? `${P.nameMe} flies to Mexico City` : `${P.nameHer} flies to Paris`;
+  const pill = o => o.city ? `<span class="pill meet"><i class="dot" style="background:var(--meet)"></i>Both → ${CITY[o.city].name}</span>`
+    : o.dir === "me" ? `<span class="pill me"><i class="dot" style="background:var(--me)"></i>${esc(P.nameMe)} → CDMX</span>`
+    : `<span class="pill her"><i class="dot" style="background:var(--her)"></i>${esc(P.nameHer)} → Paris</span>`;
+  const color = o => o.city ? "var(--meet)" : o.dir === "me" ? "var(--me)" : "var(--her)";
+  const MODE_LABEL = { home: "Free trips: home only", both: "Free trips: home or elsewhere", meet: "Free trips: elsewhere only" };
+
+  function renderHighlights(res) {
+    const ev = res.best.ev, trips = res.best.trips, days = res.cal.days;
+    document.getElementById("hDays").textContent = ev.days;
+    document.getElementById("modeLabel").textContent = MODE_LABEL[P.mode];
+    // next trip relative to today (or the first one)
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const nxt = trips.find(o => days[o.e].iso >= todayIso) || trips[0];
+    const until = Math.round((new Date(days[nxt.s].iso) - new Date(todayIso)) / 864e5);
+    document.getElementById("hNext").innerHTML = `<span class="icon" aria-hidden="true">✈︎</span><div><b>Next: ${fmtD(days[nxt.s].iso)} → ${fmtD(days[nxt.e].iso)}</b><br><span class="muted" style="font-size:13.5px">${esc(whereText(nxt))} · ${nxt.e - nxt.s + 1} days${until > 0 ? ` · in ${until} days` : ""}</span></div>`;
+    const N = res.cal.N;
+    document.getElementById("yearbar").innerHTML = trips.map(o => `<i title="${fmtD(days[o.s].iso)}–${fmtD(days[o.e].iso)}" style="left:${o.s / N * 100}%;width:${(o.e - o.s + 1) / N * 100}%;background:${color(o)}"></i>`).join("");
+    const meter = (u, t, c) => `<div class="meter"><i style="width:${Math.min(100, u / t * 100)}%;background:${c}"></i></div>`;
+    const fact = (k, v, d, m) => `<div class="fact"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span>${m || ""}</div>`;
+    document.getElementById("facts").innerHTML =
+      fact("Trips", trips.length, `${trips.filter(o => o.dir === "me").length} ${esc(P.nameMe)} · ${trips.filter(o => o.dir === "her").length} ${esc(P.nameHer)} · ${trips.filter(o => o.city).length} elsewhere`) +
+      fact("Travel cost", eur(ev.price + ev.lodging), `${eur((ev.price + ev.lodging) / ev.days)} per day together`) +
+      fact("Longest apart", `${ev.maxGap} days`, `about ${Math.round(ev.maxGap / 7)} weeks`) +
+      fact(`${esc(P.nameMe)}’s leave`, `${ev.la}/${P.leaveMe}`, `${P.leaveMe - ev.la} left`, meter(ev.la, P.leaveMe, "var(--me)")) +
+      fact(`${esc(P.nameHer)}’s leave`, `${ev.lg}/${P.leaveHer}`, `${P.leaveHer - ev.lg} left`, meter(ev.lg, P.leaveHer, "var(--her)")) +
+      fact("Fares paid", `${k(ev.payMe)} · ${k(ev.payHer)}`, `${esc(P.nameMe)} · ${esc(P.nameHer)}${ev.lodging ? ` · hotels ${k(ev.lodging)}` : ""}`);
+    // plain-language notes
+    const notes = [];
+    const sugg = trips.filter(o => o.req < 0);
+    for (const o of sugg) notes.push(`<b>Add ${fmtD(days[o.s].iso)}–${fmtD(days[o.e].iso)}:</b> ${esc(whereText(o))}. The optimiser found room for it.`);
+    const hostLeave = trips.filter(o => o.hl);
+    if (hostLeave.length) notes.push(`<b>Host on holiday:</b> ${hostLeave.map(o => `${fmtD(days[o.s].iso)} (${o.dir === "me" ? esc(P.nameHer) : esc(P.nameMe)})`).join(", ")}. Full days together are worth the leave.`);
+    if (ev.lg >= P.leaveHer - 1) notes.push(`<b>${esc(P.nameHer)}’s ${P.leaveHer} days are the bottleneck.</b> Every extra day she can take off adds time together. Try it under “Adjust the plan”.`);
+    const elsewhere = trips.filter(o => o.city);
+    if (elsewhere.length) notes.push(`<b>${elsewhere.map(o => CITY[o.city].name).join(", ")}</b> costs ${eur(elsewhere.reduce((a, o) => a + o.price + o.lodging, 0))} with the hotel, and uses leave for both of you.`);
+    document.getElementById("notes").innerHTML = notes.map(n => `<li>${n}</li>`).join("");
+  }
+
+  function renderTrips(res) {
+    const days = res.cal.days;
+    document.getElementById("trips").innerHTML = res.best.trips.map(o => {
+      const a = days[o.s].iso, b = days[o.e].iso;
+      const tag = o.req >= 0 ? `<span class="tag">${esc(res.reqs[o.req].label)}</span>` : `<span class="tag" style="color:var(--rose);border-color:var(--rose)">suggested</span>`;
+      const host = o.city ? "both on holiday" : o.hl ? (o.dir === "me" ? `${esc(P.nameHer)} takes leave` : `${esc(P.nameMe)} takes leave`) : (o.dir === "me" ? `${esc(P.nameHer)} keeps working` : `${esc(P.nameMe)} keeps working`);
+      const fares = o.city ? `${eur(o.priceMe)} + ${eur(o.priceHer)}` : eur(o.price);
+      return `<div class="trip"><span class="bar" style="background:${color(o)}"></span><div class="body">
+        <div class="top"><span class="dates num">${fmtD(a)} → ${fmtD(b)}</span>${tag}</div>
+        <div>${pill(o)} <span class="muted">· ${o.e - o.s + 1} days · ${host}</span></div>
+        <div class="stats"><span>Fares <b>${fares}</b></span>${o.lodging ? `<span>Hotel <b>${eur(o.lodging)}</b></span>` : ""}<span>Leave <b>${o.la}</b> ${esc(P.nameMe)} · <b>${o.lg}</b> ${esc(P.nameHer)}</span></div>
+      </div></div>`;
+    }).join("");
+  }
+
+  function renderScenarios() {
+    const rows = ["home", "both", "meet"].map(mode => { const r = Planner.solve({ ...P, mode }); return { mode, ev: r.best && r.best.ev }; });
+    const top = Math.max(...rows.filter(r => r.ev).map(r => r.ev.objective));
+    const lbl = { home: "Only home", both: "Home or elsewhere", meet: "Only elsewhere" };
+    document.getElementById("scen").innerHTML = rows.map(r => r.ev
+      ? `<div class="${r.ev.objective === top ? "win" : ""}">${lbl[r.mode]}<b>${r.ev.days} days</b>${eur(r.ev.price + r.ev.lodging)}<br>score ${Math.round(r.ev.objective).toLocaleString("en-GB")}</div>`
+      : `<div>${lbl[r.mode]}<b>–</b>no plan fits</div>`).join("");
+  }
+
+  function priceAt(res, i, dir) {
+    const e = Math.min(res.cal.N - 1, i + 10), c = res.cal.curve[dir];
+    return P.priceScale * (0.6 * c[i] + 0.4 * c[e]);
+  }
+
+  function renderCalendar(res) {
+    const st = new Array(res.cal.N).fill(null);
+    res.best.trips.forEach(o => { for (let i = o.s; i <= o.e; i++) st[i] = o; });
+    const box = document.getElementById("months"), days = res.cal.days;
+    let html = "";
+    for (let m = 0; m < 12; m++) {
+      const md = days.filter(d => d.m === m);
+      const a = md.reduce((s, d) => s + priceAt(res, d.i, "me"), 0) / md.length;
+      const b = md.reduce((s, d) => s + priceAt(res, d.i, "her"), 0) / md.length;
+      html += `<div class="month"><h3>${MONTHS[m]}</h3><div class="mprice"><span class="${a < b ? "cheap" : ""}" title="${esc(P.nameMe)} flies">A ${eur(a)}</span><span class="${b < a ? "cheap" : ""}" title="${esc(P.nameHer)} flies">E ${eur(b)}</span></div><div class="grid7">` +
+        ["M","T","W","T","F","S","S"].map(x => `<span class="dh">${x}</span>`).join("");
+      for (let i = 0; i < (md[0].dow + 6) % 7; i++) html += `<span></span>`;
+      for (const d of md) {
+        const o = st[d.i];
+        let cls = "day";
+        if (d.herBlocked && d.workHer) cls += " blk";
+        if (d.holMe || d.holHer) cls += " hol";
+        if (o) {
+          cls += " " + (o.city ? "meet" : o.dir);
+          if (!o.city && (o.dir === "me" ? (d.workHer && !o.hl) : (d.workMe && !o.hl))) cls += " hw";
+        }
+        html += `<button type="button" class="${cls}" data-i="${d.i}" aria-label="${d.iso}">${+d.iso.slice(8)}</button>`;
+      }
+      html += "</div></div>";
+    }
+    box.innerHTML = html;
+    box.onclick = e => {
+      const btn = e.target.closest(".day"); if (!btn) return;
+      box.querySelectorAll(".sel").forEach(x => x.classList.remove("sel")); btn.classList.add("sel");
+      const d = days[+btn.dataset.i], o = st[d.i];
+      const where = o ? whereText(o).replace("flies to", "is in").replace(`${P.nameMe} is in Mexico City`, `${P.nameMe} is in Mexico City with ${P.nameHer}`).replace(`${P.nameHer} is in Paris`, `${P.nameHer} is in Paris with ${P.nameMe}`) : "Apart";
+      const bits = [];
+      if (d.holMe) bits.push("holiday in France");
+      if (d.holHer) bits.push("holiday in Mexico");
+      if (d.herBlocked && d.workHer) bits.push(`${P.nameHer} can’t take leave`);
+      const e10 = Math.min(res.cal.N - 1, d.i + 10);
+      const cheapest = Planner.CITIES.filter(c => !(P.citiesOff || []).includes(c.id))
+        .map(c => ({ c, t: Planner.cityPrice(res.cal, P, d.i, e10, c, "me") + Planner.cityPrice(res.cal, P, d.i, e10, c, "her") }))
+        .sort((x, y) => x.t - y.t)[0];
+      document.getElementById("dayinfo").innerHTML = `<b>${fmtW(d.iso)}</b> · ${esc(where)}${bits.length ? " · " + esc(bits.join(" · ")) : ""}<br>
+        10-night return leaving that day: ${esc(P.nameMe)} ${eur(Planner.tripPrice(res.cal, P, d.i, e10, "me"))} · ${esc(P.nameHer)} ${eur(Planner.tripPrice(res.cal, P, d.i, e10, "her"))}` +
+        (cheapest ? ` · both to ${cheapest.c.name} ${eur(cheapest.t)} (fares only)` : "");
+    };
+  }
+
+  function renderWhere(res) {
+    const mo = +wm.value, days = res.cal.days;
+    const s = days.findIndex(d => d.m === mo && +d.iso.slice(8) === 15), e = Math.min(res.cal.N - 1, s + 10), nights = e - s;
+    const rows = [
+      { name: `Paris`, sub: `${P.nameHer} flies`, home: true, me: 0, her: Planner.tripPrice(res.cal, P, s, e, "her"), lodg: 0 },
+      { name: `Mexico City`, sub: `${P.nameMe} flies`, home: true, me: Planner.tripPrice(res.cal, P, s, e, "me"), her: 0, lodg: 0 }
+    ];
+    for (const c of Planner.CITIES) rows.push({ c, name: c.name, sub: c.beach ? "beach" : "city", me: Planner.cityPrice(res.cal, P, s, e, c, "me"), her: Planner.cityPrice(res.cal, P, s, e, c, "her"), lodg: (P.lodging[c.id] ?? c.lodging) * nights });
+    rows.forEach(r => r.total = r.me + r.her + r.lodg);
+    rows.sort((a, b) => a.total - b.total);
+    const off = id => (P.citiesOff || []).includes(id);
+    const minCity = Math.min(...rows.filter(r => r.c && !off(r.c.id)).map(r => r.total));
+    const box = document.getElementById("where");
+    box.innerHTML = rows.map(r => {
+      if (r.home) return `<div class="place"><span class="nm">${r.name} <span class="tag">home · ${esc(r.sub)}</span></span><span class="tot">${eur(r.total)}</span>
+        <span class="br">One ticket, no hotel</span></div>`;
+      const id = r.c.id;
+      return `<div class="place ${r.total === minCity ? "best" : ""} ${off(id) ? "off" : ""}">
+        <span class="nm">${r.name} <span class="tag">${r.sub}</span></span><span class="tot">${eur(r.total)}</span>
+        <span class="br">${esc(P.nameMe)} ${eur(r.me)} · ${esc(P.nameHer)} ${eur(r.her)} · hotel ${eur(r.lodg)}</span>
+        <span class="ctl"><label>€/night <input type="number" step="10" data-lodg="${id}" value="${P.lodging[id] ?? r.c.lodging}"></label>
+          <label>+€/day <input type="number" step="5" data-bonus="${id}" value="${P.cityBonus[id] ?? 0}"></label>
+          <label><input type="checkbox" data-on="${id}" ${off(id) ? "" : "checked"} style="width:auto">allow</label></span>
+      </div>`;
+    }).join("");
+    box.querySelectorAll("[data-lodg]").forEach(i => i.addEventListener("change", () => { P.lodging[i.dataset.lodg] = +i.value || 0; schedule(); }));
+    box.querySelectorAll("[data-bonus]").forEach(i => i.addEventListener("change", () => { P.cityBonus[i.dataset.bonus] = +i.value || 0; schedule(); }));
+    box.querySelectorAll("[data-on]").forEach(i => i.addEventListener("change", () => {
+      const id = i.dataset.on; P.citiesOff = (P.citiesOff || []).filter(x => x !== id); if (!i.checked) P.citiesOff.push(id); schedule(); }));
+  }
+
+  function renderChart(res) {
+    const box = document.getElementById("chart"), tip = document.getElementById("tip");
+    const W = Math.max(320, Math.round(box.clientWidth || 640)), H = W < 560 ? 230 : 280, m = { l: 48, r: 8, t: 12, b: 26 };
+    const N = res.cal.N, days = res.cal.days;
+    const me = days.map(d => priceAt(res, d.i, "me")), her = days.map(d => priceAt(res, d.i, "her"));
+    const qs = res.quotes.map(q => ({ ...q, i: days.findIndex(d => d.iso === q.start), price: q.price * P.priceScale }));
+    const all = me.concat(her, qs.map(q => q.price));
+    const lo = Math.floor(Math.min(...all) / 100) * 100, hi = Math.ceil(Math.max(...all) / 100) * 100;
+    const x = i => m.l + (i / (N - 1)) * (W - m.l - m.r), y = v => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated fares through the year for each direction">`;
+    for (const o of res.best.trips) s += `<rect x="${x(o.s)}" y="${m.t}" width="${Math.max(2, x(o.e) - x(o.s))}" height="${H - m.t - m.b}" fill="${color(o)}" opacity=".12" rx="3"/>`;
+    for (let v = lo; v <= hi; v += 100) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">€${v}</text>`;
+    for (let mo = 0; mo < 12; mo++) { const i = days.findIndex(d => d.m === mo); s += `<text x="${x(i) + 3}" y="${H - 8}" font-size="11" fill="var(--ink-3)">${MONTHS[mo][0]}</text>`; }
+    const path = arr => arr.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+    s += `<path d="${path(me)}" fill="none" stroke="var(--me)" stroke-width="2" stroke-linejoin="round"/><path d="${path(her)}" fill="none" stroke="var(--her)" stroke-width="2" stroke-linejoin="round"/>`;
+    for (const q of qs) s += `<circle cx="${x(q.i)}" cy="${y(q.price)}" r="5" fill="var(--${q.dir})" stroke="var(--surface)" stroke-width="2"/><circle cx="${x(q.i)}" cy="${y(q.price)}" r="1.8" fill="var(--ink)"/>`;
+    s += `<line id="xh" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink-3)" stroke-dasharray="3 3" visibility="hidden"/><rect id="hit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/></svg>`;
+    box.innerHTML = s; box.appendChild(tip);
+    const svg = box.querySelector("svg"), hit = svg.querySelector("#hit"), xh = svg.querySelector("#xh");
+    const move = ev => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+      const i = Math.max(0, Math.min(N - 1, Math.round((px - m.l) / (W - m.l - m.r) * (N - 1))));
+      xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("visibility", "visible");
+      tip.innerHTML = `<b>${fmtW(days[i].iso)}</b><br><span style="color:var(--me)">■</span> ${esc(P.nameMe)} ${eur(me[i])}<br><span style="color:var(--her)">■</span> ${esc(P.nameHer)} ${eur(her[i])}`;
+      tip.style.display = "block";
+      const bx = box.getBoundingClientRect();
+      tip.style.left = Math.min(bx.width - tip.offsetWidth - 4, Math.max(4, ev.clientX - bx.left + 12)) + "px"; tip.style.top = "6px";
+    };
+    hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+    hit.addEventListener("pointerleave", () => { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); });
+  }
+
+  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => last && renderChart(last), 150); });
+  names();
+  run();
+  onScroll();
+})();
+</script>
+</body>
+</html>
