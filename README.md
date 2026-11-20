@@ -151,7 +151,8 @@ uv run ruff check src tests
 ### Web app
 
 `docs/index.html` is a single self-contained page: the same solver in JavaScript, plus the interface. GitHub Pages
-serves it from the `docs/` folder of `main`. It loads Google Fonts and nothing else. Settings you change on the page are
+serves it from the `gh-pages` branch, which holds a copy of `docs/`. After editing `docs/index.html`, copy it to
+`gh-pages` and push (or switch Pages to `main` / `/docs` under Settings → Pages). It loads Google Fonts and nothing else. Settings you change on the page are
 kept in your browser only.
 
 ## Licence
