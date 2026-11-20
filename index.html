@@ -127,16 +127,21 @@ h3 { margin: 0; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 .months { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px 12px; }
-.month h3 { font: 600 13px/1 var(--font-body); color: var(--ink); display: flex; justify-content: space-between; align-items: baseline; }
-.mprice { font: 500 10.5px/1.3 var(--font-mono); color: var(--ink-3); margin: 3px 0 6px; display: flex; gap: 8px; }
+.month { border-radius: 14px; padding: 8px 8px 10px; background: linear-gradient(180deg, color-mix(in srgb, var(--rose) 6%, var(--surface)), var(--surface) 60%); border: 1px solid color-mix(in srgb, var(--rose) 14%, var(--line)); }
+.month h3 { font: 400 27px/1 var(--font-script); color: var(--rose); display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 2px; }
+.month h3 .tog { font: 600 11px/1 var(--font-body); color: var(--rose); background: color-mix(in srgb, var(--rose) 12%, transparent); border-radius: 999px; padding: 3px 7px; }
+.month h3 .tog.none { color: var(--ink-3); background: var(--line); }
+.mprice { font: 500 10.5px/1.3 var(--font-mono); color: var(--ink-3); margin: 3px 0 6px; display: flex; gap: 8px; flex-wrap: wrap; }
 .mprice .cheap { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
 .grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
 .grid7 .dh { font-size: 10px; color: var(--ink-3); text-align: center; }
 .day { aspect-ratio: 1; border-radius: 5px; font-size: 10.5px; display: flex; align-items: center; justify-content: center; color: var(--ink-2);
   background: transparent; border: 0; padding: 0; font-family: var(--font-mono); position: relative; cursor: pointer; min-width: 0; }
 .day.blk { background-image: repeating-linear-gradient(135deg, var(--block) 0 2px, transparent 2px 5px); }
+.day.me, .day.her, .day.meet { border-radius: 50%; font-weight: 600; }
 .day.me { background: var(--me); color: #fff; }
 .day.her { background: var(--her); color: #fff; }
+.day.first::before { content: "♥"; position: absolute; top: -5px; right: -3px; font-size: 10px; color: var(--rose); text-shadow: 0 0 2px var(--surface), 0 0 2px var(--surface); }
 .day.meet { background: var(--meet); color: #fff; }
 .day.me.hw { background: var(--me-soft); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--me); }
 .day.her.hw { background: var(--her-soft); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--her); }
@@ -162,6 +167,57 @@ h3 { margin: 0; }
 .chart { position: relative; }
 .chart svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
 .tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 12.5px; box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; display: none; }
+
+/* ---------- Compare ---------- */
+.lead { margin: 0; color: var(--ink-2); font-size: 14px; }
+.lead b { color: var(--ink); }
+.sub3 { font: 600 14.5px/1.3 var(--font-body); margin-top: 6px; }
+.breakdown { display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; border-radius: 12px; background: var(--bg); padding: 10px 12px; }
+.breakdown .row { display: flex; justify-content: space-between; gap: 10px; font-variant-numeric: tabular-nums; }
+.breakdown .row.neg span:last-child { color: var(--ink-2); }
+.breakdown .row.tot { border-top: 1px solid var(--line); padding-top: 5px; margin-top: 2px; font-weight: 700; }
+.breakdown .hint { color: var(--ink-3); font-size: 12px; }
+table.cmp { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.cmp th, table.cmp td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.cmp th:first-child, table.cmp td:first-child { text-align: left; white-space: normal; }
+table.cmp th { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+table.cmp td.best { font-weight: 700; color: var(--rose); }
+table.cmp tr.cur td:first-child { font-weight: 700; }
+.scroll { overflow-x: auto; }
+.range { font-size: 12.5px; color: var(--ink-2); }
+.scards { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 620px) { .scards { grid-template-columns: repeat(3, 1fr); } }
+.sc { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; background: var(--surface); text-align: left; font: inherit; color: inherit; }
+.sc.cur { border-color: var(--rose); box-shadow: 0 0 0 2px color-mix(in srgb, var(--rose) 25%, transparent); }
+.sc .t { font: 600 14px var(--font-body); display: flex; justify-content: space-between; }
+.sc .big2 { font: 700 26px/1 var(--font-display); }
+.sc .big2 small { font: 400 20px var(--font-script); color: var(--ink-2); margin-left: 4px; }
+.sc dl { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; margin: 0; font-size: 13px; }
+.sc dt { color: var(--ink-3); }
+.sc dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.sc dd.best { color: var(--rose); font-weight: 700; }
+.sc dd.best::before { content: "♥ "; }
+.range b { color: var(--ink); }
+
+/* ---------- Floating hearts ---------- */
+#hearts { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+.fh { position: absolute; left: -40px; will-change: transform; animation: fh-x linear forwards; }
+.fh i { display: block; animation: fh-y ease-in-out infinite alternate; }
+.fh svg { display: block; }
+@keyframes fh-x { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 80px)); } }
+@keyframes fh-y { from { transform: translateY(-14px) rotate(-12deg); } to { transform: translateY(14px) rotate(12deg); } }
+
+/* ---------- Method ---------- */
+.pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.pipe div { border-radius: 10px; padding: 8px; background: color-mix(in srgb, var(--rose) 7%, var(--surface)); font-size: 12px; color: var(--ink-2); }
+.pipe b { display: block; font: 700 13.5px/1.2 var(--font-display); color: var(--ink); margin-bottom: 2px; }
+pre.math { margin: 0; padding: 12px; border-radius: 12px; background: var(--bg); font: 12px/1.6 var(--font-mono); color: var(--ink); overflow-x: auto; white-space: pre; }
+.method h3 { font: 600 15px/1.3 var(--font-body); margin: 6px 0 0; }
+.method p, .method li { color: var(--ink-2); font-size: 14px; margin: 0; }
+.method ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+.method b { color: var(--ink); }
+.results { border-left: 3px solid var(--rose); padding: 4px 0 4px 12px; display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 480px) { .pipe { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---------- Settings ---------- */
 details.card > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
@@ -197,6 +253,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
 </head>
 <body>
 
+<div id="hearts" aria-hidden="true"></div>
 <header class="banner" aria-label="Todo contigo">
   <h1>Todo contigo</h1>
   <p class="sub"><span id="nm-her-b">Laura</span> &amp; <span id="nm-me-b">Andrés</span> · Ciudad de México ⇄ Paris · 2027</p>
@@ -232,15 +289,37 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     <div class="trips" id="trips"></div>
   </section>
 
-  <section class="card">
-    <div class="card-head"><h2>Where free trips may go</h2></div>
+  <section class="card" id="compare">
+    <div class="card-head"><h2>How plans are compared</h2></div>
+    <p class="lead">Every plan maximises one number, the <b>score</b>: the value of your days together minus everything they cost. <b>Value per day</b> is the exchange rate between time and money. Raise it and the optimiser buys more days; lower it and it saves money.</p>
+    <div class="breakdown" id="breakdown"></div>
+
+    <h3 class="sub3">1 · Which fares should we plan with?</h3>
+    <div class="seg" role="group" aria-label="Fare basis">
+      <button type="button" data-basis="low">Cheapest seen</button>
+      <button type="button" data-basis="typical">Typical</button>
+      <button type="button" data-basis="cautious">Cautious</button>
+    </div>
+    <div class="muted" id="basisNote"></div>
+
+    <h3 class="sub3">2 · What matters most to you?</h3>
+    <div class="seg" role="group" aria-label="Priority">
+      <button type="button" data-preset="save">Save money</button>
+      <button type="button" data-preset="balanced">Balanced</button>
+      <button type="button" data-preset="time">Most time together</button>
+    </div>
+    <div class="muted" id="presetNote"></div>
+    <div class="chart" id="frontier"><div class="tip" id="ftip"></div></div>
+    <div class="muted">Each dot is the <b>optimal</b> plan for one value per day. The pink bar is where its cost lands in 80% of 1,500 simulated fare draws. Moving right buys more days, moving up costs more. Tap a dot to use that plan.</div>
+
+    <h3 class="sub3">3 · Where may free trips go?</h3>
     <div class="seg" role="group" aria-label="Scenario">
       <button type="button" data-mode="home">Only home</button>
       <button type="button" data-mode="both">Home or elsewhere</button>
       <button type="button" data-mode="meet">Only elsewhere</button>
     </div>
-    <div class="scen" id="scen"></div>
-    <span class="muted">“Home” is Paris or Mexico City. Fixed trips keep their own setting. The best score is outlined.</span>
+    <div class="scards" id="scen"></div>
+    <span class="muted">“Home” is Paris or Mexico City. Fixed trips keep their own setting. ♥ marks the best value on each line. A negative score is normal: the fixed trips cost more than the value set per day.</span>
   </section>
 
   <section class="card">
@@ -253,7 +332,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
       <span><i class="sw" style="background-image:repeating-linear-gradient(135deg,var(--block) 0 2px,transparent 2px 5px);border:1px solid var(--line)"></i><span class="nm-her">Laura</span> can’t take leave</span>
       <span>• holiday</span>
     </div>
-    <div class="muted">Under each month: average return fare if <span class="nm-me">Andrés</span> flies (A) or <span class="nm-her">Laura</span> flies (E). The cheaper one is underlined.</div>
+    <div class="muted">Coloured circles are your days together; ♥ marks the day a trip starts. Under each month’s name: <b>A</b> = average return fare if <span class="nm-me">Andrés</span> flies, <b>L</b> = if <span class="nm-her">Laura</span> flies (cheaper one underlined). The chip shows how many days you share that month.</div>
     <div class="months" id="months"></div>
     <div class="dayinfo" id="dayinfo">Tap any day to see who’s where and what flights departing that day would cost.</div>
   </section>
@@ -267,13 +346,22 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
   </section>
 
   <section class="card">
-    <div class="card-head"><h2>Fares through the year</h2><span class="muted">10-night return, by departure date</span></div>
+    <div class="card-head"><h2>Fares through the year</h2><span class="muted">10-night return, by departure date · line = fares the plan uses</span></div>
     <div class="legend">
       <span><i class="sw" style="background:var(--me)"></i><span class="nm-me">Andrés</span> flies Paris → CDMX</span>
       <span><i class="sw" style="background:var(--her)"></i><span class="nm-her">Laura</span> flies CDMX → Paris</span>
-      <span><i class="sw" style="background:var(--ink);border-radius:50%"></i>Real Kiwi.com quote</span>
+      <span><i class="sw" style="background:var(--ink);border-radius:50%"></i>Real quote</span>
+      <span><i class="sw" style="background:var(--me);opacity:.25"></i>Range: lowest seen to high</span>
     </div>
     <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Where the fares come from</h2><span class="muted">Price database · 20 Nov 2026</span></div>
+    <p class="lead" id="fareFinding"></p>
+    <div class="scroll"><table class="cmp" id="evidence"></table></div>
+    <div class="scroll"><table class="cmp" id="evidence2"></table></div>
+    <span class="muted">Cells are the cheapest return fare found in that month (€). Kiwi = best departure day of the month; lastminute = fixed-date samples; LetsFG = full market search (fixed dates or the cheapest pair in a window). <b>Low</b> = cheapest seen, which the model uses as its base. <b>Typical</b> and <b>High</b> come from the price band (×1.13 expected, ×1.30 upper). * = estimate, not on sale yet. Hover a price for the airline and dates. Expedia and eDreams didn’t return readable prices, and Skyscanner has no connector. The full database is <code>data/fares.csv</code> in the repository.</span>
   </section>
 
   <details class="card" id="adjust">
@@ -296,12 +384,48 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     <div class="btns"><button class="btn primary" id="run" type="button">Re-optimise</button><button class="btn" id="reset" type="button">Reset to defaults</button></div>
   </details>
 
-  <details class="card prose">
-    <summary><h2>How the optimiser works</h2></summary>
-    <p>Every candidate trip has a start day, an end day, a place (Paris, Mexico City or a third city) and whether the host takes leave. It is worth <code>V</code> € per day together, × <code>β</code> on days the host works, × ½ on the two travel days, plus a city’s extra €/day. From that we subtract the fares, the hotel and a fixed overhead <code>C</code>. A gap of <code>g</code> days between trips costs <code>λ·max(0, g − target)²</code>, so long silences hurt more than proportionally.</p>
-    <p>A dynamic programme over the 365 days tracks your remaining leave, her remaining leave and which fixed trips are done. The result is the true optimum for these inputs, not a heuristic. The same model ships as a Python package (<code>meetplan</code>) in the repository, with tests that check the two agree.</p>
-    <p>Fares come from a seasonal curve calibrated on Kiwi.com quotes collected in November 2026 for 2027 dates. Third cities are scaled from May and March quotes. Treat every figure as an estimate and use “Fare level” once you see live prices.</p>
-  </details>
+  <section class="card method" id="method">
+    <div class="card-head"><h2>How we optimise</h2><span class="muted">for the curious data scientist</span></div>
+    <div class="pipe">
+      <div><b>1 · Data</b><span id="mData">fares from 3 sites</span></div>
+      <div><b>2 · Model</b>every possible trip, its value, cost and leave</div>
+      <div><b>3 · Solver</b>exact dynamic programme</div>
+      <div><b>4 · Robustness</b>fare band + Monte Carlo</div>
+    </div>
+
+    <h3>The question</h3>
+    <p>Choose the trips of 2027 (start day, end day, who flies or which city, and whether the host also takes leave) to make the year as good as possible together. The constraints are both leave budgets, Laura’s blocked days and the fixed trips.</p>
+
+    <h3>Formulation</h3>
+<pre class="math">maximise   Σ trips [ Σ days  V · w(d)  −  fare(s,e,who)  −  hotel  −  C ]
+           − Σ gaps  λ · max(0, g − g*)²
+
+subject to Σ leave_A ≤ 45      Σ leave_L ≤ 22
+           trips don’t overlap, gaps ≥ 14 days
+           no leave for L on her blocked days
+           every fixed trip starts/ends in its window
+
+w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
+    <p>It’s a <b>resource-constrained scheduling problem</b>: a knapsack with two budgets (the leave days) on a timeline, plus a convex penalty on gaps.</p>
+
+    <h3>Solver</h3>
+    <ul>
+      <li><b>Exact dynamic programming</b> over the 365 days. The state is (day, next fixed trip, Andrés’s leave left, Laura’s leave left), about <span id="mStates">1.9 M</span> states. Each candidate trip is one transition, and there are <span id="mCands">tens of thousands</span> of them.</li>
+      <li>The leave dimensions are handled as whole arrays at once, so a full solve takes <b id="mTime">~0.3 s</b> on a phone. This page runs it in JavaScript; the <code>meetplan</code> Python package runs the same model with numpy.</li>
+      <li><b>Optimality is proven, not hoped for.</b> A test enumerates every feasible plan of a small instance and checks the DP finds the same optimum. The JS and Python solvers agree to the cent.</li>
+      <li>A MILP or CP-SAT solver (OR-Tools) would also work, but this DP is exact, needs no server and runs instantly in your browser.</li>
+    </ul>
+
+    <h3>Uncertainty</h3>
+    <ul>
+      <li>For each month and direction, the <b>lowest fare seen</b> across Kiwi, lastminute and LetsFG is the base. A ticket you actually buy is <code>base × m</code>, with <code>m ~ Triangular(1.00, 1.08, 1.30)</code>. The 1.08 is the spread between sites on identical dates; the 1.30 covers direct flights or booking at a bad moment.</li>
+      <li>The optimiser plans with the expected fare (<b>×1.13</b>) by default. “Cheapest seen” and “Cautious” (90th percentile, ×1.22) show how sensitive the plan is to prices.</li>
+      <li>Each plan is then priced <b>4,000 times</b> with random fares (Monte Carlo) to give an 80% cost range.</li>
+    </ul>
+
+    <h3>What we found</h3>
+    <div class="results" id="mResults"><p class="muted">Computing…</p></div>
+  </section>
 
   <footer><span class="script">Todo contigo</span>Made for the two of you.</footer>
 </div>
@@ -315,25 +439,78 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
 
   // Daily round-trip price curves (EUR, 1 adult economy), calibrated on Kiwi.com quotes (Nov 2026).
   // Each entry: [from MM-DD, price]. Piecewise constant, then lightly smoothed.
+  // Daily round-trip price curves (EUR, 1 adult economy, 9–11 nights), piecewise constant from each MM-DD.
+  // Rebuilt Nov 2026 from the CHEAPEST fare observed per month across two sources:
+  //   Kiwi.com (best departure day in the month) and lastminute.com (fixed-date samples).
+  // Dec, early Jan and Nov for her are estimates (fares not yet on sale / thin inventory).
   const CURVE = {
-    me: [ // Paris -> Mexico City (he travels)
-      ["01-01", 1250], ["01-06", 880], ["02-01", 900], ["03-01", 940], ["03-20", 1000], ["04-05", 960],
-      ["04-17", 1050], ["05-03", 900], ["06-01", 980], ["06-25", 1250], ["07-03", 1380], ["08-16", 1250],
-      ["09-01", 1080], ["10-01", 950], ["10-22", 1050], ["11-08", 880], ["12-01", 950], ["12-15", 1400]
+    me: [ // Paris -> Mexico City (Andrés flies)
+      ["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 931], ["05-01", 838],
+      ["06-01", 1097], ["07-01", 1101], ["08-01", 1085], ["09-01", 835], ["10-01", 983], ["11-01", 990],
+      ["11-15", 950], ["12-01", 1000], ["12-15", 1400]
     ],
-    her: [ // Mexico City -> Paris (she travels)
-      ["01-01", 1350], ["01-06", 950], ["02-01", 950], ["03-01", 1000], ["03-18", 1080], ["04-05", 950],
-      ["05-01", 950], ["06-01", 930], ["06-28", 1150], ["07-05", 1300], ["08-10", 1200], ["08-25", 1000],
-      ["10-01", 950], ["11-01", 950], ["12-01", 1000], ["12-12", 1350]
+    her: [ // Mexico City -> Paris (Laura flies)
+      ["01-01", 1350], ["01-06", 766], ["02-01", 876], ["03-01", 876], ["04-01", 738], ["05-01", 731],
+      ["06-01", 798], ["07-01", 999], ["08-01", 736], ["09-01", 735], ["10-01", 735], ["11-01", 950],
+      ["12-01", 1000], ["12-12", 1350]
     ]
   };
-  const QUOTES = [ // real Kiwi.com cheapest return quotes used for calibration
-    { dir: "me", start: "2027-02-04", end: "2027-02-15", price: 914 },
-    { dir: "me", start: "2027-03-18", end: "2027-03-29", price: 936 },
-    { dir: "her", start: "2027-03-18", end: "2027-03-29", price: 1065 },
-    { dir: "her", start: "2027-06-12", end: "2027-06-27", price: 922 },
-    { dir: "me", start: "2027-09-10", end: "2027-09-20", price: 1106 }
+  // Evidence: every fare actually returned by the flight tools (EUR, return, 1 adult economy).
+  // kind "month" = cheapest itinerary over every departure day of the month (9–11 nights); "date" = fixed dates.
+  const QUOTES = [
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-01-29", end: "2027-02-10", price: 882, via: "Aeroméxico direct" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-02-16", end: "2027-02-28", price: 872, via: "Aeroméxico direct" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-03-25", end: "2027-04-04", price: 971, via: "Aeroméxico direct" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-04-02", end: "2027-04-13", price: 931, via: "Avianca / Iberia" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-05-05", end: "2027-05-15", price: 938, via: "Avianca / Iberia" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-06-11", end: "2027-06-21", price: 1097, via: "Avianca / Iberia" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-07-05", end: "2027-07-14", price: 1154, via: "Iberia via Dallas" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-08-30", end: "2027-09-10", price: 1085, via: "Air France / KLM" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-09-15", end: "2027-09-25", price: 980, via: "Avianca / Iberia" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-10-03", end: "2027-10-14", price: 983, via: "Avianca / Iberia" },
+    { dir: "me", src: "Kiwi", kind: "month", start: "2027-11-01", end: "2027-11-11", price: 1132, via: "Air France direct" },
+    { dir: "me", src: "Kiwi", kind: "date", start: "2027-02-04", end: "2027-02-15", price: 914, via: "Aeroméxico direct" },
+    { dir: "me", src: "Kiwi", kind: "date", start: "2027-09-10", end: "2027-09-20", price: 1106, via: "Avianca / Iberia" },
+    { dir: "me", src: "lastminute", kind: "date", start: "2027-02-04", end: "2027-02-15", price: 854, via: "British Airways + Iberia" },
+    { dir: "me", src: "lastminute", kind: "date", start: "2027-05-15", end: "2027-05-25", price: 838, via: "British Airways" },
+    { dir: "me", src: "lastminute", kind: "date", start: "2027-07-15", end: "2027-07-25", price: 1101, via: "British Airways" },
+    { dir: "me", src: "lastminute", kind: "date", start: "2027-09-15", end: "2027-09-25", price: 835, via: "British Airways" },
+    { dir: "me", src: "lastminute", kind: "date", start: "2027-10-22", end: "2027-11-07", price: 1095, via: "Air Canada, 2 stops" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-01-13", end: "2027-01-25", price: 766, via: "Air Canada via Toronto" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-02-15", end: "2027-02-25", price: 876, via: "Air France direct" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-03-28", end: "2027-04-09", price: 876, via: "Air France direct" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-04-04", end: "2027-04-15", price: 738, via: "Air Canada via Montréal" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-05-13", end: "2027-05-25", price: 731, via: "Air Canada via Montréal" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-06-14", end: "2027-06-24", price: 798, via: "Air Canada via Montréal" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-07-04", end: "2027-07-15", price: 999, via: "Air Canada via Montréal" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-08-19", end: "2027-08-31", price: 736, via: "Air Canada via Montréal" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-09-23", end: "2027-10-05", price: 735, via: "Air Canada via Montréal" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-10-18", end: "2027-10-28", price: 735, via: "Air Canada via Montréal" },
+    { dir: "her", src: "Kiwi", kind: "month", start: "2027-11-04", end: "2027-11-13", price: 1250, via: "Iberia (thin inventory)" },
+    { dir: "her", src: "Kiwi", kind: "date", start: "2027-03-18", end: "2027-03-29", price: 1065, via: "Air Canada" },
+    { dir: "her", src: "Kiwi", kind: "date", start: "2027-06-12", end: "2027-06-27", price: 922, via: "Air Canada via Montréal" },
+    { dir: "her", src: "lastminute", kind: "date", start: "2027-01-15", end: "2027-01-25", price: 845, via: "Iberia" },
+    { dir: "her", src: "lastminute", kind: "date", start: "2027-05-15", end: "2027-05-25", price: 899, via: "Air Canada" },
+    { dir: "her", src: "lastminute", kind: "date", start: "2027-06-12", end: "2027-06-27", price: 993, via: "Air Canada" },
+    { dir: "her", src: "lastminute", kind: "date", start: "2027-09-09", end: "2027-09-20", price: 975, via: "Air Canada / Lufthansa" },
+    { dir: "me", src: "LetsFG", kind: "date", start: "2027-02-04", end: "2027-02-15", price: 870, via: "Aeroméxico direct (455 offers)", nonstop: 870 },
+    { dir: "me", src: "LetsFG", kind: "window", start: "2027-05-12", end: "2027-05-26", price: 850, via: "British Airways via London", nonstop: 1036 },
+    { dir: "me", src: "LetsFG", kind: "date", start: "2027-10-22", end: "2027-11-08", price: 986, via: "Aer Lingus / British Airways", nonstop: 1230 },
+    { dir: "her", src: "LetsFG", kind: "date", start: "2027-06-12", end: "2027-06-27", price: 977, via: "Air Canada via Montréal (522 offers)", nonstop: 1290 },
+    { dir: "her", src: "LetsFG", kind: "window", start: "2027-08-26", end: "2027-09-07", price: 810, via: "Air Canada / Lufthansa", nonstop: 1367 },
+    { dir: "her", src: "LetsFG", kind: "window", start: "2027-09-23", end: "2027-10-04", price: 836, via: "Air Canada" }
   ];
+  // Price uncertainty. The curves above are the LOWEST fare seen per month. A ticket actually bought is modelled as
+  // low × m, m ~ Triangular(1.00, 1.08, 1.30): identical dates differed by ~7% across sources (mode), and the cheapest
+  // nonstop / less lucky booking ran 13–32% above the cheapest one-stop fare (upper bound).
+  const BAND = { a: 1.0, c: 1.08, b: 1.30 };
+  const triMean = (BAND.a + BAND.b + BAND.c) / 3;
+  function triQuantile(u) {
+    const { a, b, c } = BAND, f = (c - a) / (b - a);
+    return u < f ? a + Math.sqrt(u * (b - a) * (c - a)) : b - Math.sqrt((1 - u) * (b - a) * (b - c));
+  }
+  const BASIS = { low: 1, typical: triMean, cautious: triQuantile(0.9) };
+  const basisF = p => BASIS[p.fareBasis || "typical"] || 1;
 
   // Third-city meetups. Fares = Kiwi.com cheapest return (EUR) for 13–23 May 2027 and, where marked, 18–28 Mar 2027.
   // ref.me / ref.her = normalised midweek fare from Paris / Mexico City at the reference date (13 May).
@@ -389,14 +566,14 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     let f = 1;
     if (dowS === 5 || dowS === 6) f += 0.04;   // weekend departures cost a bit more
     if (dowE === 0) f += 0.03;                 // Sunday returns too
-    return p.priceScale * (0.6 * c[s] + 0.4 * c[e]) * f;
+    return p.priceScale * basisF(p) * (0.6 * c[s] + 0.4 * c[e]) * f;
   }
 
   function cityPrice(cal, p, s, e, city, who) {
     const c = cal.curve[who], ref = cal.refCurve[who];
     const dowS = cal.days[s].dow;
     let f = 1; if (dowS === 5 || dowS === 6) f += 0.04;
-    return p.priceScale * city.ref[who] * ((0.6 * c[s] + 0.4 * c[e]) / ref) * f;
+    return p.priceScale * basisF(p) * city.ref[who] * ((0.6 * c[s] + 0.4 * c[e]) / ref) * f;
   }
 
   // Evaluate one trip option. dir: "me" (he flies to Mexico) | "her" (she flies to Paris). hostLeave: host takes leave.
@@ -537,7 +714,28 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     return { cal, reqs, best, quotes: QUOTES };
   }
 
-  const api = { solve, buildCalendar, tripPrice, cityPrice, CURVE, QUOTES, CITIES };
+  // Monte Carlo: redraw every ticket of a plan from the band; returns P10/P50/P90 of total travel cost (fares + hotels).
+  function simulate(p, trips, n = 4000, seed = 12345) {
+    let st = seed >>> 0;
+    const rnd = () => { st = (st * 1664525 + 1013904223) >>> 0; return st / 4294967296; };
+    const tickets = [];
+    let fixed = 0;
+    for (const o of trips) {
+      fixed += o.lodging;
+      for (const v of [o.priceMe, o.priceHer]) if (v > 0) tickets.push(v / basisF(p));  // back to the 'lowest seen' base
+    }
+    const out = new Float64Array(n);
+    for (let k = 0; k < n; k++) {
+      let t = fixed;
+      for (const base of tickets) t += base * triQuantile(rnd());
+      out[k] = t;
+    }
+    out.sort();
+    const q = x => out[Math.min(n - 1, Math.floor(x * n))];
+    return { p10: q(0.1), p50: q(0.5), p90: q(0.9), min: out[0], max: out[n - 1], tickets: tickets.length };
+  }
+
+  const api = { simulate, BAND, BASIS, solve, buildCalendar, tripPrice, cityPrice, CURVE, QUOTES, CITIES };
   if (typeof module !== "undefined") module.exports = api; else root.Planner = api;
 })(this);
 
@@ -553,7 +751,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     holidaysMe: ["2027-01-01","2027-03-29","2027-05-01","2027-05-06","2027-05-08","2027-05-17","2027-07-14","2027-08-15","2027-11-01","2027-11-11","2027-12-25"],
     holidaysHer: ["2027-01-01","2027-02-01","2027-03-15","2027-03-25","2027-03-26","2027-05-01","2027-09-16","2027-11-02","2027-11-15","2027-12-25"],
     blackoutHerExtra: [],
-    mode: "both", citiesOff: [],
+    mode: "both", citiesOff: [], fareBasis: "typical",
     cityBonus: { nyc: 25, mia: 25, cun: 25, puj: 25, sju: 25, fdf: 25, yul: 25, mad: 25 },
     lodging: { nyc: 230, mia: 190, cun: 120, puj: 150, sju: 170, fdf: 130, yul: 150, mad: 120 },
     required: [
@@ -563,7 +761,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
       { label: "Late Oct to early Nov", sMin: "2027-10-22", sMax: "2027-10-31", eMin: "2027-11-01", eMax: "2027-11-10", dir: "me" }
     ]
   };
-  const KEY = "todo-contigo-v4";
+  const KEY = "todo-contigo-v6";
   let P;
   try { P = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { P = null; }
   if (!P) P = JSON.parse(JSON.stringify(DEFAULTS));
@@ -571,6 +769,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
   const CITY = Object.fromEntries(Planner.CITIES.map(c => [c.id, c]));
   const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const MONTH_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const k = v => "€" + (v >= 1000 ? (v / 1000).toFixed(1) + "k" : Math.round(v));
   const eur = v => "€" + Math.round(v).toLocaleString("en-GB");
@@ -808,7 +1007,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     setTimeout(renderScenarios, 30);
   }
   function render(res) {
-    renderHighlights(res); renderTrips(res); renderCalendar(res); renderWhere(res); renderChart(res); onScroll();
+    renderHighlights(res); renderBreakdown(res); renderTrips(res); renderCalendar(res); renderWhere(res); renderChart(res); renderEvidence(res); syncPreset(); syncBasis(); renderFrontier(); renderMethod(res); onScroll();
   }
 
   const whereText = o => o.city ? `Together in ${CITY[o.city].name}` : o.dir === "me" ? `${P.nameMe} flies to Mexico City` : `${P.nameHer} flies to Paris`;
@@ -818,8 +1017,10 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
   const color = o => o.city ? "var(--meet)" : o.dir === "me" ? "var(--me)" : "var(--her)";
   const MODE_LABEL = { home: "Free trips: home only", both: "Free trips: home or elsewhere", meet: "Free trips: elsewhere only" };
 
+  let SIM = null;
   function renderHighlights(res) {
     const ev = res.best.ev, trips = res.best.trips, days = res.cal.days;
+    SIM = Planner.simulate(P, trips);
     document.getElementById("hDays").textContent = ev.days;
     document.getElementById("modeLabel").textContent = MODE_LABEL[P.mode];
     // next trip relative to today (or the first one)
@@ -833,11 +1034,11 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     const fact = (k, v, d, m) => `<div class="fact"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span>${m || ""}</div>`;
     document.getElementById("facts").innerHTML =
       fact("Trips", trips.length, `${trips.filter(o => o.dir === "me").length} ${esc(P.nameMe)} · ${trips.filter(o => o.dir === "her").length} ${esc(P.nameHer)} · ${trips.filter(o => o.city).length} elsewhere`) +
-      fact("Travel cost", eur(ev.price + ev.lodging), `${eur((ev.price + ev.lodging) / ev.days)} per day together`) +
+      fact("Travel cost", eur(ev.price + ev.lodging), `likely ${k(SIM.p10)}–${k(SIM.p90)} · ${eur((ev.price + ev.lodging) / ev.days)}/day`) +
       fact("Longest apart", `${ev.maxGap} days`, `about ${Math.round(ev.maxGap / 7)} weeks`) +
       fact(`${esc(P.nameMe)}’s leave`, `${ev.la}/${P.leaveMe}`, `${P.leaveMe - ev.la} left`, meter(ev.la, P.leaveMe, "var(--me)")) +
       fact(`${esc(P.nameHer)}’s leave`, `${ev.lg}/${P.leaveHer}`, `${P.leaveHer - ev.lg} left`, meter(ev.lg, P.leaveHer, "var(--her)")) +
-      fact("Fares paid", `${k(ev.payMe)} · ${k(ev.payHer)}`, `${esc(P.nameMe)} · ${esc(P.nameHer)}${ev.lodging ? ` · hotels ${k(ev.lodging)}` : ""}`);
+      fact("Fares", k(ev.payMe + ev.payHer), `${esc(P.nameMe)} ${k(ev.payMe)} · ${esc(P.nameHer)} ${k(ev.payHer)}${ev.lodging ? ` · hotels ${k(ev.lodging)}` : ""}`);
     // plain-language notes
     const notes = [];
     const sugg = trips.filter(o => o.req < 0);
@@ -866,17 +1067,153 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
   }
 
   function renderScenarios() {
-    const rows = ["home", "both", "meet"].map(mode => { const r = Planner.solve({ ...P, mode }); return { mode, ev: r.best && r.best.ev }; });
-    const top = Math.max(...rows.filter(r => r.ev).map(r => r.ev.objective));
     const lbl = { home: "Only home", both: "Home or elsewhere", meet: "Only elsewhere" };
-    document.getElementById("scen").innerHTML = rows.map(r => r.ev
-      ? `<div class="${r.ev.objective === top ? "win" : ""}">${lbl[r.mode]}<b>${r.ev.days} days</b>${eur(r.ev.price + r.ev.lodging)}<br>score ${Math.round(r.ev.objective).toLocaleString("en-GB")}</div>`
-      : `<div>${lbl[r.mode]}<b>–</b>no plan fits</div>`).join("");
+    const rows = ["home", "both", "meet"].map(mode => { const q = { ...P, mode }, r = Planner.solve(q); return { mode, ev: r.best && r.best.ev, n: r.best ? r.best.trips.length : 0, sim: r.best ? Planner.simulate(q, r.best.trips) : null }; });
+    const ok = rows.filter(r => r.ev);
+    const metrics = [
+      ["Travel cost", r => r.ev.price + r.ev.lodging, "min", (v) => eur(v)],
+      ["If prices swing (80%)", r => r.sim.p90, "min", (v, r) => `${k(r.sim.p10)}–${k(r.sim.p90)}`],
+      ["Per day together", r => (r.ev.price + r.ev.lodging) / r.ev.days, "min", v => eur(v)],
+      ["Longest apart", r => r.ev.maxGap, "min", v => v + " days"],
+      [`Leave ${esc(P.nameMe)} / ${esc(P.nameHer)}`, r => 0, null, (v, r) => `${r.ev.la} / ${r.ev.lg}`],
+      ["Score (higher = better)", r => r.ev.objective, "max", v => Math.round(v).toLocaleString("en-GB")]
+    ];
+    const bestOf = metrics.map(([, f, goal]) => goal ? (goal === "max" ? Math.max(...ok.map(f)) : Math.min(...ok.map(f))) : null);
+    const maxDays = Math.max(...ok.map(r => r.ev.days));
+    document.getElementById("scen").innerHTML = rows.map(r => {
+      if (!r.ev) return `<div class="sc"><div class="t">${lbl[r.mode]}</div><span class="muted">No plan fits these constraints</span></div>`;
+      return `<button type="button" class="sc ${r.mode === P.mode ? "cur" : ""}" data-mode2="${r.mode}">
+        <span class="t">${lbl[r.mode]}<span class="muted">${r.mode === P.mode ? "shown" : "tap to show"}</span></span>
+        <span class="big2" style="color:${r.ev.days === maxDays ? "var(--rose)" : "var(--ink)"}">${r.ev.days}<small>días juntos</small></span>
+        <span class="muted">${r.n} trips</span>
+        <dl>${metrics.map(([name, f, goal, fmt], i) => `<dt>${name}</dt><dd class="${goal && f(r) === bestOf[i] && ok.length > 1 ? "best" : ""}">${fmt(f(r), r)}</dd>`).join("")}</dl>
+      </button>`;
+    }).join("");
+    document.querySelectorAll("[data-mode2]").forEach(b => b.addEventListener("click", () => { P.mode = b.dataset.mode2; syncSeg(); schedule(); }));
+  }
+
+  /* ---- Fare basis (price uncertainty) ---- */
+  const BASIS_NOTE = {
+    low: "Every ticket priced at the lowest fare seen in its month. Optimistic: you’d need to catch the best day on the cheapest site.",
+    typical: "Every ticket priced at the expected fare: the lowest seen × 1.13. This is the robust default.",
+    cautious: "Every ticket priced at a level you’ll beat 9 times out of 10: the lowest seen × 1.22. Plans that still pay off here are safe bets."
+  };
+  function syncBasis() {
+    document.querySelectorAll("[data-basis]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.basis === P.fareBasis)));
+    document.getElementById("basisNote").textContent = BASIS_NOTE[P.fareBasis];
+  }
+  document.querySelectorAll("[data-basis]").forEach(b => b.addEventListener("click", () => { P.fareBasis = b.dataset.basis; syncBasis(); frontierCache = null; schedule(); }));
+
+  /* ---- Presets: value per day + gap penalty ---- */
+  const PRESETS = {
+    save: { V: 70, lambda: 0.05, note: "A day together is valued at €70, and long gaps are only lightly penalised. Only trips that are cheap per day make it in." },
+    balanced: { V: 120, lambda: 0.15, note: "A day together is valued at €120, with a moderate penalty for long gaps." },
+    time: { V: 220, lambda: 0.3, note: "A day together is valued at €220, and long gaps are heavily penalised. The optimiser uses all the leave it can." }
+  };
+  function syncPreset() {
+    const k = Object.keys(PRESETS).find(k => PRESETS[k].V === P.V && PRESETS[k].lambda === P.lambda);
+    document.querySelectorAll("[data-preset]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === k)));
+    document.getElementById("presetNote").textContent = k ? PRESETS[k].note : `Custom: a day together is valued at €${P.V}, gap penalty ${P.lambda}.`;
+  }
+  document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
+    const pr = PRESETS[b.dataset.preset]; P.V = pr.V; P.lambda = pr.lambda;
+    const fv = document.getElementById("f-V"), fl = document.getElementById("f-lambda"); if (fv) fv.value = P.V; if (fl) fl.value = P.lambda;
+    syncPreset(); frontierCache = null; schedule();
+  }));
+
+  /* ---- Score breakdown of the current plan ---- */
+  function renderBreakdown(res) {
+    const tr = res.best.trips, ev = res.best.ev;
+    const value = tr.reduce((a, o) => a + o.value, 0), over = P.C * tr.length;
+    const row = (k, v, cls, hint) => `<div class="row ${cls || ""}"><span>${k}${hint ? ` <span class="hint">${hint}</span>` : ""}</span><span>${v}</span></div>`;
+    document.getElementById("breakdown").innerHTML =
+      row("Value of days together", "+" + eur(value), "", `${ev.days} days × €${P.V}, less on travel days and host work days`) +
+      row("Fares", "−" + eur(ev.price), "neg") +
+      (ev.lodging ? row("Hotels", "−" + eur(ev.lodging), "neg") : "") +
+      row("Trip overhead", "−" + eur(over), "neg", `${tr.length} × €${P.C}`) +
+      row("Gap penalty", "−" + eur(ev.gapPen), "neg", `longest gap ${ev.maxGap} days`) +
+      row("Score (this plan)", Math.round(ev.objective).toLocaleString("en-GB"), "tot");
+  }
+
+  /* ---- Trade-off frontier: optimal plan for each value per day ---- */
+  let frontierCache = null, frontierJob = 0;
+  function frontierKey() { const q = { ...P }; delete q.V; delete q.nameMe; delete q.nameHer; return JSON.stringify(q); }
+  function renderFrontier() {
+    const key = frontierKey();
+    if (frontierCache && frontierCache.key === key) return drawFrontier(frontierCache.pts);
+    const Vs = [40, 60, 80, 100, 120, 150, 180, 220, 260, 320], pts = [], job = ++frontierJob;
+    let i = 0;
+    const step = () => {
+      if (job !== frontierJob) return;
+      const V = Vs[i++], r = Planner.solve({ ...P, V });
+      if (r.best) { const sm = Planner.simulate({ ...P, V }, r.best.trips, 1500); pts.push({ V, days: r.best.ev.days, cost: r.best.ev.price + r.best.ev.lodging, n: r.best.trips.length, gap: r.best.ev.maxGap, lo: sm.p10, hi: sm.p90 }); }
+      drawFrontier(pts);
+      if (i < Vs.length) setTimeout(step, 0); else frontierCache = { key, pts };
+    };
+    setTimeout(step, 0);
+  }
+  function drawFrontier(pts) {
+    const box = document.getElementById("frontier"), tip = document.getElementById("ftip");
+    const W = Math.max(320, Math.round(box.clientWidth || 640)), H = 220, m = { l: 52, r: 12, t: 12, b: 34 };
+    const cur = last && last.best ? { days: last.best.ev.days, cost: last.best.ev.price + last.best.ev.lodging } : null;
+    const all = pts.concat(cur ? [cur] : []).concat(pts.filter(p => p.lo).flatMap(p => [{ days: p.days, cost: p.lo }, { days: p.days, cost: p.hi }]));
+    if (!all.length) return;
+    const dmin = Math.min(...all.map(p => p.days)) - 4, dmax = Math.max(...all.map(p => p.days)) + 4;
+    const cmin = Math.floor((Math.min(...all.map(p => p.cost)) - 300) / 500) * 500, cmax = Math.ceil((Math.max(...all.map(p => p.cost)) + 300) / 500) * 500;
+    const x = d => m.l + (d - dmin) / (dmax - dmin) * (W - m.l - m.r), y = c => m.t + (1 - (c - cmin) / (cmax - cmin)) * (H - m.t - m.b);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Days together versus travel cost for each optimal plan">`;
+    for (let c = cmin; c <= cmax; c += 500) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(c)}" y2="${y(c)}" stroke="var(--line)"/><text x="${m.l - 6}" y="${y(c) + 4}" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">€${(c / 1000).toFixed(1)}k</text>`;
+    const step = Math.max(5, Math.round((dmax - dmin) / 6 / 5) * 5);
+    for (let d = Math.ceil(dmin / step) * step; d <= dmax; d += step) s += `<text x="${x(d)}" y="${H - 16}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${d}</text>`;
+    s += `<text x="${(m.l + W - m.r) / 2}" y="${H - 2}" text-anchor="middle" font-size="11" fill="var(--ink-3)">days together →</text>`;
+    const sorted = pts.slice().sort((a, b) => a.V - b.V);
+    if (sorted.length > 1) s += `<path d="${sorted.map((p, i) => `${i ? "L" : "M"}${x(p.days).toFixed(1)},${y(p.cost).toFixed(1)}`).join("")}" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    sorted.forEach(p => { if (p.lo) s += `<line x1="${x(p.days)}" x2="${x(p.days)}" y1="${y(p.lo)}" y2="${y(p.hi)}" stroke="var(--rose)" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/>`; });
+    sorted.forEach((p, i) => { s += `<circle class="fp" data-i="${i}" cx="${x(p.days)}" cy="${y(p.cost)}" r="7" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="2" style="cursor:pointer"/>`; });
+    if (cur) s += `<circle cx="${x(cur.days)}" cy="${y(cur.cost)}" r="8" fill="var(--rose)" stroke="var(--surface)" stroke-width="2.5" pointer-events="none"/><text x="${x(cur.days)}" y="${y(cur.cost) - 13}" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--rose)">your plan</text>`;
+    s += `</svg>`;
+    box.innerHTML = s; box.appendChild(tip);
+    box.querySelectorAll(".fp").forEach(c => {
+      const p = sorted[+c.dataset.i];
+      const show = ev => {
+        tip.innerHTML = `<b>€${p.V} per day together</b><br>${p.days} days · ${p.n} trips<br>${eur(p.cost)} travel${p.lo ? ` (likely ${k(p.lo)}–${k(p.hi)})` : ""}<br>longest gap ${p.gap} d<br><span class="muted">tap to use this plan</span>`;
+        tip.style.display = "block"; const bx = box.getBoundingClientRect();
+        tip.style.left = Math.min(bx.width - tip.offsetWidth - 4, Math.max(4, ev.clientX - bx.left + 10)) + "px"; tip.style.top = "4px";
+      };
+      c.addEventListener("pointerenter", show); c.addEventListener("pointermove", show);
+      c.addEventListener("pointerleave", () => tip.style.display = "none");
+      c.addEventListener("click", () => { P.V = p.V; const fv = document.getElementById("f-V"); if (fv) fv.value = P.V; syncPreset(); tip.style.display = "none"; schedule(); });
+    });
+  }
+
+  /* ---- Fare evidence ---- */
+  function renderEvidence(res) {
+    const qs = res.quotes;
+    const one = (dir, who) => {
+      let html = `<thead><tr><th>${esc(who)} flies</th><th>Kiwi</th><th>lastminute</th><th>LetsFG</th><th>Low</th><th>Typical</th><th>High</th></tr></thead><tbody>`;
+      const cell = (src, m) => {
+        const q = qs.filter(q => q.dir === dir && q.src === src && +q.start.slice(5, 7) === m + 1);
+        if (!q.length) return `<td class="muted">–</td>`;
+        const min = q.reduce((a, b) => a.price < b.price ? a : b);
+        return `<td title="${esc(min.via)} · ${fmtD(min.start)}–${fmtD(min.end)}">${min.price}</td>`;
+      };
+      for (let m = 0; m < 12; m++) {
+        const mid = res.cal.days.find(d => d.m === m && +d.iso.slice(8) === 15).i;
+        const low = res.cal.curve[dir][mid] * P.priceScale;
+        const est = (m === 11) || (dir === "her" && m === 10);
+        html += `<tr><td>${MONTHS[m]}${est ? "*" : ""}</td>${cell("Kiwi", m)}${cell("lastminute", m)}${cell("LetsFG", m)}<td class="best">${Math.round(low)}</td><td>${Math.round(low * Planner.BASIS.typical)}</td><td>${Math.round(low * Planner.BAND.b)}</td></tr>`;
+      }
+      return html + `</tbody>`;
+    };
+    document.getElementById("evidence").innerHTML = one("me", P.nameMe);
+    document.getElementById("evidence2").innerHTML = one("her", P.nameHer);
+    const n = qs.length;
+    document.getElementById("fareFinding").innerHTML = `<b>${n} real quotes from 3 sites</b> (Kiwi.com, lastminute.com, LetsFG, which also aggregates Google Flights and travel agencies, 450–620 offers per search). Three things stand out. <b>${esc(P.nameHer)}’s ticket is usually €100–250 cheaper</b>, with Air Canada via Montréal at €731–810 in Apr–May and Aug–Oct. <b>For ${esc(P.nameMe)}, mid-May and mid-September dip to €835–850</b> (British Airways via London). On the <b>same dates the three sites differ by about 7%</b>, but direct flights cost 13–69% more than the cheapest one-stop. Prices are €, return, economy, collected 20 Nov 2026.`;
   }
 
   function priceAt(res, i, dir) {
     const e = Math.min(res.cal.N - 1, i + 10), c = res.cal.curve[dir];
-    return P.priceScale * (0.6 * c[i] + 0.4 * c[e]);
+    return P.priceScale * Planner.BASIS[P.fareBasis || "typical"] * (0.6 * c[i] + 0.4 * c[e]);
   }
 
   function renderCalendar(res) {
@@ -888,7 +1225,8 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
       const md = days.filter(d => d.m === m);
       const a = md.reduce((s, d) => s + priceAt(res, d.i, "me"), 0) / md.length;
       const b = md.reduce((s, d) => s + priceAt(res, d.i, "her"), 0) / md.length;
-      html += `<div class="month"><h3>${MONTHS[m]}</h3><div class="mprice"><span class="${a < b ? "cheap" : ""}" title="${esc(P.nameMe)} flies">A ${eur(a)}</span><span class="${b < a ? "cheap" : ""}" title="${esc(P.nameHer)} flies">E ${eur(b)}</span></div><div class="grid7">` +
+      const tog = md.filter(d => st[d.i]).length;
+      html += `<div class="month"><h3>${MONTH_ES[m]}<span class="tog ${tog ? "" : "none"}">${tog ? "♥ " + tog : "apart"}</span></h3><div class="mprice"><span class="${a < b ? "cheap" : ""}" title="${esc(P.nameMe)} flies">✈ A ${eur(a)}</span><span class="${b < a ? "cheap" : ""}" title="${esc(P.nameHer)} flies">L ${eur(b)}</span></div><div class="grid7">` +
         ["M","T","W","T","F","S","S"].map(x => `<span class="dh">${x}</span>`).join("");
       for (let i = 0; i < (md[0].dow + 6) % 7; i++) html += `<span></span>`;
       for (const d of md) {
@@ -898,6 +1236,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
         if (d.holMe || d.holHer) cls += " hol";
         if (o) {
           cls += " " + (o.city ? "meet" : o.dir);
+          if (d.i === o.s) cls += " first";
           if (!o.city && (o.dir === "me" ? (d.workHer && !o.hl) : (d.workMe && !o.hl))) cls += " hw";
         }
         html += `<button type="button" class="${cls}" data-i="${d.i}" aria-label="${d.iso}">${+d.iso.slice(8)}</button>`;
@@ -961,7 +1300,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     const N = res.cal.N, days = res.cal.days;
     const me = days.map(d => priceAt(res, d.i, "me")), her = days.map(d => priceAt(res, d.i, "her"));
     const qs = res.quotes.map(q => ({ ...q, i: days.findIndex(d => d.iso === q.start), price: q.price * P.priceScale }));
-    const all = me.concat(her, qs.map(q => q.price));
+    const all = me.concat(her, qs.map(q => q.price), me.map(v => v * Planner.BAND.b / Planner.BASIS[P.fareBasis]), her.map(v => v * Planner.BAND.b / Planner.BASIS[P.fareBasis]));
     const lo = Math.floor(Math.min(...all) / 100) * 100, hi = Math.ceil(Math.max(...all) / 100) * 100;
     const x = i => m.l + (i / (N - 1)) * (W - m.l - m.r), y = v => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated fares through the year for each direction">`;
@@ -969,6 +1308,9 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     for (let v = lo; v <= hi; v += 100) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">€${v}</text>`;
     for (let mo = 0; mo < 12; mo++) { const i = days.findIndex(d => d.m === mo); s += `<text x="${x(i) + 3}" y="${H - 8}" font-size="11" fill="var(--ink-3)">${MONTHS[mo][0]}</text>`; }
     const path = arr => arr.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+    const band = (arr, col) => { const hiA = arr.map(v => v * Planner.BAND.b / Planner.BASIS[P.fareBasis]), loA = arr.map(v => v / Planner.BASIS[P.fareBasis]);
+      return `<path d="${path(hiA)}${loA.map((v, i) => `L${x(loA.length - 1 - i).toFixed(1)},${y(loA[loA.length - 1 - i]).toFixed(1)}`).join("")}Z" fill="${col}" opacity=".13" stroke="none"/>`; };
+    s += band(me, "var(--me)") + band(her, "var(--her)");
     s += `<path d="${path(me)}" fill="none" stroke="var(--me)" stroke-width="2" stroke-linejoin="round"/><path d="${path(her)}" fill="none" stroke="var(--her)" stroke-width="2" stroke-linejoin="round"/>`;
     for (const q of qs) s += `<circle cx="${x(q.i)}" cy="${y(q.price)}" r="5" fill="var(--${q.dir})" stroke="var(--surface)" stroke-width="2"/><circle cx="${x(q.i)}" cy="${y(q.price)}" r="1.8" fill="var(--ink)"/>`;
     s += `<line id="xh" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink-3)" stroke-dasharray="3 3" visibility="hidden"/><rect id="hit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/></svg>`;
@@ -987,7 +1329,60 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     hit.addEventListener("pointerleave", () => { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); });
   }
 
-  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => last && renderChart(last), 150); });
+  /* ---- Method: live results ---- */
+  function renderMethod(res) {
+    document.getElementById("mData").textContent = `${res.quotes.length} quotes, 3 sites`;
+    const A1 = P.leaveMe + 1, G1 = P.leaveHer + 1, R = res.reqs.length + 1;
+    document.getElementById("mStates").textContent = ((res.cal.N + 1) * R * A1 * G1 / 1e6).toFixed(1) + " M";
+    const st = document.getElementById("status").textContent.match(/(\d+) ms/);
+    if (st) document.getElementById("mTime").textContent = st[1] + " ms";
+    setTimeout(() => {
+      const b = {};
+      for (const fb of ["low", "typical", "cautious"]) { const q = { ...P, fareBasis: fb }, r = Planner.solve(q); b[fb] = r.best ? { ev: r.best.ev, sim: Planner.simulate(q, r.best.trips), trips: r.best.trips } : null; }
+      const cur = res.best, ev = cur.ev, days = res.cal.days;
+      const lines = [];
+      lines.push(`<p><b>Your plan:</b> ${ev.days} days together across ${cur.trips.length} trips, about ${eur(ev.price + ev.lodging)} in travel. With real price swings it lands between <b>${eur(SIM.p10)} and ${eur(SIM.p90)}</b> in 80% of cases.</p>`);
+      if (b.low && b.typical && b.low.ev.days !== b.typical.ev.days) {
+        const extra = b.low.trips.filter(o => !b.typical.trips.some(t => t.s === o.s && t.dir === o.dir));
+        const ex = extra.map(o => `${fmtD(days[o.s].iso)}–${fmtD(days[o.e].iso)}`).join(", ");
+        lines.push(`<p><b>Price risk changes the plan.</b> With the cheapest fares seen, the optimiser adds ${ex || "a trip"} (${b.low.ev.days} days). That plan looks like ${eur(b.low.ev.price + b.low.ev.lodging)} on paper, but realistically costs ${eur(b.low.sim.p10)}–${eur(b.low.sim.p90)}. With typical fares it’s ${b.typical.ev.days} days for ${eur(b.typical.sim.p10)}–${eur(b.typical.sim.p90)}. So <b>book that trip only if you catch a fare near the low</b>.</p>`);
+      } else if (b.low && b.typical) lines.push(`<p><b>The plan is robust to prices.</b> Cheapest, typical and cautious fares all lead to the same ${b.typical.ev.days} days.</p>`);
+      if (frontierCache && frontierCache.pts.length > 2) {
+        const p = frontierCache.pts.slice().sort((x, y) => x.V - y.V), lo = p[0], hi = p[p.length - 1];
+        if (hi.days > lo.days) lines.push(`<p><b>The trade-off curve:</b> from ${lo.days} to ${hi.days} days together costs ${eur(hi.cost - lo.cost)} more, about ${eur((hi.cost - lo.cost) / (hi.days - lo.days))} per extra day. Fixed trips already account for most of the budget.</p>`);
+      }
+      lines.push(`<p><b>Leave is the real currency.</b> ${esc(P.nameHer)}’s ${P.leaveHer} days run out first, so the cheapest extra time comes from her flying in her cheap months (Apr–May, Aug–Oct) while ${esc(P.nameMe)} hosts, or from ${esc(P.nameMe)} flying out while she keeps working.</p>`);
+      document.getElementById("mResults").innerHTML = lines.join("");
+    }, 60);
+  }
+
+  /* ---- Floating hearts: light rose, drifting left to right as you scroll ---- */
+  const heartsBox = document.getElementById("hearts");
+  const HEART_COLORS = ["#f8bbd0", "#f4a6c0", "#fce4ec", "#f9c6d6", "#efb3c8"];
+  let lastY = window.scrollY, budget = 0, live = 0;
+  function spawnHeart() {
+    if (live > 16) return;
+    const size = 10 + Math.random() * 16, dur = 7 + Math.random() * 7, wob = 1.6 + Math.random() * 1.8;
+    const c = HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)];
+    const el = document.createElement("div");
+    el.className = "fh";
+    el.style.top = (8 + Math.random() * 84) + "vh";
+    el.style.animationDuration = dur + "s";
+    el.style.opacity = (0.3 + Math.random() * 0.3).toFixed(2);
+    el.innerHTML = `<i style="animation-duration:${wob}s"><svg width="${size}" height="${size}" viewBox="-16 -14 32 26"><path d="M0,10 C-14,0 -10,-12 0,-5 C10,-12 14,0 0,10 Z" fill="${c}"/></svg></i>`;
+    heartsBox.appendChild(el); live++;
+    el.addEventListener("animationend", e => { if (e.target === el) { el.remove(); live--; } });
+  }
+  if (!reduceMotion) {
+    for (let i = 0; i < 4; i++) setTimeout(spawnHeart, i * 900);
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY; budget += Math.abs(y - lastY); lastY = y;
+      while (budget > 140) { budget -= 140; spawnHeart(); }
+    }, { passive: true });
+    setInterval(() => { if (document.visibilityState === "visible" && Math.random() < 0.5) spawnHeart(); }, 2600);
+  }
+
+  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (last) { renderChart(last); if (frontierCache) drawFrontier(frontierCache.pts); } }, 150); });
   names();
   run();
   onScroll();
