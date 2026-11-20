@@ -58,7 +58,7 @@ h3 { margin: 0; }
 .script { font-family: var(--font-script); font-weight: 400; }
 
 /* ---------- Language switch ---------- */
-.lang { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 10px; z-index: 50; display: flex; gap: 2px; padding: 3px; border-radius: 999px;
+.lang { position: absolute; top: max(10px, env(safe-area-inset-top)); right: 10px; z-index: 50; display: flex; gap: 2px; padding: 3px; border-radius: 999px;
   background: rgba(20, 14, 40, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.18); }
 .lang button { font: 600 12px/1 var(--font-body); letter-spacing: .06em; color: rgba(255,255,255,.75); background: transparent; border: 0; border-radius: 999px; padding: 7px 10px; cursor: pointer; }
 .lang button[aria-pressed="true"] { background: #fff; color: #2b2350; }
@@ -72,9 +72,9 @@ h3 { margin: 0; }
   background: radial-gradient(circle at 35% 35%, #fffaf0, #f3e6c8 60%, #e0cfa8); box-shadow: 0 0 40px 10px rgba(255, 244, 214, .25); }
 .night .moon::after { content: ""; position: absolute; inset: -2px -14px 6px 12px; border-radius: 50%; background: transparent; box-shadow: inset 12px 2px 0 0 rgba(12,10,34,.0); }
 .night .inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 560px; will-change: transform, opacity; }
-.night .eyebrow { font: 500 12.5px/1.3 var(--font-body); letter-spacing: .28em; text-transform: uppercase; opacity: .8; }
+.night .eyebrow { font: 400 clamp(30px, 8.5vw, 46px)/1.1 var(--font-script); color: #fff; opacity: .95; text-shadow: 0 0 18px rgba(255, 200, 220, .35); }
 .night .count { display: flex; align-items: baseline; gap: 12px; }
-.night .count .d { font: 700 clamp(96px, 30vw, 168px)/0.9 var(--font-display); letter-spacing: -.03em;
+.night .count .d { font: 400 clamp(130px, 40vw, 220px)/0.95 var(--font-script); letter-spacing: 0; padding: 0 .12em;
   background: linear-gradient(180deg, #fff 0%, #ffd9e6 60%, #f7a8c4 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
   text-shadow: 0 0 40px rgba(247, 168, 196, .25); font-variant-numeric: tabular-nums; }
 .night .count .u { font: 400 clamp(34px, 9vw, 52px)/1 var(--font-script); color: #ffd9e6; }
@@ -98,7 +98,7 @@ h3 { margin: 0; }
   background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 58%, var(--sky-3) 100%); padding: 28px 16px 0; }
 .banner h1 { font: 400 clamp(56px, 16vw, 104px)/1 var(--font-script); margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,.25); }
 .banner .sub { margin: 6px 0 0; font: 500 14px/1.4 var(--font-body); letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
-.banner svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 4px auto 0; }
+.banner svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 18px auto 0; }
 .stars circle { fill: #fff; }
 
 /* ---------- Highlights ---------- */
@@ -206,6 +206,18 @@ h3 { margin: 0; }
 
 /* ---------- Compare ---------- */
 .lead { margin: 0; color: var(--ink-2); font-size: 14px; }
+.guide { border-radius: 14px; padding: 12px 14px; background: color-mix(in srgb, var(--rose) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--rose) 25%, var(--line)); display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: var(--ink-2); }
+.guide b { color: var(--ink); }
+.guide ol { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.rec { display: inline-block; font: 700 9.5px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--rose); background: color-mix(in srgb, var(--rose) 12%, transparent); border-radius: 999px; padding: 3px 6px; margin-top: 4px; }
+.seg button[aria-pressed="true"] .rec { color: #fff; background: color-mix(in srgb, #fff 22%, transparent); }
+details.info { font-size: 13px; color: var(--ink-2); }
+details.info summary { cursor: pointer; color: var(--rose); font-weight: 600; list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+details.info summary::-webkit-details-marker { display: none; }
+details.info summary::before { content: "i"; display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--rose); font: 700 11px/1 var(--font-body); }
+details.info[open] summary { margin-bottom: 6px; }
+details.info ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.seg button { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .lead b { color: var(--ink); }
 .sub3 { font: 600 14.5px/1.3 var(--font-body); margin-top: 6px; }
 .breakdown { display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; border-radius: 12px; background: var(--bg); padding: 10px 12px; }
@@ -296,7 +308,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
   <canvas id="sky" aria-hidden="true"></canvas>
   <div class="moon" aria-hidden="true"></div>
   <div class="inner" id="nightInner">
-    <div class="eyebrow" data-es="Nos volvemos a ver en">Until we see each other again</div>
+    <div class="eyebrow" data-es="No puedo esperar a verte">Can’t wait to see you</div>
     <div class="count"><span class="d" id="cdDays">–</span><span class="u" id="cdUnit" data-es="días">days</span></div>
     <div class="clock" aria-live="off">
       <span><b id="cdH">00</b><span data-es="horas">hours</span></span>
@@ -314,7 +326,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
 <header class="banner" aria-label="Todo contigo">
   <h1>Todo contigo</h1>
   <p class="sub"><span id="nm-her-b">Laura</span> &amp; <span id="nm-me-b">Andrés</span> · Ciudad de México ⇄ <span data-es="París">Paris</span> · 2027</p>
-  <svg id="bannerSvg" viewBox="0 0 400 130" aria-hidden="true"></svg>
+  <svg id="bannerSvg" viewBox="0 0 400 165" aria-hidden="true"></svg>
 </header>
 
 <div class="wrap">
@@ -350,31 +362,47 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     <div class="card-head"><h2 data-es="Cómo se comparan los planes">How plans are compared</h2></div>
     <p class="lead" data-es="Cada plan maximiza un solo número, la &lt;b&gt;puntuación&lt;/b&gt;: el valor de sus días juntos menos todo lo que cuestan. El &lt;b&gt;valor por día&lt;/b&gt; es el tipo de cambio entre tiempo y dinero. Si sube, el optimizador compra más días; si baja, ahorra dinero.">Every plan maximises one number, the <b>score</b>: the value of your days together minus everything they cost. <b>Value per day</b> is the exchange rate between time and money. Raise it and the optimiser buys more days; lower it and it saves money.</p>
     <div class="breakdown" id="breakdown"></div>
+    <div class="guide" data-es="&lt;b&gt;Cómo usar esto (30 segundos)&lt;/b&gt;
+      &lt;ol&gt;
+        &lt;li&gt;Las tres filas de botones de abajo son &lt;b&gt;preguntas para ustedes dos&lt;/b&gt;. Cada respuesta cambia el plan.&lt;/li&gt;
+        &lt;li&gt;Toca un botón y &lt;b&gt;todo se reoptimiza al instante&lt;/b&gt;: los viajes, el calendario y los totales.&lt;/li&gt;
+        &lt;li&gt;Los botones marcados como &lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt; ya están seleccionados. Es el plan que sugerimos: precios realistas, equilibrio entre tiempo y dinero, y cualquier destino permitido.&lt;/li&gt;
+        &lt;li&gt;Ninguna combinación está “mal”. Comparen los &lt;b&gt;días juntos&lt;/b&gt; y el &lt;b&gt;rango de coste&lt;/b&gt; que produce, y quédense con la que sientan mejor.&lt;/li&gt;
+      &lt;/ol&gt;"><b>How to use this (30 seconds)</b>
+      <ol>
+        <li>The three rows of buttons below are <b>questions for you two</b>. Each answer changes the plan.</li>
+        <li>Tap a button and <b>everything re-optimises instantly</b>: the trips, the calendar, the totals and the countdown highlights.</li>
+        <li>The buttons marked <span class="rec">recommended</span> are already selected. That’s the plan we suggest: realistic prices, balanced between time and money, any destination allowed.</li>
+        <li>No combination is “wrong”. Compare the <b>days together</b> and the <b>cost range</b> it produces, and keep the one that feels right.</li>
+      </ol></div>
 
     <h3 class="sub3" data-es="1 · ¿Con qué tarifas planificamos?">1 · Which fares should we plan with?</h3>
     <div class="seg" role="group" aria-label="Fare basis">
       <button type="button" data-basis="low" data-es="La más barata vista">Cheapest seen</button>
-      <button type="button" data-basis="typical" data-es="Típica">Typical</button>
+      <button type="button" data-basis="typical" data-es="Típica&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Typical<span class="rec">recommended</span></button>
       <button type="button" data-basis="cautious" data-es="Prudente">Cautious</button>
     </div>
     <div class="muted" id="basisNote"></div>
+    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;La más barata vista&lt;/b&gt;: supone que encuentran el precio más bajo que vimos. Da más días, pero es optimista.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Típica&lt;/b&gt;: el precio que probablemente pagarán. Úsenla para decidir.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Prudente&lt;/b&gt;: supone precios altos. Si un viaje sigue entrando aquí, es una apuesta segura para reservar.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li><b>Cheapest seen</b>: assumes you catch the lowest price we found. Most days, but optimistic.</li><li><b>Typical</b>: the price you’ll most likely pay. Use this to decide.</li><li><b>Cautious</b>: assumes prices are high. If a trip still makes it in here, it’s a safe bet to book.</li></ul></details>
 
     <h3 class="sub3" data-es="2 · ¿Qué es lo más importante para ustedes?">2 · What matters most to you?</h3>
     <div class="seg" role="group" aria-label="Priority">
       <button type="button" data-preset="save" data-es="Ahorrar">Save money</button>
-      <button type="button" data-preset="balanced" data-es="Equilibrado">Balanced</button>
+      <button type="button" data-preset="balanced" data-es="Equilibrado&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Balanced<span class="rec">recommended</span></button>
       <button type="button" data-preset="time" data-es="Más tiempo juntos">Most time together</button>
     </div>
     <div class="muted" id="presetNote"></div>
+    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;Define cuánto “vale” un día juntos frente al dinero.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Ahorrar&lt;/b&gt;: solo los viajes que salen muy bien por día.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Equilibrado&lt;/b&gt;: nuestra opción por defecto.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Más tiempo juntos&lt;/b&gt;: usa cada día de vacaciones posible, aunque cueste más.&lt;/li&gt;&lt;li&gt;El gráfico muestra todas las opciones a la vez. Cada punto es un plan óptimo completo, y pueden tocar uno para probarlo.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li>This sets how much a day together is “worth” against money.</li><li><b>Save money</b>: only trips that are very good value per day.</li><li><b>Balanced</b>: our default.</li><li><b>Most time together</b>: uses every possible day of leave, even if it costs more.</li><li>The chart shows all options at once. Each dot is a complete optimal plan, and you can tap one to try it.</li></ul></details>
     <div class="chart" id="frontier"><div class="tip" id="ftip"></div></div>
     <div class="muted" data-es="Cada punto es el plan &lt;b&gt;óptimo&lt;/b&gt; para un valor por día. La barra rosa indica dónde cae su coste en el 80% de 1 500 simulaciones de tarifas. Hacia la derecha hay más días; hacia arriba, más coste. Toca un punto para usar ese plan.">Each dot is the <b>optimal</b> plan for one value per day. The pink bar is where its cost lands in 80% of 1,500 simulated fare draws. Moving right buys more days, moving up costs more. Tap a dot to use that plan.</div>
 
     <h3 class="sub3" data-es="3 · ¿A dónde pueden ir los viajes libres?">3 · Where may free trips go?</h3>
     <div class="seg" role="group" aria-label="Scenario">
       <button type="button" data-mode="home" data-es="Solo en casa">Only home</button>
-      <button type="button" data-mode="both" data-es="Casa u otro lugar">Home or elsewhere</button>
+      <button type="button" data-mode="both" data-es="Casa u otro lugar&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Home or elsewhere<span class="rec">recommended</span></button>
       <button type="button" data-mode="meet" data-es="Solo otro lugar">Only elsewhere</button>
     </div>
+    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;Se aplica a los viajes que añade el optimizador. Los fijos, como Nueva York, se quedan como están.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo en casa&lt;/b&gt;: París o Ciudad de México. Lo más barato, porque uno de los dos recibe al otro.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Casa u otro lugar&lt;/b&gt;: también permite una ciudad intermedia (Cancún, Miami, Madrid…) cuando compensa.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo otro lugar&lt;/b&gt;: siempre un sitio nuevo, más vacaciones, pero dos billetes más hotel.&lt;/li&gt;&lt;li&gt;Las tarjetas de abajo comparan los tres. ♥ marca el mejor valor de cada línea, y pueden tocar una tarjeta para ver ese plan.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li>Applies to the trips the optimiser adds on its own. The fixed ones, like New York, stay as they are.</li><li><b>Only home</b>: Paris or Mexico City. Cheapest, because one of you hosts.</li><li><b>Home or elsewhere</b>: also allows a city in between (Cancún, Miami, Madrid…) when it’s worth it.</li><li><b>Only elsewhere</b>: always somewhere new, more like holidays, but two tickets plus a hotel.</li><li>The cards below compare the three. ♥ marks the best value on each line, and you can tap a card to show that plan.</li></ul></details>
     <div class="scards" id="scen"></div>
     <span class="muted" data-es="“Casa” es París o Ciudad de México. Los viajes fijos mantienen su propia opción. ♥ marca el mejor valor de cada línea. Una puntuación negativa es normal: los viajes fijos cuestan más que el valor fijado por día.">“Home” is Paris or Mexico City. Fixed trips keep their own setting. ♥ marks the best value on each line. A negative score is normal: the fixed trips cost more than the value set per day.</span>
   </section>
@@ -923,14 +951,22 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
 
   function landmarks(groundY) {
     // CDMX on the left (pyramid + Ángel), Paris on the right (Eiffel tower)
-    return `<g opacity=".55" fill="#1a1230">
-      <path d="M8,${groundY} L18,${groundY - 10} L28,${groundY - 10} L36,${groundY - 18} L46,${groundY - 18} L54,${groundY - 10} L64,${groundY - 10} L74,${groundY} Z"/>
-      <rect x="86" y="${groundY - 44}" width="3" height="44"/><circle cx="87.5" cy="${groundY - 48}" r="4"/>
+    const g = groundY;
+    // Mexico: Popocatépetl (smoking cone) and Iztaccíhuatl (the sleeping woman), snow-capped, with Teotihuacan in front
+    const volcanoes = `<g>
+      <path d="M-6,${g} L18,${g - 30} Q26,${g - 38} 34,${g - 36} Q44,${g - 42} 52,${g - 37} Q62,${g - 33} 70,${g - 26} L96,${g} Z" fill="#3a2a55" opacity=".75"/>
+      <path d="M26,${g - 36} Q30,${g - 39} 34,${g - 36} Q44,${g - 42} 52,${g - 37} Q58,${g - 34} 62,${g - 31} Q54,${g - 32} 48,${g - 34} Q40,${g - 33} 34,${g - 33} Q30,${g - 33} 26,${g - 36} Z" fill="#f4eef8" opacity=".85"/>
+      <path d="M40,${g} L84,${g - 58} L92,${g - 58} L136,${g} Z" fill="#2c2046" opacity=".85"/>
+      <path d="M77,${g - 49} L84,${g - 58} L92,${g - 58} L99,${g - 49} Q95,${g - 51} 92,${g - 48} Q88,${g - 52} 84,${g - 48} Q81,${g - 51} 77,${g - 49} Z" fill="#f7f1fa"/>
+      <path d="M88,${g - 60} C84,${g - 70} 94,${g - 74} 90,${g - 84}" stroke="#e9e3f0" stroke-opacity=".55" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    </g>`;
+    return volcanoes + `<g opacity=".55" fill="#1a1230">
+      <path d="M8,${g} L16,${g - 7} L24,${g - 7} L30,${g - 13} L38,${g - 13} L44,${g - 7} L52,${g - 7} L60,${g} Z"/>
       <path d="M352,${groundY} L362,${groundY - 22} L364,${groundY - 62} L366,${groundY - 62} L368,${groundY - 22} L378,${groundY} L373,${groundY} Q365,${groundY - 14} 357,${groundY} Z"/>
       <rect x="358" y="${groundY - 24}" width="14" height="2.5"/>
     </g>
-    <text x="40" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">CDMX</text>
-    <text x="365" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">PARIS</text>
+    <text x="62" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">CDMX</text>
+    <text x="365" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">${tr("PARIS", "PARÍS")}</text>
     <line x1="0" y1="${groundY}" x2="400" y2="${groundY}" stroke="#fff" stroke-opacity=".35"/>`;
   }
   function stars(n, h) {
@@ -959,7 +995,7 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
   }
 
   // Banner: loop — she runs in from the left, he from the right, they meet, a heart rises, repeat.
-  const bannerPose = makeScene(document.getElementById("bannerSvg"), 112, 0.95);
+  const bannerPose = makeScene(document.getElementById("bannerSvg"), 147, 0.95);
   const CYCLE = 7000, RUN = 3800;
   const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   function bannerFrame(now) {
