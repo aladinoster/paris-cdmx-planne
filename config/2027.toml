@@ -1,0 +1,195 @@
+# Planner input for 2027. Every value here can be edited; dates are YYYY-MM-DD.
+# "me" = you (based in Paris, France); "her" = your partner (based in Mexico City).
+
+year = 2027
+# Which places FREE trips may use: "home" (Paris or Mexico City), "both" (home or a third city), "meet" (third cities only).
+mode = "both"
+
+[leave]
+me = 45   # your annual leave days
+her = 22  # her annual leave days
+
+[trips]
+min_days = 7     # shortest free trip (days, both travel days included)
+max_days = 16    # longest free trip; fixed trips may be longer
+min_gap = 14     # minimum days apart between two trips
+max_gap = 200    # longest gap the solver will consider
+
+[value]
+day = 120                 # € value of one day together
+host_working_factor = 0.6 # value multiplier on days the host is at work (evenings + weekends only)
+travel_day_factor = 0.5   # first and last day of a trip count this much
+trip_overhead = 150       # € fixed cost per trip (transfers, jet lag, logistics)
+gap_target = 45           # gaps longer than this many days are penalised...
+gap_lambda = 0.15         # ...by gap_lambda * (gap - gap_target)^2 €
+
+[her_constraints]
+month_end_days = 5        # she can't take leave in the last N days of each month
+block_august = true       # she can't take leave in August
+extra_blackout = []       # any other dates she can't take off
+
+[holidays]
+# Days off that don't consume leave (weekends are always off).
+me = ["2027-01-01", "2027-03-29", "2027-05-01", "2027-05-06", "2027-05-08", "2027-05-17",
+      "2027-07-14", "2027-08-15", "2027-11-01", "2027-11-11", "2027-12-25"]
+# Mexican federal holidays + Holy Thursday/Friday and Día de Muertos (edit to her employer's calendar).
+her = ["2027-01-01", "2027-02-01", "2027-03-15", "2027-03-25", "2027-03-26", "2027-05-01",
+       "2027-09-16", "2027-11-02", "2027-11-15", "2027-12-25"]
+
+[fares]
+scale = 1.0                       # multiply every fare (use after checking live prices)
+weekend_departure_surcharge = 0.04
+sunday_return_surcharge = 0.03    # home trips only
+reference_day = "05-13"           # third-city fares are quoted for this departure day
+# Round-trip economy fare (EUR) by departure date, piecewise constant from each MM-DD, then 5-day smoothed.
+# Calibrated on Kiwi.com quotes collected in Nov 2026 (see [[fares.quotes]]).
+curve.me = [["01-01", 1250], ["01-06", 880], ["02-01", 900], ["03-01", 940], ["03-20", 1000], ["04-05", 960],
+            ["04-17", 1050], ["05-03", 900], ["06-01", 980], ["06-25", 1250], ["07-03", 1380], ["08-16", 1250],
+            ["09-01", 1080], ["10-01", 950], ["10-22", 1050], ["11-08", 880], ["12-01", 950], ["12-15", 1400]]
+curve.her = [["01-01", 1350], ["01-06", 950], ["02-01", 950], ["03-01", 1000], ["03-18", 1080], ["04-05", 950],
+             ["05-01", 950], ["06-01", 930], ["06-28", 1150], ["07-05", 1300], ["08-10", 1200], ["08-25", 1000],
+             ["10-01", 950], ["11-01", 950], ["12-01", 1000], ["12-12", 1350]]
+
+[[fares.quotes]]
+who = "me"
+start = "2027-02-04"
+end = "2027-02-15"
+price = 914
+[[fares.quotes]]
+who = "me"
+start = "2027-03-18"
+end = "2027-03-29"
+price = 936
+[[fares.quotes]]
+who = "her"
+start = "2027-03-18"
+end = "2027-03-29"
+price = 1065
+[[fares.quotes]]
+who = "her"
+start = "2027-06-12"
+end = "2027-06-27"
+price = 922
+[[fares.quotes]]
+who = "me"
+start = "2027-09-10"
+end = "2027-09-20"
+price = 1106
+
+# Fixed trips. start/end ranges let the solver slide a trip; equal bounds lock the dates.
+# where: "me" (you fly to CDMX), "her" (she flies to Paris), "home" (optimiser picks who),
+#        "meet:<city id>", "meet:any" (optimiser picks the city), "anywhere".
+[[fixed_trips]]
+label = "February, you go"
+start = ["2027-02-04", "2027-02-04"]
+end = ["2027-02-15", "2027-02-15"]
+where = "me"
+
+[[fixed_trips]]
+label = "March, New York together"
+start = ["2027-03-18", "2027-03-18"]
+end = ["2027-03-28", "2027-03-28"]
+where = "meet:nyc"
+
+[[fixed_trips]]
+label = "June, she comes (Marseille)"
+start = ["2027-06-12", "2027-06-12"]
+end = ["2027-06-27", "2027-06-27"]
+where = "her"
+
+[[fixed_trips]]
+label = "Late Oct to early Nov, you go"
+start = ["2027-10-22", "2027-10-31"]
+end = ["2027-11-01", "2027-11-10"]
+where = "me"
+
+# Third cities. ref_me / ref_her: normalised midweek round-trip fare (EUR) from Paris / Mexico City
+# at fares.reference_day; moved through the year with each origin's curve.
+# lodging: € per night for two. bonus: extra € value per day of holiday there. enabled: allow it.
+[[cities]]
+id = "nyc"
+name = "New York"
+beach = false
+ref_me = 610
+ref_her = 470
+lodging = 230
+bonus = 25
+enabled = true
+quotes = "May 762 / 514 · Mar 567 / 507"
+
+[[cities]]
+id = "mia"
+name = "Miami"
+beach = true
+ref_me = 690
+ref_her = 400
+lodging = 190
+bonus = 25
+enabled = true
+quotes = "May 649 / 342 · Mar 723 / 595"
+
+[[cities]]
+id = "cun"
+name = "Cancún"
+beach = true
+ref_me = 800
+ref_her = 180
+lodging = 120
+bonus = 25
+enabled = true
+quotes = "May 959 / 176 · Mar 749 / 181"
+
+[[cities]]
+id = "puj"
+name = "Punta Cana"
+beach = true
+ref_me = 890
+ref_her = 426
+lodging = 150
+bonus = 25
+enabled = true
+quotes = "May 890 / 426"
+
+[[cities]]
+id = "sju"
+name = "San Juan"
+beach = true
+ref_me = 932
+ref_her = 578
+lodging = 170
+bonus = 25
+enabled = true
+quotes = "May 932 / 578"
+
+[[cities]]
+id = "fdf"
+name = "Martinique"
+beach = true
+ref_me = 632
+ref_her = 1228
+lodging = 130
+bonus = 25
+enabled = true
+quotes = "May 632 / 1228"
+
+[[cities]]
+id = "yul"
+name = "Montréal"
+beach = false
+ref_me = 439
+ref_her = 540
+lodging = 150
+bonus = 25
+enabled = true
+quotes = "May 439 / 540"
+
+[[cities]]
+id = "mad"
+name = "Madrid"
+beach = false
+ref_me = 135
+ref_her = 841
+lodging = 120
+bonus = 25
+enabled = true
+quotes = "May 135 / 841"
