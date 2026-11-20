@@ -71,6 +71,8 @@ class Config:
     quotes: tuple[Quote, ...]
     fixed_trips: tuple[FixedTrip, ...]
     cities: tuple[City, ...] = field(default_factory=tuple)
+    name_me: str = "Me"
+    name_her: str = "Her"
 
     def with_(self, **kw) -> Config:
         """Return a copy with some fields replaced (used for scenarios)."""
@@ -129,6 +131,8 @@ def parse_config(raw: dict) -> Config:
             for c in raw.get("cities", [])
         ),
     )
+    names = raw.get("names", {})
+    cfg = replace(cfg, name_me=names.get("me", "Me"), name_her=names.get("her", "Her"))
     validate(cfg)
     return cfg
 

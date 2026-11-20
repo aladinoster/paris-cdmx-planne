@@ -48,7 +48,7 @@ def cmd_solve(args) -> int:
 def cmd_compare(args) -> int:
     base = load_config(args.config)
     labels = {"home": "Only Paris or Mexico City", "both": "Home or a third city", "meet": "Only third cities"}
-    print(f"{'Scenario':<28}{'Days':>6}{'Trips':>7}{'Fares':>10}{'Lodging':>10}{'Leave me/her':>14}{'Score':>10}")
+    print(f"{'Scenario':<28}{'Days':>6}{'Trips':>7}{'Fares':>10}{'Lodging':>10}{'Leave A/L':>14}{'Score':>10}")
     for mode in MODES:
         p = solve(base.with_(mode=mode)).plan
         if p is None:
@@ -64,10 +64,10 @@ def cmd_where(args) -> int:
     cal = build_calendar(cfg)
     rows = where_to_meet(cal, cfg, args.month, args.nights)
     print(f"{args.nights}-night trip from 15 {MONTHS[args.month - 1]} {cfg.year}, cheapest first\n")
-    print(f"{'Place':<26}{'Kind':<7}{'Your fare':>11}{'Her fare':>10}{'Lodging':>10}{'Total':>9}")
+    print(f"{'Place':<28}{'Kind':<7}{cfg.name_me[:9]:>11}{cfg.name_her[:9]:>10}{'Lodging':>10}{'Total':>9}")
     for r in rows:
         dash = lambda v: f"{v:,.0f}" if v else "–"
-        print(f"{r['place']:<26}{r['kind']:<7}{dash(r['fare_me']):>11}{dash(r['fare_her']):>10}"
+        print(f"{r['place']:<28}{r['kind']:<7}{dash(r['fare_me']):>11}{dash(r['fare_her']):>10}"
               f"{dash(r['lodging']):>10}{r['total']:>9,.0f}")
     return 0
 
@@ -76,12 +76,12 @@ def cmd_fares(args) -> int:
     cfg = load_config(args.config)
     cal = build_calendar(cfg)
     print("Average estimated round-trip fare by departure month (10-night midweek trip)\n")
-    print(f"{'Month':<7}{'You fly':>9}{'She flies':>11}  Cheaper")
+    print(f"{'Month':<7}{cfg.name_me[:9]:>9}{cfg.name_her[:9]:>11}  Cheaper (who flies)")
     for m in range(1, 13):
         idx = [i for i, d in enumerate(cal.dates) if d.month == m]
         a = sum(reference_fare(cal, cfg, i, "me") for i in idx) / len(idx)
         b = sum(reference_fare(cal, cfg, i, "her") for i in idx) / len(idx)
-        who = "about the same" if abs(a - b) < 25 else (f"you, by €{b - a:,.0f}" if a < b else f"she, by €{a - b:,.0f}")
+        who = "about the same" if abs(a - b) < 25 else (f"{cfg.name_me}, by €{b - a:,.0f}" if a < b else f"{cfg.name_her}, by €{a - b:,.0f}")
         print(f"{MONTHS[m - 1]:<7}{a:>9,.0f}{b:>11,.0f}  {who}")
     return 0
 

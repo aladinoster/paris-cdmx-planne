@@ -1,7 +1,11 @@
 # Planner input for 2027. Every value here can be edited; dates are YYYY-MM-DD.
-# "me" = you (based in Paris, France); "her" = your partner (based in Mexico City).
+# "me" = Andrés (based in Paris, France); "her" = Laura (based in Mexico City).
 
 year = 2027
+
+[names]
+me = "Andrés"   # based in Paris
+her = "Laura"   # based in Mexico City
 # Which places FREE trips may use: "home" (Paris or Mexico City), "both" (home or a third city), "meet" (third cities only).
 mode = "both"
 
@@ -80,7 +84,7 @@ price = 1106
 # where: "me" (you fly to CDMX), "her" (she flies to Paris), "home" (optimiser picks who),
 #        "meet:<city id>", "meet:any" (optimiser picks the city), "anywhere".
 [[fixed_trips]]
-label = "February, you go"
+label = "February, Andrés goes"
 start = ["2027-02-04", "2027-02-04"]
 end = ["2027-02-15", "2027-02-15"]
 where = "me"
@@ -92,13 +96,13 @@ end = ["2027-03-28", "2027-03-28"]
 where = "meet:nyc"
 
 [[fixed_trips]]
-label = "June, she comes (Marseille)"
+label = "June, Laura comes (Marseille)"
 start = ["2027-06-12", "2027-06-12"]
 end = ["2027-06-27", "2027-06-27"]
 where = "her"
 
 [[fixed_trips]]
-label = "Late Oct to early Nov, you go"
+label = "Late Oct to early Nov, Andrés goes"
 start = ["2027-10-22", "2027-10-31"]
 end = ["2027-11-01", "2027-11-10"]
 where = "me"

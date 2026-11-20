@@ -1,6 +1,6 @@
 # Todo contigo · meetplan
 
-An exact optimiser for a long-distance couple's year of trips: **when** to meet, **where** (Paris, Mexico City or a
+Made for Laura (Mexico City) and Andrés (Paris). An exact optimiser for a long-distance couple's year of trips: **when** to meet, **where** (Paris, Mexico City or a
 city in between) and **for how long**. It stays within both people's leave and blocked dates, and trades days together
 against fares, hotels and long gaps apart.
 
@@ -52,16 +52,15 @@ Output:
 Plan for 2027 (mode: both)
   Days together : 70 (19% of the year)
   Trips         : 5
-  Travel cost   : €7,426  (your fares €2,569, hers €2,558, lodging €2,300)
-  Leave used    : you 45/45, her 22/22
+  Travel cost   : €7,426  (Andrés's fares €2,569, Laura's €2,558, lodging €2,300)
+  Leave used    : Andrés 45/45, Laura 22/22
   Longest gap   : 75 days
-
-Dates                    Where                    Days     Fares  Lodging  Leave me/her  Host / fixed
-2027-02-04 → 2027-02-15  You → Mexico City          12      €900        –      8/0       keeps working · February, you go
+Dates                    Where                    Days     Fares  Lodging     Leave A/L  Host / fixed
+2027-02-04 → 2027-02-15  Andrés → Mexico City       12      €900        –      8/0       Laura keeps working · February, Andrés goes
 2027-03-18 → 2027-03-28  Both → New York            11    €1,183   €2,300      7/5       both on leave · March, New York together
-2027-06-12 → 2027-06-27  She → Paris                16    €1,033        –     10/10      takes leave · June, she comes (Marseille)
-2027-09-09 → 2027-09-20  She → Paris                12    €1,000        –      8/7       takes leave · suggested
-2027-10-22 → 2027-11-09  You → Mexico City          19    €1,010        –     12/0       keeps working · Late Oct to early Nov, you go
+2027-06-12 → 2027-06-27  Laura → Paris              16    €1,033        –     10/10      Andrés takes leave · June, Laura comes (Marseille)
+2027-09-09 → 2027-09-20  Laura → Paris              12    €1,000        –      8/7       Andrés takes leave · suggested
+2027-10-22 → 2027-11-09  Andrés → Mexico City       19    €1,010        –     12/0       Laura keeps working · Late Oct to early Nov, Andrés goes
 ```
 
 ## Commands
@@ -102,7 +101,8 @@ with `-c`.
 | Section | Meaning |
 |---|---|
 | `year`, `mode` | Planning year; default scenario (`home` / `both` / `meet`) |
-| `[leave]` | Annual leave days: `me` (Paris side), `her` (Mexico side) |
+| `[names]` | Display names: `me` (Paris side), `her` (Mexico side) |
+| `[leave]` | Annual leave days for each |
 | `[trips]` | `min_days` / `max_days` for free trips, `min_gap` between trips, `max_gap` search window |
 | `[value]` | `day`: € value of a day together; `host_working_factor`: value when the host works; `travel_day_factor`; `trip_overhead` €; `gap_target` and `gap_lambda` for the gap penalty |
 | `[her_constraints]` | `month_end_days` she can't take off, `block_august`, `extra_blackout` dates |

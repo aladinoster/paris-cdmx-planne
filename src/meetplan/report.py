@@ -17,7 +17,7 @@ from .solver import Result
 def where_label(cfg: Config, t: Trip) -> str:
     if t.city:
         return f"Both → {cfg.city_map[t.city].name}"
-    return "You → Mexico City" if t.where == "me" else "She → Paris"
+    return f"{cfg.name_me} → Mexico City" if t.where == "me" else f"{cfg.name_her} → Paris"
 
 
 def _fmt_eur(v: float) -> str:
@@ -35,7 +35,8 @@ def trip_rows(res: Result) -> list[dict]:
             "where": where_label(cfg, t),
             "who_flies": "both" if t.city else ("me" if t.where == "me" else "her"),
             "city": cfg.city_map[t.city].name if t.city else ("Mexico City" if t.where == "me" else "Paris"),
-            "host": "both on leave" if t.city else ("takes leave" if t.host_leave else "keeps working"),
+            "host": "both on leave" if t.city else
+                    f"{cfg.name_her if t.where == 'me' else cfg.name_me} {'takes leave' if t.host_leave else 'keeps working'}",
             "fare_me": round(t.fare_me, 2),
             "fare_her": round(t.fare_her, 2),
             "lodging": round(t.lodging, 2),
@@ -56,12 +57,12 @@ def text_report(res: Result) -> str:
     w(f"Plan for {cfg.year} (mode: {cfg.mode})\n")
     w(f"  Days together : {plan.days_together} ({plan.days_together / res.cal.n:.0%} of the year)\n")
     w(f"  Trips         : {len(plan.trips)}\n")
-    w(f"  Travel cost   : {_fmt_eur(plan.travel_cost)}  (your fares {_fmt_eur(plan.fares_me)}, "
-      f"hers {_fmt_eur(plan.fares_her)}, lodging {_fmt_eur(plan.lodging)})\n")
-    w(f"  Leave used    : you {plan.leave_me}/{cfg.leave_me}, her {plan.leave_her}/{cfg.leave_her}\n")
+    w(f"  Travel cost   : {_fmt_eur(plan.travel_cost)}  ({cfg.name_me}'s fares {_fmt_eur(plan.fares_me)}, "
+      f"{cfg.name_her}'s {_fmt_eur(plan.fares_her)}, lodging {_fmt_eur(plan.lodging)})\n")
+    w(f"  Leave used    : {cfg.name_me} {plan.leave_me}/{cfg.leave_me}, {cfg.name_her} {plan.leave_her}/{cfg.leave_her}\n")
     w(f"  Longest gap   : {plan.longest_gap} days\n")
     w(f"  Score         : {plan.objective:,.0f}\n\n")
-    hdr = f"{'Dates':<25}{'Where':<24}{'Days':>5}{'Fares':>10}{'Lodging':>9}{'Leave me/her':>14}  Host / fixed\n"
+    hdr = f"{'Dates':<25}{'Where':<24}{'Days':>5}{'Fares':>10}{'Lodging':>9}{'Leave A/L':>14}  Host / fixed\n"
     w(hdr)
     w("-" * (len(hdr) + 18) + "\n")
     for row in trip_rows(res):
@@ -108,7 +109,7 @@ def to_ics(res: Result) -> str:
             f"DTEND;VALUE=DATE:{end}",
             f"SUMMARY:{row['where']} ({row['days']} days)",
             (f"DESCRIPTION:Fares €{row['fare_me'] + row['fare_her']:.0f}, lodging €{row['lodging']:.0f}, "
-             f"leave you {row['leave_me']} / her {row['leave_her']}. {row['fixed'] or 'Suggested by optimiser'}"),
+             f"leave {res.cfg.name_me} {row['leave_me']} / {res.cfg.name_her} {row['leave_her']}. {row['fixed'] or 'Suggested by optimiser'}"),
             "END:VEVENT",
         ]
     lines.append("END:VCALENDAR")
@@ -120,8 +121,8 @@ def where_to_meet(cal: YearCalendar, cfg: Config, month: int, nights: int = 10) 
     s = next(i for i, d in enumerate(cal.dates) if d.month == month and d.day == 15)
     e = min(cal.n - 1, s + nights)
     rows = [
-        {"place": "Paris (she flies)", "kind": "home", "fare_me": 0.0, "fare_her": home_fare(cal, cfg, s, e, "her"), "lodging": 0.0},
-        {"place": "Mexico City (you fly)", "kind": "home", "fare_me": home_fare(cal, cfg, s, e, "me"), "fare_her": 0.0, "lodging": 0.0},
+        {"place": f"Paris ({cfg.name_her} flies)", "kind": "home", "fare_me": 0.0, "fare_her": home_fare(cal, cfg, s, e, "her"), "lodging": 0.0},
+        {"place": f"Mexico City ({cfg.name_me} flies)", "kind": "home", "fare_me": home_fare(cal, cfg, s, e, "me"), "fare_her": 0.0, "lodging": 0.0},
     ]
     for c in cfg.cities:
         rows.append({"place": c.name + ("" if c.enabled else " (off)"), "kind": "beach" if c.beach else "city",
