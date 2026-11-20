@@ -1,0 +1,43 @@
+checked,source,direction,depart,return,kind,price_eur,cheapest_nonstop_eur,carriers,notes
+2026-11-20,kiwi,PAR-MEX,2027-01-29,2027-02-10,best_in_month,882,,Aeromexico direct,cheapest departure 10-31 Jan (9-11 nights)
+2026-11-20,kiwi,PAR-MEX,2027-02-16,2027-02-28,best_in_month,872,,Aeromexico direct,
+2026-11-20,kiwi,PAR-MEX,2027-03-25,2027-04-04,best_in_month,971,,Aeromexico direct,Easter week
+2026-11-20,kiwi,PAR-MEX,2027-04-02,2027-04-13,best_in_month,931,,Avianca / Iberia,
+2026-11-20,kiwi,PAR-MEX,2027-05-05,2027-05-15,best_in_month,938,,Avianca / Iberia,
+2026-11-20,kiwi,PAR-MEX,2027-06-11,2027-06-21,best_in_month,1097,,Avianca / Iberia,
+2026-11-20,kiwi,PAR-MEX,2027-07-05,2027-07-14,best_in_month,1154,,Iberia via Dallas,
+2026-11-20,kiwi,PAR-MEX,2027-08-30,2027-09-10,best_in_month,1085,,Air France / KLM,
+2026-11-20,kiwi,PAR-MEX,2027-09-15,2027-09-25,best_in_month,980,,Avianca / Iberia,
+2026-11-20,kiwi,PAR-MEX,2027-10-03,2027-10-14,best_in_month,983,,Avianca / Iberia,
+2026-11-20,kiwi,PAR-MEX,2027-11-01,2027-11-11,best_in_month,1132,,Air France direct,thin inventory (near sales horizon)
+2026-11-20,kiwi,PAR-MEX,2027-02-04,2027-02-15,fixed_dates,914,914,Aeromexico direct,
+2026-11-20,kiwi,PAR-MEX,2027-03-18,2027-03-29,fixed_dates,936,1077,Avianca / Iberia,
+2026-11-20,kiwi,PAR-MEX,2027-09-10,2027-09-20,fixed_dates,1106,1255,Avianca / Iberia,
+2026-11-20,lastminute,PAR-MEX,2027-02-04,2027-02-15,fixed_dates,854,868,British Airways + Iberia,
+2026-11-20,lastminute,PAR-MEX,2027-05-15,2027-05-25,fixed_dates,838,,British Airways,
+2026-11-20,lastminute,PAR-MEX,2027-07-15,2027-07-25,fixed_dates,1101,,British Airways,
+2026-11-20,lastminute,PAR-MEX,2027-09-15,2027-09-25,fixed_dates,835,,British Airways,
+2026-11-20,lastminute,PAR-MEX,2027-10-22,2027-11-07,fixed_dates,1095,,Air Canada,2 stops
+2026-11-20,letsfg,PAR-MEX,2027-02-04,2027-02-15,fixed_dates,870,870,Aeromexico direct,455 offers; Air France direct 1071; refundable 1412
+2026-11-20,letsfg,PAR-MEX,2027-05-12,2027-05-26,best_in_window,850,1036,British Airways via London,window 25 Apr-31 May 10-15 nights; 27 Apr-10 May 872; refundable 1457
+2026-11-20,letsfg,PAR-MEX,2027-10-22,2027-11-08,fixed_dates,986,1230,Aer Lingus / British Airways,economy 1-stop from 1024; refundable 1630
+2026-11-20,kiwi,MEX-PAR,2027-01-13,2027-01-25,best_in_month,766,,Air Canada via Toronto,cheapest departure 6-31 Jan
+2026-11-20,kiwi,MEX-PAR,2027-02-15,2027-02-25,best_in_month,876,876,Air France direct,
+2026-11-20,kiwi,MEX-PAR,2027-03-28,2027-04-09,best_in_month,876,876,Air France direct,
+2026-11-20,kiwi,MEX-PAR,2027-04-04,2027-04-15,best_in_month,738,,Air Canada via Montreal,
+2026-11-20,kiwi,MEX-PAR,2027-05-13,2027-05-25,best_in_month,731,,Air Canada via Montreal,
+2026-11-20,kiwi,MEX-PAR,2027-06-14,2027-06-24,best_in_month,798,,Air Canada via Montreal,
+2026-11-20,kiwi,MEX-PAR,2027-07-04,2027-07-15,best_in_month,999,,Air Canada via Montreal,
+2026-11-20,kiwi,MEX-PAR,2027-08-19,2027-08-31,best_in_month,736,,Air Canada via Montreal,
+2026-11-20,kiwi,MEX-PAR,2027-09-23,2027-10-05,best_in_month,735,,Air Canada via Montreal,
+2026-11-20,kiwi,MEX-PAR,2027-10-18,2027-10-28,best_in_month,735,,Air Canada via Montreal,
+2026-11-20,kiwi,MEX-PAR,2027-11-04,2027-11-13,best_in_month,1250,,Iberia,thin inventory (near sales horizon)
+2026-11-20,kiwi,MEX-PAR,2027-03-18,2027-03-29,fixed_dates,1065,,Air Canada,
+2026-11-20,kiwi,MEX-PAR,2027-06-12,2027-06-27,fixed_dates,922,,Air Canada via Montreal,
+2026-11-20,lastminute,MEX-PAR,2027-01-15,2027-01-25,fixed_dates,845,,Iberia,
+2026-11-20,lastminute,MEX-PAR,2027-05-15,2027-05-25,fixed_dates,899,,Air Canada,
+2026-11-20,lastminute,MEX-PAR,2027-06-12,2027-06-27,fixed_dates,993,,Air Canada,
+2026-11-20,lastminute,MEX-PAR,2027-09-09,2027-09-20,fixed_dates,975,,Air Canada / Lufthansa,
+2026-11-20,letsfg,MEX-PAR,2027-06-12,2027-06-27,fixed_dates,977,1290,Air Canada via Montreal,522 offers; refundable 1451
+2026-11-20,letsfg,MEX-PAR,2027-08-26,2027-09-07,best_in_window,810,1367,Air Canada / Lufthansa,window 20 Aug-15 Oct 10-12 nights; refundable 1291
+2026-11-20,letsfg,MEX-PAR,2027-09-23,2027-10-04,best_in_window,836,,Air Canada,second-best pair in the same window

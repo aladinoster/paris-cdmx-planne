@@ -73,6 +73,8 @@ class Config:
     cities: tuple[City, ...] = field(default_factory=tuple)
     name_me: str = "Me"
     name_her: str = "Her"
+    fare_basis: str = "typical"
+    band: tuple[float, float, float] = (1.0, 1.08, 1.30)
 
     def with_(self, **kw) -> Config:
         """Return a copy with some fields replaced (used for scenarios)."""
@@ -120,7 +122,7 @@ def parse_config(raw: dict) -> Config:
         reference_day=fares.get("reference_day", "05-13"),
         curve_me=tuple((k, float(v)) for k, v in fares["curve"]["me"]),
         curve_her=tuple((k, float(v)) for k, v in fares["curve"]["her"]),
-        quotes=tuple(Quote(q["who"], _d(q["start"]), _d(q["end"]), float(q["price"])) for q in fares.get("quotes", [])),
+        quotes=(),
         fixed_trips=tuple(
             FixedTrip(t["label"], _d(t["start"][0]), _d(t["start"][1]), _d(t["end"][0]), _d(t["end"][1]), t["where"])
             for t in raw.get("fixed_trips", [])
@@ -132,13 +134,21 @@ def parse_config(raw: dict) -> Config:
         ),
     )
     names = raw.get("names", {})
-    cfg = replace(cfg, name_me=names.get("me", "Me"), name_her=names.get("her", "Her"))
+    cfg = replace(cfg, name_me=names.get("me", "Me"), name_her=names.get("her", "Her"),
+                  fare_basis=fares.get("basis", "typical"),
+                  band=(float(fares.get("band_low", 1.0)), float(fares.get("band_mode", 1.08)),
+                        float(fares.get("band_high", 1.30))))
     validate(cfg)
     return cfg
 
 
 def validate(cfg: Config) -> None:
     errors = []
+    if cfg.fare_basis not in ("low", "typical", "cautious"):
+        errors.append(f"fares.basis must be low, typical or cautious, got {cfg.fare_basis!r}")
+    a, c, b = cfg.band
+    if not a <= c <= b or a <= 0:
+        errors.append("fares band must satisfy 0 < band_low ≤ band_mode ≤ band_high")
     if cfg.mode not in MODES:
         errors.append(f"mode must be one of {MODES}, got {cfg.mode!r}")
     if not 1 <= cfg.min_days <= cfg.max_days:

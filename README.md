@@ -52,15 +52,15 @@ Output:
 Plan for 2027 (mode: both)
   Days together : 70 (19% of the year)
   Trips         : 5
-  Travel cost   : €7,426  (Andrés's fares €2,569, Laura's €2,558, lodging €2,300)
+  Travel cost   : €7,610  (Andrés's fares €2,885, Laura's €2,425, lodging €2,300)
   Leave used    : Andrés 45/45, Laura 22/22
   Longest gap   : 75 days
 Dates                    Where                    Days     Fares  Lodging     Leave A/L  Host / fixed
-2027-02-04 → 2027-02-15  Andrés → Mexico City       12      €900        –      8/0       Laura keeps working · February, Andrés goes
-2027-03-18 → 2027-03-28  Both → New York            11    €1,183   €2,300      7/5       both on leave · March, New York together
-2027-06-12 → 2027-06-27  Laura → Paris              16    €1,033        –     10/10      Andrés takes leave · June, Laura comes (Marseille)
-2027-09-09 → 2027-09-20  Laura → Paris              12    €1,000        –      8/7       Andrés takes leave · suggested
-2027-10-22 → 2027-11-09  Andrés → Mexico City       19    €1,010        –     12/0       Laura keeps working · Late Oct to early Nov, Andrés goes
+2027-02-04 → 2027-02-15  Andrés → Mexico City       12      €962        –      8/0       Laura keeps working · February, Andrés goes
+2027-03-18 → 2027-03-28  Both → New York            11    €1,402   €2,300      7/5       both on leave · March, New York together
+2027-06-12 → 2027-06-27  Laura → Paris              16      €962        –     10/10      Andrés takes leave · June, Laura comes (Marseille)
+2027-09-09 → 2027-09-20  Laura → Paris              12      €828        –      8/7       Andrés takes leave · suggested
+2027-10-22 → 2027-11-09  Andrés → Mexico City       19    €1,155        –     12/0       Laura keeps working · Late Oct to early Nov, Andrés goes
 ```
 
 ## Commands
@@ -71,7 +71,11 @@ Dates                    Where                    Days     Fares  Lodging     Le
 | `uv run meetplan solve --mode home` | Override the scenario: `home`, `both` or `meet` |
 | `uv run meetplan solve --fare-scale 1.1` | Re-solve with every fare 10% higher |
 | `uv run meetplan solve -o plan.ics` | Also export the plan: `.ics` (calendar), `.csv` or `.json` |
+| `uv run meetplan solve --basis cautious` | Plan with `low` (cheapest seen), `typical` (default) or `cautious` fares |
 | `uv run meetplan compare` | Solve the three scenarios side by side |
+| `uv run meetplan risk` | Re-plan with low / typical / cautious fares and give each plan's Monte Carlo cost range |
+| `uv run meetplan frontier` | Days-vs-cost trade-off: the optimal plan for each value of a day together |
+| `uv run meetplan data` | Summarise the fare database (`data/fares.csv`) |
 | `uv run meetplan where 9` | Rank every place to meet for a 10-night trip from 15 September |
 | `uv run meetplan fares` | Who should fly each month (home trips) |
 | `uv run meetplan -c my.toml solve` | Use another input file |
@@ -111,6 +115,38 @@ with `-c`.
 | `[[fixed_trips]]` | Trips that must happen. `start` and `end` are `[earliest, latest]`; `where` is `me`, `her`, `home`, `meet:<city>`, `meet:any` or `anywhere` |
 | `[[cities]]` | Third-city options: reference fares from each side (`ref_me`, `ref_her`), `lodging` € per night for two, `bonus` € of extra value per holiday day, `enabled` |
 
+### The fare database (`data/fares.csv`)
+
+Every price the model uses comes from real searches, stored one row per quote: when it was checked, the source
+(`kiwi`, `lastminute`, `letsfg`), direction, dates, kind (`best_in_month` = cheapest departure day in a month,
+`fixed_dates`, `best_in_window` = cheapest pair in a flexible window), the cheapest price, the cheapest nonstop
+when known, carriers and notes. The first collection (20 Nov 2026) holds 42 quotes; LetsFG searches aggregate
+450–620 offers each, Google Flights included. Expedia and eDreams did not return machine-readable prices.
+
+Findings: on identical dates the three sites differed by ~7%; the cheapest nonstop costs ×1.00–×1.69 the cheapest
+fare (median ×1.13); Laura's direction is usually €100–250 cheaper (Air Canada via Montréal, €731–810 in Apr–May
+and Aug–Oct); Andrés's dips to €835–850 in mid-May and mid-September (British Airways via London).
+
+To add data, append rows and update the curves in `config/2027.toml`; a test fails if a curve is ever above the
+cheapest quote of its month.
+
+### Price uncertainty
+
+Each month's curve value is the **lowest** fare seen. A ticket actually bought is modelled as
+`lowest × m`, `m ~ Triangular(1.00, 1.08, 1.30)` (`[fares] band_*`). The optimiser plans with `basis` =
+`low` (×1.00), `typical` (expected value, ×1.13, default) or `cautious` (90th percentile, ×1.22), and
+`meetplan.prices.simulate_cost` redraws every ticket 4,000 times to give the P10–P90 travel cost.
+
+```
+$ uv run meetplan risk
+Plan with fares     Days  Trips  Cost (plan)      P10      P50      P90
+low                   87      6        7,862    8,395    8,561    8,739
+typical               70      5        7,610    7,447    7,604    7,774
+cautious              70      5        8,044    7,447    7,604    7,774
+```
+
+Planning on the cheapest fares adds a May trip that only pays off if a fare near the low is actually caught.
+
 ### Updating fares
 
 Fares are estimates. The two curves are piecewise-constant from each `MM-DD` and are calibrated on Kiwi.com quotes
@@ -144,7 +180,7 @@ exhaustive enumeration on a small instance.
 
 ```bash
 uv sync                    # installs runtime + dev dependencies (pytest, ruff)
-uv run pytest              # 12 tests
+uv run pytest              # 19 tests
 uv run ruff check src tests
 ```
 

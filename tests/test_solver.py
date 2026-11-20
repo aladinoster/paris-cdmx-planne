@@ -5,6 +5,7 @@ import pytest
 
 from meetplan import build_calendar, load_config, solve
 from meetplan.model import generate_trips
+from meetplan.prices import basis_factor, load_quotes, simulate_cost
 from meetplan.report import to_csv, to_ics, to_json
 from meetplan.solver import summarise
 
@@ -21,14 +22,24 @@ def result(cfg):
     return solve(cfg)
 
 
-def test_reference_plan_matches_web_solver(result):
-    # Same numbers as the JavaScript solver on the GitHub Pages site (docs/index.html).
-    p = result.plan
-    assert p.days_together == 70
-    assert (p.leave_me, p.leave_her) == (45, 22)
-    assert round(p.fares_me + p.fares_her) == 5126
+# Reference numbers from the JavaScript solver on the GitHub Pages site (docs/index.html), per fare basis.
+WEB = {
+    ("typical", "both"): (70, 45, 22, 5309.59, -1433.5435),
+    ("typical", "meet"): (59, 38, 15, 4481.49, -2340.0435),
+    ("low", "both"): (87, 45, 22, 5561.82, -810.8170),
+    ("cautious", "both"): (70, 45, 22, 5743.60, -1867.5460),
+}
+
+
+@pytest.mark.parametrize("key", list(WEB))
+def test_matches_web_solver(cfg, key):
+    basis, mode = key
+    days, la, lg, fares, obj = WEB[key]
+    p = solve(cfg.with_(fare_basis=basis, mode=mode)).plan
+    assert (p.days_together, p.leave_me, p.leave_her) == (days, la, lg)
+    assert p.fares_me + p.fares_her == pytest.approx(fares, abs=0.01)
     assert round(p.lodging) == 2300
-    assert p.objective == pytest.approx(-1250.25, abs=0.01)
+    assert p.objective == pytest.approx(obj, abs=0.01)
 
 
 def test_constraints_hold(cfg, result):
@@ -79,3 +90,26 @@ def test_exports(result):
     ics = to_ics(result)
     assert ics.count("BEGIN:VEVENT") == len(result.plan.trips)
     assert "DTSTART;VALUE=DATE:20270318" in ics and "DTEND;VALUE=DATE:20270329" in ics
+
+
+def test_price_database_supports_the_curves(cfg):
+    # Every month with real quotes: the curve's base fare is never above the cheapest quote seen that month.
+    cal = build_calendar(cfg)
+    quotes = load_quotes()
+    assert len(quotes) >= 40 and {q.source for q in quotes} == {"kiwi", "lastminute", "letsfg"}
+    for who in ("me", "her"):
+        curve = cal.curve_me if who == "me" else cal.curve_her
+        for m in range(1, 12):
+            qs = [q.price for q in quotes if q.who == who and q.depart.month == m and "thin" not in q.notes]
+            if qs:
+                mid = next(i for i, d in enumerate(cal.dates) if d.month == m and d.day == 15)
+                assert curve[mid] <= min(qs) + 1e-6, (who, m, curve[mid], min(qs))
+
+
+def test_monte_carlo_band(cfg, result):
+    s = simulate_cost(cfg, result.plan.trips)
+    assert s["p10"] < s["p50"] < s["p90"]
+    planned = result.plan.travel_cost
+    assert s["p10"] <= planned <= s["p90"] * 1.05   # the 'typical' plan sits inside its own band
+    assert basis_factor(cfg.with_(fare_basis="low")) == 1.0
+    assert basis_factor(cfg.with_(fare_basis="cautious")) > basis_factor(cfg)

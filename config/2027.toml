@@ -45,40 +45,23 @@ scale = 1.0                       # multiply every fare (use after checking live
 weekend_departure_surcharge = 0.04
 sunday_return_surcharge = 0.03    # home trips only
 reference_day = "05-13"           # third-city fares are quoted for this departure day
-# Round-trip economy fare (EUR) by departure date, piecewise constant from each MM-DD, then 5-day smoothed.
-# Calibrated on Kiwi.com quotes collected in Nov 2026 (see [[fares.quotes]]).
-curve.me = [["01-01", 1250], ["01-06", 880], ["02-01", 900], ["03-01", 940], ["03-20", 1000], ["04-05", 960],
-            ["04-17", 1050], ["05-03", 900], ["06-01", 980], ["06-25", 1250], ["07-03", 1380], ["08-16", 1250],
-            ["09-01", 1080], ["10-01", 950], ["10-22", 1050], ["11-08", 880], ["12-01", 950], ["12-15", 1400]]
-curve.her = [["01-01", 1350], ["01-06", 950], ["02-01", 950], ["03-01", 1000], ["03-18", 1080], ["04-05", 950],
-             ["05-01", 950], ["06-01", 930], ["06-28", 1150], ["07-05", 1300], ["08-10", 1200], ["08-25", 1000],
-             ["10-01", 950], ["11-01", 950], ["12-01", 1000], ["12-12", 1350]]
-
-[[fares.quotes]]
-who = "me"
-start = "2027-02-04"
-end = "2027-02-15"
-price = 914
-[[fares.quotes]]
-who = "me"
-start = "2027-03-18"
-end = "2027-03-29"
-price = 936
-[[fares.quotes]]
-who = "her"
-start = "2027-03-18"
-end = "2027-03-29"
-price = 1065
-[[fares.quotes]]
-who = "her"
-start = "2027-06-12"
-end = "2027-06-27"
-price = 922
-[[fares.quotes]]
-who = "me"
-start = "2027-09-10"
-end = "2027-09-20"
-price = 1106
+# Which fare the optimiser plans with: "low" (cheapest seen), "typical" (expected), "cautious" (90th percentile).
+basis = "typical"
+# Price band: a ticket actually bought = lowest-seen fare × m, m ~ Triangular(band_low, band_mode, band_high).
+# Calibrated on data/fares.csv: identical dates differed ~7% across sites; nonstop / unlucky booking up to +30%.
+band_low = 1.00
+band_mode = 1.08
+band_high = 1.30
+# LOWEST round-trip economy fare (EUR, 9–11 nights) seen per month across Kiwi.com, lastminute.com and LetsFG
+# (see data/fares.csv), piecewise constant from each MM-DD, then 5-day smoothed. Dec, early Jan and Nov for her are
+# estimates (not yet on sale / thin inventory).
+curve.me = [["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 931], ["05-01", 838],
+            ["06-01", 1097], ["07-01", 1101], ["08-01", 1085], ["09-01", 835], ["10-01", 983], ["11-01", 990],
+            ["11-15", 950], ["12-01", 1000], ["12-15", 1400]]
+curve.her = [["01-01", 1350], ["01-06", 766], ["02-01", 876], ["03-01", 876], ["04-01", 738], ["05-01", 731],
+             ["06-01", 798], ["07-01", 999], ["08-01", 736], ["09-01", 735], ["10-01", 735], ["11-01", 950],
+             ["12-01", 1000], ["12-12", 1350]]
+# Raw observations live in data/fares.csv (loaded with meetplan.prices.load_quotes).
 
 # Fixed trips. start/end ranges let the solver slide a trip; equal bounds lock the dates.
 # where: "me" (you fly to CDMX), "her" (she flies to Paris), "home" (optimiser picks who),

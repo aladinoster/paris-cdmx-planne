@@ -10,6 +10,7 @@ from pathlib import Path
 from .calendar import build_calendar
 from .config import MODES, load_config
 from .fares import reference_fare
+from .prices import load_quotes, monthly_summary, simulate_cost
 from .report import text_report, to_csv, to_ics, to_json, where_to_meet
 from .solver import solve
 
@@ -23,6 +24,8 @@ def _load(args):
         cfg = cfg.with_(mode=args.mode)
     if getattr(args, "fare_scale", None):
         cfg = cfg.with_(fare_scale=args.fare_scale)
+    if getattr(args, "basis", None):
+        cfg = cfg.with_(fare_basis=args.basis)
     return cfg
 
 
@@ -32,6 +35,10 @@ def cmd_solve(args) -> int:
     res = solve(cfg)
     dt = time.perf_counter() - t0
     print(text_report(res))
+    if res.plan:
+        sim = simulate_cost(cfg, res.plan.trips)
+        print(f"If prices swing: travel cost €{sim['p10']:,.0f}–€{sim['p90']:,.0f} in 80% of 4,000 simulations "
+              f"(median €{sim['p50']:,.0f}; planned with '{cfg.fare_basis}' fares)")
     print(f"(exact optimum over {res.n_candidates:,} candidate trips in {dt:.1f}s)")
     if args.out:
         out = Path(args.out)
@@ -56,6 +63,56 @@ def cmd_compare(args) -> int:
             continue
         print(f"{labels[mode]:<28}{p.days_together:>6}{len(p.trips):>7}{p.fares_me + p.fares_her:>10,.0f}"
               f"{p.lodging:>10,.0f}{p.leave_me:>8}/{p.leave_her:<5}{p.objective:>10,.0f}")
+    return 0
+
+
+def cmd_risk(args) -> int:
+    """Re-plan with optimistic / expected / cautious fares and price each plan with Monte Carlo."""
+    base = load_config(args.config)
+    print(f"{'Plan with fares':<18}{'Days':>6}{'Trips':>7}{'Cost (plan)':>13}{'P10':>9}{'P50':>9}{'P90':>9}")
+    for basis in ("low", "typical", "cautious"):
+        cfg = base.with_(fare_basis=basis)
+        p = solve(cfg).plan
+        if p is None:
+            print(f"{basis:<18}  infeasible")
+            continue
+        s = simulate_cost(cfg, p.trips)
+        print(f"{basis:<18}{p.days_together:>6}{len(p.trips):>7}{p.travel_cost:>13,.0f}"
+              f"{s['p10']:>9,.0f}{s['p50']:>9,.0f}{s['p90']:>9,.0f}")
+    print("\nP10–P90: realistic travel cost when every ticket is redrawn from the price band.")
+    return 0
+
+
+def cmd_frontier(args) -> int:
+    """Sweep the value of a day together: the days-vs-cost trade-off curve of optimal plans."""
+    base = load_config(args.config)
+    print(f"{'€/day':>6}{'Days':>6}{'Trips':>7}{'Cost':>9}{'P10–P90':>16}{'Longest gap':>13}")
+    for v in (40, 60, 80, 100, 120, 150, 180, 220, 260, 320):
+        cfg = base.with_(day_value=float(v))
+        p = solve(cfg).plan
+        if p is None:
+            continue
+        s = simulate_cost(cfg, p.trips, n=1500)
+        rng = f"{s['p10'] / 1000:.1f}k–{s['p90'] / 1000:.1f}k"
+        print(f"{v:>6}{p.days_together:>6}{len(p.trips):>7}{p.travel_cost:>9,.0f}{rng:>16}{p.longest_gap:>10} d")
+    return 0
+
+
+def cmd_data(args) -> int:
+    """Summarise the price database (data/fares.csv)."""
+    qs = load_quotes(args.data) if args.data else load_quotes()
+    srcs = sorted({q.source for q in qs})
+    print(f"{len(qs)} quotes from {', '.join(srcs)} (checked {min(q.checked for q in qs)})\n")
+    summ = monthly_summary(qs)
+    print(f"{'Month':<7}{'Paris→CDMX  n   min   max':>28}{'CDMX→Paris  n   min   max':>30}")
+    for m in range(1, 13):
+        cells = []
+        for who in ("me", "her"):
+            d = summ.get((who, m))
+            cells.append(f"{d['n']:>13}{d['min']:>6,.0f}{d['max']:>6,.0f}" if d else f"{'–':>13}{'':>12}")
+        print(f"{MONTHS[m - 1]:<7}{cells[0]:>28}{cells[1]:>30}")
+    ns = [q.nonstop / q.price for q in qs if q.nonstop]
+    print(f"\nCheapest nonstop vs cheapest overall: ×{min(ns):.2f}–×{max(ns):.2f} (median ×{sorted(ns)[len(ns) // 2]:.2f})")
     return 0
 
 
@@ -94,11 +151,22 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("solve", help="find the optimal plan")
     p.add_argument("--mode", choices=MODES, help="override the config's scenario")
     p.add_argument("--fare-scale", type=float, help="multiply every fare, e.g. 1.1 for +10%%")
+    p.add_argument("--basis", choices=("low", "typical", "cautious"), help="fares to plan with")
     p.add_argument("-o", "--out", help="also write the plan to .json, .csv or .ics")
     p.set_defaults(func=cmd_solve)
 
     p = sub.add_parser("compare", help="solve all three scenarios side by side")
     p.set_defaults(func=cmd_compare)
+
+    p = sub.add_parser("risk", help="re-plan with low / typical / cautious fares + Monte Carlo cost range")
+    p.set_defaults(func=cmd_risk)
+
+    p = sub.add_parser("frontier", help="days-vs-cost trade-off of optimal plans")
+    p.set_defaults(func=cmd_frontier)
+
+    p = sub.add_parser("data", help="summarise the fare database")
+    p.add_argument("--data", help="path to a fares CSV (default: data/fares.csv)")
+    p.set_defaults(func=cmd_data)
 
     p = sub.add_parser("where", help="rank places to meet for a given month")
     p.add_argument("month", type=int, choices=range(1, 13), metavar="MONTH", help="1–12")

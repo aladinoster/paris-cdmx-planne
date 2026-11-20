@@ -27,7 +27,7 @@ def test_reversed_dates_are_rejected():
         parse_config(r)
 
 
-@pytest.mark.parametrize("args", [["fares"], ["where", "9"], ["compare"]])
+@pytest.mark.parametrize("args", [["fares"], ["where", "9"], ["compare"], ["data"], ["risk"]])
 def test_cli_commands_run(args, capsys):
     assert main(["-c", str(CONFIG), *args]) == 0
     assert capsys.readouterr().out.strip()
