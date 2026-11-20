@@ -5,6 +5,7 @@ city in between) and **for how long**. It stays within both people's leave and b
 against fares, hotels and long gaps apart.
 
 - **Web app** (no install, runs in the browser): https://aladinoster.github.io/paris-cdmx-planne/
+  · in Spanish: https://aladinoster.github.io/paris-cdmx-planne/#es (EN/ES switch at the top right)
 - **Python package** `meetplan`: the same model as a CLI and library, managed with [uv](https://docs.astral.sh/uv/).
 
 Both implementations give identical results; `tests/` checks this.
