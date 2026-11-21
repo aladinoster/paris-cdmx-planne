@@ -404,9 +404,18 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
       <button type="button" data-mode="both" data-es="Casa u otro lugar&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Home or elsewhere<span class="rec">recommended</span></button>
       <button type="button" data-mode="meet" data-es="Solo otro lugar">Only elsewhere</button>
     </div>
-    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;Se aplica a los viajes que añade el optimizador. Los fijos, como Nueva York, se quedan como están.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo en casa&lt;/b&gt;: París o Ciudad de México. Lo más barato, porque uno de los dos recibe al otro.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Casa u otro lugar&lt;/b&gt;: también permite una ciudad intermedia (Cancún, Miami, Madrid…) cuando compensa.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo otro lugar&lt;/b&gt;: siempre un sitio nuevo, más vacaciones, pero dos billetes más hotel.&lt;/li&gt;&lt;li&gt;Las tarjetas de abajo comparan los tres. ♥ marca el mejor valor de cada línea, y puedes tocar una tarjeta para ver ese plan.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li>Applies to the trips the optimiser adds on its own. The fixed ones, like New York, stay as they are.</li><li><b>Only home</b>: Paris or Mexico City. Cheapest, because one of you hosts.</li><li><b>Home or elsewhere</b>: also allows a city in between (Cancún, Miami, Madrid…) when it’s worth it.</li><li><b>Only elsewhere</b>: always somewhere new, more like holidays, but two tickets plus a hotel.</li><li>The cards below compare the three. ♥ marks the best value on each line, and you can tap a card to show that plan.</li></ul></details>
+    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;Se aplica a los viajes que añade el optimizador. Los fijos, como Nueva York, se quedan como están.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo en casa&lt;/b&gt;: París o Ciudad de México. Lo más barato, porque uno de los dos recibe al otro.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Casa u otro lugar&lt;/b&gt;: también permite una ciudad intermedia (Barcelona, Madrid, Roma, Cancún…) cuando compensa.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo otro lugar&lt;/b&gt;: siempre un sitio nuevo, más vacaciones, pero dos billetes más hotel.&lt;/li&gt;&lt;li&gt;Las tarjetas de abajo comparan los tres. ♥ marca el mejor valor de cada línea, y puedes tocar una tarjeta para ver ese plan.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li>Applies to the trips the optimiser adds on its own. The fixed ones, like New York, stay as they are.</li><li><b>Only home</b>: Paris or Mexico City. Cheapest, because one of you hosts.</li><li><b>Home or elsewhere</b>: also allows a city in between (Barcelona, Madrid, Rome, Cancún…) when it’s worth it.</li><li><b>Only elsewhere</b>: always somewhere new, more like holidays, but two tickets plus a hotel.</li><li>The cards below compare the three. ♥ marks the best value on each line, and you can tap a card to show that plan.</li></ul></details>
     <div class="scards" id="scen"></div>
-    <span class="muted" data-es="“Casa” es París o Ciudad de México. Los viajes fijos mantienen su propia opción. ♥ marca el mejor valor de cada línea. Una puntuación negativa es normal: los viajes fijos cuestan más que el valor fijado por día.">“Home” is Paris or Mexico City. Fixed trips keep their own setting. ♥ marks the best value on each line. A negative score is normal: the fixed trips cost more than the value set per day.</span>
+    <span class="muted" data-es="“Casa” es París o Ciudad de México. Los viajes fijos mantienen su propia opción. ♥ marca el mejor valor de cada línea.">“Home” is Paris or Mexico City. Fixed trips keep their own setting. ♥ marks the best value on each line.</span>
+
+    <h3 class="sub3"><span data-es="4 · ¿Nos vemos en">4 · Do we see each other in</span> <select id="focusSel" aria-label="Month" style="width:auto;display:inline-block;font:inherit;padding:2px 6px"></select>?</h3>
+    <div class="seg" role="group" aria-label="Focus month">
+      <button type="button" data-focus="off" data-es="Que decida el plan">Let the plan decide</button>
+      <button type="button" data-focus="on" data-es="Sí, seguro&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Yes, for sure<span class="rec">recommended</span></button>
+    </div>
+    <div class="muted" id="focusNote"></div>
+    <details class="info" data-es="&lt;summary&gt;¿Cómo funciona?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;Sí, seguro&lt;/b&gt; añade un viaje obligatorio que empieza ese mes y pasa allí al menos la mitad de sus días.&lt;/li&gt;&lt;li&gt;La tabla compara cada forma de vernos ese mes. Cada fila es el &lt;b&gt;mejor año completo&lt;/b&gt; con esa elección, así que ves lo que cuesta de verdad, también en días que se pierden en otros viajes.&lt;/li&gt;&lt;li&gt;Toca una fila para usarla. “Lo que elija el plan” deja que el optimizador escoja.&lt;/li&gt;&lt;/ul&gt;"><summary>How does this work?</summary><ul><li><b>Yes, for sure</b> adds a required trip that starts in that month and spends at least half of its days there.</li><li>The table compares every way of meeting that month. Each row is the <b>best full year</b> with that choice, so you see what it really costs, including days lost on other trips.</li><li>Tap a row to use it. “Whatever the plan picks” lets the optimiser choose.</li></ul></details>
+    <div class="scroll"><table class="cmp" id="focusOpts"></table></div>
   </section>
 
   <section class="card">
@@ -466,7 +475,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     <div class="form">
       <div class="field"><label for="holidaysMe" data-es="Tus festivos (Francia)">Your days off (France)</label><textarea id="holidaysMe"></textarea><small data-es="Una fecha por línea, AAAA-MM-DD">One date per line, YYYY-MM-DD</small></div>
       <div class="field"><label for="holidaysHer" data-es="Sus festivos (México)">Her days off (Mexico)</label><textarea id="holidaysHer"></textarea><small data-es="Festivos federales, Jueves y Viernes Santo, Día de Muertos">Federal holidays, Holy Thursday and Friday, Día de Muertos</small></div>
-      <div class="field"><label for="blackoutHerExtra" data-es="Otras fechas en que no puede tomar vacaciones">Extra dates she can’t take off</label><textarea id="blackoutHerExtra"></textarea><small data-es="Además de los fines de mes y agosto">On top of month-ends and August</small></div>
+      <div class="field"><label for="blackoutHerExtra" data-es="Otras fechas en que no puede tomar vacaciones">Extra dates she can’t take off</label><textarea id="blackoutHerExtra"></textarea><small data-es="Además del cambio de mes y agosto">On top of month-ends and August</small></div>
     </div>
     <div class="btns"><button class="btn primary" id="run" type="button" data-es="Reoptimizar">Re-optimise</button><button class="btn" id="reset" type="button" data-es="Restablecer">Reset to defaults</button></div>
   </details>
@@ -484,15 +493,19 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     <p data-es="Elegir los viajes de 2027 (día de salida, de regreso, quién vuela o a qué ciudad, y si el anfitrión también toma vacaciones) para que el año juntos sea lo mejor posible. Las restricciones son las vacaciones de ambos, los días bloqueados de Laura y los viajes fijos.">Choose the trips of 2027 (start day, end day, who flies or which city, and whether the host also takes leave) to make the year as good as possible together. The constraints are both leave budgets, Laura’s blocked days and the fixed trips.</p>
 
     <h3 data-es="Formulación">Formulation</h3>
-<pre class="math">maximise   Σ trips [ Σ days  V · w(d)  −  fare(s,e,who)  −  hotel  −  C ]
+<pre class="math">maximise   Σ trips [ Σ days V · w(d)  +  F  −  κ · m · ( fare + hotel + C ) ]
            − Σ gaps  λ · max(0, g − g*)²
 
 subject to Σ leave_A ≤ 45      Σ leave_L ≤ 22
            trips don’t overlap, gaps ≥ 14 days
-           no leave for L on her blocked days
+           no leave for L on her last working day of a month
+             nor her first 3 of the next (weekends skipped), nor in August
            every fixed trip starts/ends in its window
+           (optional) one trip with ≥ ½ of its days in April
 
-w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
+w(d) = 1 (both free) · β (host working) · ½ (travel day)
+κ = 0.6  weight of money        F = €100 per trip (frequency)
+m = 0.7  meeting halfway, 1 at home</pre>
     <p data-es="Es un &lt;b&gt;problema de planificación con recursos limitados&lt;/b&gt;: una mochila con dos presupuestos (los días de vacaciones) sobre una línea de tiempo, más una penalización convexa por las separaciones.">It’s a <b>resource-constrained scheduling problem</b>: a knapsack with two budgets (the leave days) on a timeline, plus a convex penalty on gaps.</p>
 
     <h3 data-es="Solucionador">Solver</h3>
@@ -523,7 +536,7 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
 </div>
 
 <script>
-// Long-distance meeting planner: exact DP over trips + Lagrangian relaxation of the two leave budgets.
+// Long-distance meeting planner: exact DP over trips, tracking both leave budgets.
 (function (root) {
   const DAY = 86400000;
   function ymd(d) { return d.toISOString().slice(0, 10); }
@@ -537,7 +550,7 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
   // Dec, early Jan and Nov for her are estimates (fares not yet on sale / thin inventory).
   const CURVE = {
     me: [ // Paris -> Mexico City (Andrés flies)
-      ["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 931], ["05-01", 838],
+      ["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 862], ["05-01", 838],
       ["06-01", 1097], ["07-01", 1101], ["08-01", 1085], ["09-01", 835], ["10-01", 983], ["11-01", 990],
       ["11-15", 950], ["12-01", 1000], ["12-15", 1400]
     ],
@@ -590,7 +603,10 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     { dir: "me", src: "LetsFG", kind: "date", start: "2027-10-22", end: "2027-11-08", price: 986, via: "Aer Lingus / British Airways", nonstop: 1230 },
     { dir: "her", src: "LetsFG", kind: "date", start: "2027-06-12", end: "2027-06-27", price: 977, via: "Air Canada via Montréal (522 offers)", nonstop: 1290 },
     { dir: "her", src: "LetsFG", kind: "window", start: "2027-08-26", end: "2027-09-07", price: 810, via: "Air Canada / Lufthansa", nonstop: 1367 },
-    { dir: "her", src: "LetsFG", kind: "window", start: "2027-09-23", end: "2027-10-04", price: 836, via: "Air Canada" }
+    { dir: "her", src: "LetsFG", kind: "window", start: "2027-09-23", end: "2027-10-04", price: 836, via: "Air Canada" },
+    { dir: "me", src: "Kiwi", kind: "window", start: "2027-04-15", end: "2027-04-27", price: 963, via: "Iberia via Dallas / Madrid" },
+    { dir: "me", src: "lastminute", kind: "date", start: "2027-04-15", end: "2027-04-27", price: 862, via: "British Airways via London" },
+    { dir: "her", src: "Kiwi", kind: "window", start: "2027-04-19", end: "2027-04-29", price: 767, via: "Air Canada via Toronto" }
   ];
   // Price uncertainty. The curves above are the LOWEST fare seen per month. A ticket actually bought is modelled as
   // low × m, m ~ Triangular(1.00, 1.08, 1.30): identical dates differed by ~7% across sources (mode), and the cheapest
@@ -614,7 +630,11 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     { id: "sju", name: "San Juan", beach: true, ref: { me: 932, her: 578 }, lodging: 170, q: "May 932 / 578" },
     { id: "fdf", name: "Martinique", beach: true, ref: { me: 632, her: 1228 }, lodging: 130, q: "May 632 / 1228" },
     { id: "yul", name: "Montréal", beach: false, ref: { me: 439, her: 540 }, lodging: 150, q: "May 439 / 540" },
-    { id: "mad", name: "Madrid", beach: false, ref: { me: 135, her: 841 }, lodging: 120, q: "May 135 / 841" }
+    { id: "mad", name: "Madrid", beach: false, ref: { me: 135, her: 841 }, lodging: 120, q: "May 135 / 841 · Apr – / 838", seen: { 4: { her: 838 } } },
+    { id: "bcn", name: "Barcelona", beach: true, ref: { me: 94, her: 800 }, lodging: 140, q: "May 94 / 934 · Apr 84 / 682–739", seen: { 4: { me: 84, her: 682 } } },
+    { id: "fco", name: "Rome", beach: false, ref: { me: 111, her: 850 }, lodging: 140, q: "May 111 / 964 · Apr – / 751", seen: { 4: { her: 751 } } },
+    { id: "mxp", name: "Milan", beach: false, ref: { me: 76, her: 950 }, lodging: 140, q: "May 76 / 962" },
+    { id: "agp", name: "Málaga", beach: true, ref: { me: 126, her: 950 }, lodging: 110, q: "May 126 / 968" }
   ];
   const REF_DAY = "05-13";
 
@@ -627,10 +647,17 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     for (let i = 0; i < N; i++) {
       const d = new Date(start + i * DAY), iso = ymd(d), dow = d.getUTCDay();
       const wk = dow === 0 || dow === 6;
-      const m = d.getUTCMonth(), dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-      const herBlocked = (p.blockAugust && m === 7) || (dim - d.getUTCDate() < p.monthEndDays) || blackHer.has(iso);
-      days.push({ i, iso, dow, m, wk, workMe: !wk && !hFR.has(iso), workHer: !wk && !hMX.has(iso), herBlocked,
-        holMe: hFR.has(iso), holHer: hMX.has(iso) });
+      const m = d.getUTCMonth();
+      days.push({ i, iso, dow, m, wk, workMe: !wk && !hFR.has(iso), workHer: !wk && !hMX.has(iso),
+        herBlocked: (p.blockAugust && m === 7) || blackHer.has(iso), turn: false, holMe: hFR.has(iso), holHer: hMX.has(iso) });
+    }
+    // Month turn: she can't take leave on her last `lastWD` working days of a month nor her first `firstWD` of the
+    // next one. Counted in HER working days, so weekends and Mexican holidays are skipped over.
+    for (let m = 0; m < 12; m++) {
+      const md = days.filter(d => d.m === m && d.workHer);
+      const mark = d => { d.herBlocked = true; d.turn = true; };
+      md.slice(Math.max(0, md.length - (p.lastWD ?? 1))).forEach(mark);
+      md.slice(0, p.firstWD ?? 3).forEach(mark);
     }
     // price curves per departure day
     const curve = {};
@@ -665,6 +692,9 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     const c = cal.curve[who], ref = cal.refCurve[who];
     const dowS = cal.days[s].dow;
     let f = 1; if (dowS === 5 || dowS === 6) f += 0.04;
+    // A lowest fare actually observed for this city in the departure month beats the seasonal estimate.
+    const seen = city.seen && city.seen[cal.days[s].m + 1];
+    if (seen && seen[who] != null) return p.priceScale * basisF(p) * seen[who] * f;
     return p.priceScale * basisF(p) * city.ref[who] * ((0.6 * c[s] + 0.4 * c[e]) / ref) * f;
   }
 
@@ -683,7 +713,10 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
       const priceMe = cityPrice(cal, p, s, e, city, "me"), priceHer = cityPrice(cal, p, s, e, city, "her");
       const lodging = (p.lodging && p.lodging[city.id] != null ? p.lodging[city.id] : city.lodging) * (e - s);
       const price = priceMe + priceHer;
-      return { ok, la, lg, value, price, priceMe, priceHer, lodging, city: city.id, net: value - price - lodging - p.C };
+      // Meeting halfway is an effort we choose to make: its cost counts at meetCostFactor in the objective.
+      const wc = (p.costWeight ?? 1) * (p.meetCostFactor ?? 1);
+      return { ok, la, lg, value, price, priceMe, priceHer, lodging, city: city.id,
+        net: value + (p.tripBonus || 0) - wc * (price + lodging + p.C) };
     }
     for (let i = s; i <= e; i++) {
       const d = cal.days[i];
@@ -701,14 +734,24 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
       }
     }
     const price = tripPrice(cal, p, s, e, dir);
-    return { ok, la, lg, value, price, priceMe: dir === "me" ? price : 0, priceHer: dir === "her" ? price : 0, lodging: 0, city: null, net: value - price - p.C };
+    return { ok, la, lg, value, price, priceMe: dir === "me" ? price : 0, priceHer: dir === "her" ? price : 0, lodging: 0, city: null,
+      net: value + (p.tripBonus || 0) - (p.costWeight ?? 1) * (price + p.C) };
   }
 
   function solve(p) {
     const cal = buildCalendar(p);
     const N = cal.N;
     const idx = iso => Math.round((parseD(iso) - Date.UTC(p.year, 0, 1)) / DAY);
-    const reqs = p.required.map(r => ({
+    const reqList = p.required.slice();
+    // "Make sure we meet in month X": one extra required trip that starts in that month (free-trip length rules).
+    if (p.focusMonth != null && p.focusMonth >= 0) {
+      const m = p.focusMonth, y = p.year;
+      const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      reqList.push({ label: "focus", focus: true, sMin: ymd(new Date(Date.UTC(y, m, 1))), sMax: ymd(new Date(Date.UTC(y, m, last - 6))),
+        eMin: ymd(new Date(Date.UTC(y, m, 7))), eMax: ymd(new Date(Date.UTC(y, m + 1, 7))),
+        dir: p.focusWhere || (p.mode === "home" ? "any" : p.mode === "meet" ? "meet:any" : "anywhere"), minDays: p.Lmin, maxDays: p.Lmax, focusM: m });
+    }
+    const reqs = reqList.map(r => ({
       ...r, sMin: idx(r.sMin), sMax: idx(r.sMax), eMin: idx(r.eMin), eMax: idx(r.eMax)
     })).sort((a, b) => a.sMin - b.sMin);
     const R = reqs.length;
@@ -731,6 +774,9 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     }
     reqs.forEach((r, k) => {
       for (let s = r.sMin; s <= r.sMax; s++) for (let e = Math.max(r.eMin, s); e <= r.eMax; e++) {
+        if (r.minDays && e - s + 1 < r.minDays) continue;
+        if (r.maxDays && e - s + 1 > r.maxDays) continue;
+        if (r.focusM != null) { let k = 0; for (let i = s; i <= e; i++) if (cal.days[i].m === r.focusM) k++; if (2 * k < e - s + 1) continue; }
         for (const dir of dirsFor(r.dir)) for (const hl of (dir.startsWith("meet:") ? [false] : [false, true])) {
           const t = tripStats(cal, p, s, e, dir, hl);
           if (t.ok) opts[s].push({ s, e, dir, hl, ...t, req: k });
@@ -856,27 +902,29 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     nameMe: "Andrés", nameHer: "Laura",
     year: 2027, leaveMe: 45, leaveHer: 22, Lmin: 7, Lmax: 16, minGap: 14, maxGap: 200,
     V: 120, beta: 0.6, travelDayValue: 0.5, C: 150, priceScale: 1, gapTarget: 45, lambda: 0.15,
-    monthEndDays: 5, blockAugust: true,
+    lastWD: 1, firstWD: 3, blockAugust: true,
+    costWeight: 0.6, meetCostFactor: 0.7, tripBonus: 100, focusMonth: 3, focusWhere: null,
     holidaysMe: ["2027-01-01","2027-03-29","2027-05-01","2027-05-06","2027-05-08","2027-05-17","2027-07-14","2027-08-15","2027-11-01","2027-11-11","2027-12-25"],
     holidaysHer: ["2027-01-01","2027-02-01","2027-03-15","2027-03-25","2027-03-26","2027-05-01","2027-09-16","2027-11-02","2027-11-15","2027-12-25"],
     blackoutHerExtra: [],
     mode: "both", citiesOff: [], fareBasis: "typical",
-    cityBonus: { nyc: 25, mia: 25, cun: 25, puj: 25, sju: 25, fdf: 25, yul: 25, mad: 25 },
-    lodging: { nyc: 230, mia: 190, cun: 120, puj: 150, sju: 170, fdf: 130, yul: 150, mad: 120 },
+    cityBonus: { nyc: 25, mia: 25, cun: 25, puj: 25, sju: 25, fdf: 25, yul: 25, mad: 25, bcn: 25, fco: 25, mxp: 25, agp: 25 },
+    lodging: { nyc: 230, mia: 190, cun: 120, puj: 150, sju: 170, fdf: 130, yul: 150, mad: 120, bcn: 140, fco: 140, mxp: 140, agp: 110 },
     required: [
-      { label: "February", sMin: "2027-02-04", sMax: "2027-02-04", eMin: "2027-02-15", eMax: "2027-02-15", dir: "me" },
-      { label: "New York together", sMin: "2027-03-18", sMax: "2027-03-18", eMin: "2027-03-28", eMax: "2027-03-28", dir: "meet:nyc" },
-      { label: "June, Marseille", sMin: "2027-06-12", sMax: "2027-06-12", eMin: "2027-06-27", eMax: "2027-06-27", dir: "her" },
-      { label: "Late Oct to early Nov", sMin: "2027-10-22", sMax: "2027-10-31", eMin: "2027-11-01", eMax: "2027-11-10", dir: "me" }
+      { label: tr("February, Andrés goes", "Febrero, Andrés va"), sMin: "2027-02-04", sMax: "2027-02-04", eMin: "2027-02-15", eMax: "2027-02-15", dir: "me" },
+      { label: tr("New York together", "Nueva York juntos"), sMin: "2027-03-18", sMax: "2027-03-18", eMin: "2027-03-28", eMax: "2027-03-28", dir: "meet:nyc" },
+      { label: tr("June, Marseille", "Junio, Marsella"), sMin: "2027-06-12", sMax: "2027-06-12", eMin: "2027-06-27", eMax: "2027-06-27", dir: "her" },
+      { label: tr("Late Oct to early Nov", "Finales de oct a inicios de nov"), sMin: "2027-10-22", sMax: "2027-10-31", eMin: "2027-11-01", eMax: "2027-11-10", dir: "me" }
     ]
   };
-  const KEY = "todo-contigo-v6";
+  const KEY = "todo-contigo-v7";
   let P;
   try { P = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { P = null; }
   if (!P) P = JSON.parse(JSON.stringify(DEFAULTS));
   for (const k in DEFAULTS) if (P[k] === undefined) P[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
   const CITY = Object.fromEntries(Planner.CITIES.map(c => [c.id, c]));
+  if (ES) Object.entries({ nyc: "Nueva York", fco: "Roma", mxp: "Milán", fdf: "Martinica", yul: "Montreal" }).forEach(([k, v]) => { if (CITY[k]) CITY[k].name = v; });
   const MONTHS = ES ? ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"] : ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const MONTH_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   if (ES) document.querySelector(".yearbar-axis").innerHTML = "EFMAMJJASOND".split("").map(c => `<span>${c}</span>`).join("");
@@ -1044,7 +1092,12 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     ["minGap", tr("Min. days between trips", "Días mínimos entre viajes"), "", 1], ["V", tr("Value of a day together (€)", "Valor de un día juntos (€)"), tr("How much a day together is worth", "Cuánto vale un día juntos"), 5],
     ["beta", tr("Value when host works (×)", "Valor si el anfitrión trabaja (×)"), tr("0.6 = evenings and weekends", "0,6 = tardes y fines de semana"), 0.05], ["C", tr("Overhead per trip (€)", "Gastos fijos por viaje (€)"), tr("Transfers, jet lag, logistics", "Traslados, jet lag, logística"), 10],
     ["gapTarget", tr("Comfortable gap (days)", "Separación cómoda (días)"), tr("Longer gaps are penalised", "Las separaciones más largas se penalizan"), 1], ["lambda", tr("Gap penalty strength", "Fuerza de la penalización"), tr("€ per day² beyond the target", "€ por día² más allá del objetivo"), 0.01],
-    ["monthEndDays", tr("Her month-end blackout (days)", "Su bloqueo de fin de mes (días)"), tr("Last N days of every month", "Últimos N días de cada mes"), 1], ["priceScale", tr("Fare level (×)", "Nivel de tarifas (×)"), tr("1.0 = calibrated estimate", "1,0 = estimación calibrada"), 0.05]
+    ["lastWD", tr("Her blocked days at month end", "Sus días bloqueados a fin de mes"), tr("Last N working days of every month", "Últimos N días laborables de cada mes"), 1],
+    ["firstWD", tr("Her blocked days at month start", "Sus días bloqueados a inicio de mes"), tr("First N working days (weekends skipped)", "Primeros N días laborables (sin contar fines de semana)"), 1],
+    ["costWeight", tr("Weight of money (×)", "Peso del dinero (×)"), tr("1 = every euro counts fully; 0.6 = time first", "1 = cada euro cuenta entero; 0,6 = primero el tiempo"), 0.05],
+    ["meetCostFactor", tr("Meeting halfway: cost counts (×)", "Vernos a mitad de camino: el coste cuenta (×)"), tr("0.7 = an effort we choose to make", "0,7 = un esfuerzo que elegimos hacer"), 0.05],
+    ["tripBonus", tr("Value of each extra trip (€)", "Valor de cada viaje extra (€)"), tr("Rewards seeing each other more often", "Premia vernos más a menudo"), 10],
+    ["priceScale", tr("Fare level (×)", "Nivel de tarifas (×)"), tr("1.0 = calibrated estimate", "1,0 = estimación calibrada"), 0.05]
   ];
   const form = document.getElementById("form");
   for (const [k, label, help, step] of FIELDS) {
@@ -1095,7 +1148,7 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
   document.getElementById("run").addEventListener("click", run);
   document.getElementById("reset").addEventListener("click", () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
   document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => { P.mode = b.dataset.mode; syncSeg(); schedule(); }));
-  function syncSeg() { document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === P.mode))); }
+  function syncSeg() { document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === P.mode))); }
   syncSeg();
   const wm = document.getElementById("wmMonth");
   MONTHS.forEach((m, i) => { const o = document.createElement("option"); o.value = i; o.textContent = m; wm.appendChild(o); });
@@ -1125,9 +1178,10 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     st.textContent = tr(`Optimal plan · ${Math.round(performance.now() - t0)} ms`, `Plan óptimo · ${Math.round(performance.now() - t0)} ms`);
     render(res);
     setTimeout(renderScenarios, 30);
+    setTimeout(renderFocus, 60);
   }
   function render(res) {
-    renderHighlights(res); renderBreakdown(res); renderTrips(res); renderCalendar(res); renderWhere(res); renderChart(res); renderEvidence(res); syncPreset(); syncBasis(); renderFrontier(); renderMethod(res); onScroll();
+    renderHighlights(res); renderBreakdown(res); renderTrips(res); renderCalendar(res); renderWhere(res); renderChart(res); renderEvidence(res); syncPreset(); syncBasis(); syncFocus(); renderFrontier(); renderMethod(res); onScroll();
   }
 
   const whereText = o => o.city ? tr(`Together in ${CITY[o.city].name}`, `Juntos en ${CITY[o.city].name}`) : o.dir === "me" ? tr(`${P.nameMe} flies to Mexico City`, `${P.nameMe} vuela a Ciudad de México`) : tr(`${P.nameHer} flies to Paris`, `${P.nameHer} vuela a París`);
@@ -1175,7 +1229,8 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     const days = res.cal.days;
     document.getElementById("trips").innerHTML = res.best.trips.map(o => {
       const a = days[o.s].iso, b = days[o.e].iso;
-      const tag = o.req >= 0 ? `<span class="tag">${esc(res.reqs[o.req].label)}</span>` : `<span class="tag" style="color:var(--rose);border-color:var(--rose)">${tr("suggested", "sugerido")}</span>`;
+      const rq = o.req >= 0 ? res.reqs[o.req] : null;
+      const tag = rq ? `<span class="tag">${rq.focus ? tr(`${MONTH_EN[res.cal.days[o.s].m]}, as we wanted`, `${MONTH_LONG[res.cal.days[o.s].m].replace(/^./, c => c.toUpperCase())}, como queríamos`) : esc(rq.label)}</span>` : `<span class="tag" style="color:var(--rose);border-color:var(--rose)">${tr("suggested", "sugerido")}</span>`;
       const hostN = o.dir === "me" ? esc(P.nameHer) : esc(P.nameMe);
       const host = o.city ? tr("both on holiday", "ambos de vacaciones") : o.hl ? tr(`${hostN} takes leave`, `${hostN} toma vacaciones`) : tr(`${hostN} keeps working`, `${hostN} sigue trabajando`);
       const fares = o.city ? `${eur(o.priceMe)} + ${eur(o.priceHer)}` : eur(o.price);
@@ -1230,32 +1285,95 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
   document.querySelectorAll("[data-basis]").forEach(b => b.addEventListener("click", () => { P.fareBasis = b.dataset.basis; syncBasis(); frontierCache = null; schedule(); }));
 
   /* ---- Presets: value per day + gap penalty ---- */
+  const PKEYS = ["V", "lambda", "costWeight", "tripBonus"];
   const PRESETS = {
-    save: { V: 70, lambda: 0.05, note: tr("A day together is valued at €70, and long gaps are only lightly penalised. Only trips that are cheap per day make it in.", "Un día juntos vale 70 €, y las separaciones largas apenas se penalizan. Solo entran los viajes baratos por día.") },
-    balanced: { V: 120, lambda: 0.15, note: tr("A day together is valued at €120, with a moderate penalty for long gaps.", "Un día juntos vale 120 €, con una penalización moderada por separaciones largas.") },
-    time: { V: 220, lambda: 0.3, note: tr("A day together is valued at €220, and long gaps are heavily penalised. The optimiser uses all the leave it can.", "Un día juntos vale 220 €, y las separaciones largas se penalizan mucho. El optimizador usa todas las vacaciones que puede.") }
+    save: { V: 90, lambda: 0.05, costWeight: 1, tripBonus: 0, note: tr("Every euro counts fully and a day together is worth €90. Only trips that are cheap per day make it in.", "Cada euro cuenta entero y un día juntos vale 90 €. Solo entran los viajes baratos por día.") },
+    balanced: { V: 120, lambda: 0.15, costWeight: 0.6, tripBonus: 100, note: tr("Time first: money counts at 60%, each trip is worth an extra €100 (seeing each other often), and a day together €120.", "Primero el tiempo: el dinero cuenta al 60%, cada viaje vale 100 € extra (vernos a menudo) y un día juntos 120 €.") },
+    time: { V: 160, lambda: 0.3, costWeight: 0.4, tripBonus: 200, note: tr("Money counts at 40%, long gaps are heavily penalised and every trip is worth €200 more. We use all the leave we can.", "El dinero cuenta al 40%, las separaciones largas se penalizan mucho y cada viaje vale 200 € más. Usamos todas las vacaciones posibles.") }
   };
   function syncPreset() {
-    const k = Object.keys(PRESETS).find(k => PRESETS[k].V === P.V && PRESETS[k].lambda === P.lambda);
+    const k = Object.keys(PRESETS).find(k => PKEYS.every(f => PRESETS[k][f] === P[f]));
     document.querySelectorAll("[data-preset]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === k)));
-    document.getElementById("presetNote").textContent = k ? PRESETS[k].note : tr(`Custom: a day together is valued at €${P.V}, gap penalty ${P.lambda}.`, `Personalizado: un día juntos vale ${P.V} €, penalización ${P.lambda}.`);
+    document.getElementById("presetNote").textContent = k ? PRESETS[k].note : tr(`Custom: a day together is worth €${P.V}, money counts at ${Math.round(P.costWeight * 100)}%, €${P.tripBonus} per trip.`, `Personalizado: un día juntos vale ${P.V} €, el dinero cuenta al ${Math.round(P.costWeight * 100)}%, ${P.tripBonus} € por viaje.`);
   }
   document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
-    const pr = PRESETS[b.dataset.preset]; P.V = pr.V; P.lambda = pr.lambda;
-    const fv = document.getElementById("f-V"), fl = document.getElementById("f-lambda"); if (fv) fv.value = P.V; if (fl) fl.value = P.lambda;
+    const pr = PRESETS[b.dataset.preset]; for (const f of PKEYS) { P[f] = pr[f]; const el = document.getElementById("f-" + f); if (el) el.value = P[f]; }
     syncPreset(); frontierCache = null; schedule();
   }));
+
+  /* ---- Step 4: make sure we meet in a given month (default April) ---- */
+  const MONTH_LONG = ES ? ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"] : MONTH_EN;
+  const focusSel = document.getElementById("focusSel");
+  MONTH_LONG.forEach((m, i) => { const o = document.createElement("option"); o.value = i; o.textContent = m; focusSel.appendChild(o); });
+  let focusM = P.focusMonth != null && P.focusMonth >= 0 ? P.focusMonth : 3;
+  focusSel.value = focusM;
+  focusSel.addEventListener("change", () => { focusM = +focusSel.value; if (P.focusMonth >= 0) P.focusMonth = focusM; P.focusWhere = null; schedule(); });
+  function syncFocus() {
+    const on = P.focusMonth != null && P.focusMonth >= 0;
+    document.querySelectorAll("[data-focus]").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.focus === "on") === on)));
+    const m = MONTH_LONG[focusM], w = P.focusWhere;
+    const wl = !w ? null : w === "me" ? tr(`${P.nameMe} goes to Mexico City`, `${P.nameMe} va a Ciudad de México`) : w === "her" ? tr(`${P.nameHer} comes to Paris`, `${P.nameHer} viene a París`) : CITY[w.slice(5)].name;
+    document.getElementById("focusNote").textContent = on
+      ? (wl ? tr(`The plan always includes a trip in ${m}: ${wl}.`, `El plan siempre incluye un viaje en ${m}: ${wl}.`) : tr(`The plan always includes a trip in ${m}, wherever it works best.`, `El plan siempre incluye un viaje en ${m}, donde mejor encaje.`))
+      : tr(`No special rule for ${m}: the optimiser decides freely.`, `Sin regla especial para ${m}: el optimizador decide libremente.`);
+  }
+  document.querySelectorAll("[data-focus]").forEach(b => b.addEventListener("click", () => {
+    P.focusMonth = b.dataset.focus === "on" ? focusM : -1; if (P.focusMonth < 0) P.focusWhere = null; syncFocus(); frontierCache = null; schedule();
+  }));
+  let focusCache = null, focusJob = 0;
+  function renderFocus() {
+    const tbl = document.getElementById("focusOpts");
+    const base = { ...P, focusMonth: focusM }; delete base.focusWhere; delete base.nameMe; delete base.nameHer;
+    const key = JSON.stringify(base);
+    const ways = [null, "me", "her"].concat(Planner.CITIES.filter(c => !(P.citiesOff || []).includes(c.id)).map(c => "meet:" + c.id));
+    const label = w => !w ? tr("Whatever the plan picks", "Lo que elija el plan") : w === "me" ? `${esc(P.nameMe)} → CDMX` : w === "her" ? `${esc(P.nameHer)} → ${tr("Paris", "París")}` : `${tr("Both", "Ambos")} → ${CITY[w.slice(5)].name}`;
+    const head = `<tr><th>${tr(`How we meet in ${MONTH_LONG[focusM]}`, `Cómo nos vemos en ${MONTH_LONG[focusM]}`)}</th><th>${tr("Days in the year", "Días en el año")}</th><th>${tr("Year cost", "Coste del año")}</th></tr>`;
+    const draw = rows => {
+      const ok = rows.filter(r => r.best);
+      const maxD = Math.max(...ok.map(r => r.best.ev.days)), minC = Math.min(...ok.map(r => r.sim.p50));
+      const cur = P.focusMonth >= 0 ? (P.focusWhere || null) : undefined;
+      rows = rows.slice().sort((a, b) => (a.w === null ? -1 : b.w === null ? 1 : 0) || (!a.best) - (!b.best) || (a.best && b.best ? (b.best.ev.days - a.best.ev.days) || (a.sim.p50 - b.sim.p50) : 0));
+      tbl.innerHTML = head + rows.map(r => {
+        if (!r.best) return `<tr><td>${label(r.w)}</td><td colspan="2" class="muted" style="text-align:left">${tr("doesn’t fit (leave or blocked days)", "no cabe (vacaciones o días bloqueados)")}</td></tr>`;
+        const o = r.best.trips.find(t => t.req >= 0 && r.reqs[t.req].focus), d = r.cal.days;
+        return `<tr data-fw="${r.w || ""}" class="${cur !== undefined && cur === r.w ? "cur" : ""}" style="cursor:pointer" title="${tr("Tap to use this", "Toca para usar esta opción")}">
+          <td>${cur !== undefined && cur === r.w ? "♥ " : ""}${label(r.w)}${o && !r.w ? ` <span class="muted">(${o.city ? CITY[o.city].name : o.dir === "me" ? esc(P.nameMe) + " → CDMX" : esc(P.nameHer) + " → " + tr("Paris", "París")})</span>` : ""}
+            ${o ? `<br><span class="muted" style="font-weight:400;font-size:12px">${fmtD(d[o.s].iso)} → ${fmtD(d[o.e].iso)} · ${eur(o.price + o.lodging)} · ${tr(`${esc(P.nameHer)}’s leave`, `vacaciones de ${esc(P.nameHer)}`)} ${o.lg}</span>` : ""}</td>
+          <td class="${r.best.ev.days === maxD ? "best" : ""}">${r.best.ev.days}</td>
+          <td class="${r.sim.p50 === minC ? "best" : ""}">${k(r.sim.p50)}</td></tr>`;
+      }).join("") + (rows.length < ways.length ? `<tr><td colspan="3" class="muted" style="text-align:left">${tr("Computing…", "Calculando…")}</td></tr>` : "");
+      tbl.querySelectorAll("[data-fw]").forEach(tr_ => tr_.addEventListener("click", () => {
+        P.focusMonth = focusM; P.focusWhere = tr_.dataset.fw || null; syncFocus(); frontierCache = null; schedule();
+      }));
+    };
+    if (focusCache && focusCache.key === key) return draw(focusCache.rows);
+    const job = ++focusJob, rows = [];
+    tbl.innerHTML = head;
+    const step = () => {
+      if (job !== focusJob) return;
+      const w = ways[rows.length], q = { ...P, focusMonth: focusM, focusWhere: w };
+      const r = Planner.solve(q);
+      rows.push({ w, best: r.best, reqs: r.reqs, cal: r.cal, sim: r.best ? Planner.simulate(q, r.best.trips, 1500) : null });
+      draw(rows);
+      if (rows.length < ways.length) setTimeout(step, 0); else focusCache = { key, rows };
+    };
+    setTimeout(step, 0);
+  }
 
   /* ---- Score breakdown of the current plan ---- */
   function renderBreakdown(res) {
     const trs = res.best.trips, ev = res.best.ev;
-    const value = trs.reduce((a, o) => a + o.value, 0), over = P.C * trs.length;
+    const value = trs.reduce((a, o) => a + o.value, 0), over = P.C * trs.length, bonus = (P.tripBonus || 0) * trs.length;
+    const real = ev.price + ev.lodging + over;
+    const weighted = trs.reduce((a, o) => a + (P.costWeight ?? 1) * (o.city ? (P.meetCostFactor ?? 1) : 1) * (o.price + o.lodging + P.C), 0);
     const row = (k, v, cls, hint) => `<div class="row ${cls || ""}"><span>${k}${hint ? ` <span class="hint">${hint}</span>` : ""}</span><span>${v}</span></div>`;
     document.getElementById("breakdown").innerHTML =
       row(tr("Value of days together", "Valor de los días juntos"), "+" + eur(value), "", tr(`${ev.days} days × €${P.V}, less on travel days and host work days`, `${ev.days} días × ${P.V} €, menos en días de viaje y de trabajo del anfitrión`)) +
       row(tr("Fares", "Billetes"), "−" + eur(ev.price), "neg") +
       (ev.lodging ? row(tr("Hotels", "Hoteles"), "−" + eur(ev.lodging), "neg") : "") +
       row(tr("Trip overhead", "Gastos fijos por viaje"), "−" + eur(over), "neg", `${trs.length} × ${eur(P.C)}`) +
+      (real - weighted > 0.5 ? row(tr("Time before money", "Primero el tiempo"), "+" + eur(real - weighted), "", tr(`money counts at ${Math.round(P.costWeight * 100)}%${trs.some(o => o.city) ? `, meeting halfway at ${Math.round(P.costWeight * P.meetCostFactor * 100)}%` : ""}`, `el dinero cuenta al ${Math.round(P.costWeight * 100)}%${trs.some(o => o.city) ? `, vernos a mitad de camino al ${Math.round(P.costWeight * P.meetCostFactor * 100)}%` : ""}`)) : "") +
+      (bonus ? row(tr("Seeing each other often", "Vernos a menudo"), "+" + eur(bonus), "", `${trs.length} × ${eur(P.tripBonus)}`) : "") +
       row(tr("Gap penalty", "Penalización por separación"), "−" + eur(ev.gapPen), "neg", tr(`longest gap ${ev.maxGap} days`, `mayor separación ${ev.maxGap} días`)) +
       row(tr("Score (this plan)", "Puntuación (este plan)"), num(ev.objective), "tot");
   }
