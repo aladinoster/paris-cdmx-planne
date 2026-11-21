@@ -26,9 +26,20 @@ travel_day_factor = 0.5   # first and last day of a trip count this much
 trip_overhead = 150       # € fixed cost per trip (transfers, jet lag, logistics)
 gap_target = 45           # gaps longer than this many days are penalised...
 gap_lambda = 0.15         # ...by gap_lambda * (gap - gap_target)^2 €
+cost_weight = 0.6         # how much a euro counts in the objective: < 1 puts frequency and duration ahead of cost
+meet_cost_factor = 0.7    # third-city trips: their cost counts only 70% (an effort we choose to make)
+trip_bonus = 100          # € value of each trip, rewarding seeing each other more often
+
+[focus]
+# Make sure one trip falls in this month (1-12; at least half its days inside it). Remove or set 0 to turn off.
+month = 4
+# where = "anywhere"      # optional: "me", "her", "home", "meet:bcn", ... (default follows `mode`)
 
 [her_constraints]
-month_end_days = 5        # she can't take leave in the last N days of each month
+# Month turn: she can't take leave on her last N working days of a month nor her first M working days of the
+# next one. Counted in her working days, so weekends and holidays in between are skipped.
+last_working_days = 1
+first_working_days = 3
 block_august = true       # she can't take leave in August
 extra_blackout = []       # any other dates she can't take off
 
@@ -55,7 +66,7 @@ band_high = 1.30
 # LOWEST round-trip economy fare (EUR, 9–11 nights) seen per month across Kiwi.com, lastminute.com and LetsFG
 # (see data/fares.csv), piecewise constant from each MM-DD, then 5-day smoothed. Dec, early Jan and Nov for her are
 # estimates (not yet on sale / thin inventory).
-curve.me = [["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 931], ["05-01", 838],
+curve.me = [["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 862], ["05-01", 838],
             ["06-01", 1097], ["07-01", 1101], ["08-01", 1085], ["09-01", 835], ["10-01", 983], ["11-01", 990],
             ["11-15", 950], ["12-01", 1000], ["12-15", 1400]]
 curve.her = [["01-01", 1350], ["01-06", 766], ["02-01", 876], ["03-01", 876], ["04-01", 738], ["05-01", 731],
@@ -179,4 +190,51 @@ ref_her = 841
 lodging = 120
 bonus = 25
 enabled = true
-quotes = "May 135 / 841"
+quotes = "May 135 / 841 · Apr – / 838"
+seen = { 4 = { her = 838 } }
+
+[[cities]]
+id = "bcn"
+name = "Barcelona"
+beach = true
+ref_me = 94
+ref_her = 800
+lodging = 140
+bonus = 25
+enabled = true
+quotes = "May 94 / 934 · Apr 84 / 682–739"
+seen = { 4 = { me = 84, her = 682 } }   # lowest fare observed in a month overrides the seasonal estimate
+
+[[cities]]
+id = "fco"
+name = "Rome"
+beach = false
+ref_me = 111
+ref_her = 850
+lodging = 140
+bonus = 25
+enabled = true
+quotes = "May 111 / 964 · Apr – / 751"
+seen = { 4 = { her = 751 } }
+
+[[cities]]
+id = "mxp"
+name = "Milan"
+beach = false
+ref_me = 76
+ref_her = 950
+lodging = 140
+bonus = 25
+enabled = true
+quotes = "May 76 / 962"
+
+[[cities]]
+id = "agp"
+name = "Málaga"
+beach = true
+ref_me = 126
+ref_her = 950
+lodging = 110
+bonus = 25
+enabled = true
+quotes = "May 126 / 968"

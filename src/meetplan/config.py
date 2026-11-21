@@ -21,6 +21,7 @@ class City:
     bonus: float = 0.0
     enabled: bool = True
     quotes: str = ""
+    seen: tuple[tuple[int, str, float], ...] = ()  # (month, "me"|"her", lowest fare observed that month)
 
 
 @dataclass(frozen=True)
@@ -31,6 +32,9 @@ class FixedTrip:
     end_min: date
     end_max: date
     where: str  # me | her | home | meet:<id> | meet:any | anywhere
+    min_days: int | None = None   # optional length limits (used by the focus-month trip)
+    max_days: int | None = None
+    focus_month: int | None = None  # if set, at least half of the trip's days fall in this month (1-12)
 
 
 @dataclass(frozen=True)
@@ -57,7 +61,8 @@ class Config:
     trip_overhead: float
     gap_target: float
     gap_lambda: float
-    month_end_days: int
+    last_working_days: int
+    first_working_days: int
     block_august: bool
     extra_blackout: frozenset[date]
     holidays_me: frozenset[date]
@@ -75,6 +80,11 @@ class Config:
     name_her: str = "Her"
     fare_basis: str = "typical"
     band: tuple[float, float, float] = (1.0, 1.08, 1.30)
+    cost_weight: float = 1.0       # how much a euro counts in the objective (1 = fully)
+    meet_cost_factor: float = 1.0  # extra multiplier on the cost of third-city trips (effort we choose to make)
+    trip_bonus: float = 0.0        # € value of each trip, rewarding frequency
+    focus_month: int | None = None  # 1-12: make sure one trip falls in this month
+    focus_where: str | None = None  # where that trip goes (default: follows `mode`)
 
     def with_(self, **kw) -> Config:
         """Return a copy with some fields replaced (used for scenarios)."""
@@ -111,7 +121,8 @@ def parse_config(raw: dict) -> Config:
         trip_overhead=float(raw["value"]["trip_overhead"]),
         gap_target=float(raw["value"]["gap_target"]),
         gap_lambda=float(raw["value"]["gap_lambda"]),
-        month_end_days=int(raw["her_constraints"]["month_end_days"]),
+        last_working_days=int(raw["her_constraints"].get("last_working_days", 1)),
+        first_working_days=int(raw["her_constraints"].get("first_working_days", 3)),
         block_august=bool(raw["her_constraints"]["block_august"]),
         extra_blackout=frozenset(map(_d, raw["her_constraints"].get("extra_blackout", []))),
         holidays_me=frozenset(map(_d, raw["holidays"]["me"])),
@@ -129,11 +140,17 @@ def parse_config(raw: dict) -> Config:
         ),
         cities=tuple(
             City(c["id"], c["name"], bool(c.get("beach", False)), float(c["ref_me"]), float(c["ref_her"]),
-                 float(c["lodging"]), float(c.get("bonus", 0)), bool(c.get("enabled", True)), c.get("quotes", ""))
+                 float(c["lodging"]), float(c.get("bonus", 0)), bool(c.get("enabled", True)), c.get("quotes", ""),
+                 tuple((int(m), who, float(v)) for m, sides in c.get("seen", {}).items() for who, v in sides.items()))
             for c in raw.get("cities", [])
         ),
     )
     names = raw.get("names", {})
+    val, focus = raw["value"], raw.get("focus", {})
+    fm = focus.get("month")
+    cfg = replace(cfg, cost_weight=float(val.get("cost_weight", 1.0)),
+                  meet_cost_factor=float(val.get("meet_cost_factor", 1.0)), trip_bonus=float(val.get("trip_bonus", 0.0)),
+                  focus_month=int(fm) if fm else None, focus_where=focus.get("where") or None)
     cfg = replace(cfg, name_me=names.get("me", "Me"), name_her=names.get("her", "Her"),
                   fare_basis=fares.get("basis", "typical"),
                   band=(float(fares.get("band_low", 1.0)), float(fares.get("band_mode", 1.08)),
@@ -163,5 +180,7 @@ def validate(cfg: Config) -> None:
         w = t.where
         if not (w in ("me", "her", "home", "meet:any", "anywhere") or (w.startswith("meet:") and w[5:] in ids)):
             errors.append(f"fixed trip {t.label!r}: unknown where={w!r}")
+    if cfg.focus_month is not None and not 1 <= cfg.focus_month <= 12:
+        errors.append("focus.month must be 1-12")
     if errors:
         raise ValueError("Invalid config:\n  - " + "\n  - ".join(errors))

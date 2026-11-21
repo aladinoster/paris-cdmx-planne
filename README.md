@@ -51,17 +51,19 @@ Output:
 
 ```
 Plan for 2027 (mode: both)
-  Days together : 70 (19% of the year)
-  Trips         : 5
-  Travel cost   : €7,610  (Andrés's fares €2,885, Laura's €2,425, lodging €2,300)
+  Days together : 99 (27% of the year)
+  Trips         : 7
+  Travel cost   : €9,716  (Andrés's fares €4,921, Laura's €2,494, lodging €2,300)
   Leave used    : Andrés 45/45, Laura 22/22
-  Longest gap   : 75 days
+  Longest gap   : 68 days
 Dates                    Where                    Days     Fares  Lodging     Leave A/L  Host / fixed
+2027-01-08 → 2027-01-18  Laura → Paris              11      €898        –      0/7       Andrés keeps working · suggested
 2027-02-04 → 2027-02-15  Andrés → Mexico City       12      €962        –      8/0       Laura keeps working · February, Andrés goes
 2027-03-18 → 2027-03-28  Both → New York            11    €1,402   €2,300      7/5       both on leave · March, New York together
-2027-06-12 → 2027-06-27  Laura → Paris              16      €962        –     10/10      Andrés takes leave · June, Laura comes (Marseille)
-2027-09-09 → 2027-09-20  Laura → Paris              12      €828        –      8/7       Andrés takes leave · suggested
-2027-10-22 → 2027-11-09  Andrés → Mexico City       19    €1,155        –     12/0       Laura keeps working · Late Oct to early Nov, Andrés goes
+2027-04-17 → 2027-05-02  Andrés → Mexico City       16    €1,030        –     10/0       Laura keeps working · April together
+2027-06-12 → 2027-06-27  Laura → Paris              16      €962        –      0/10      Andrés keeps working · June, Laura comes (Marseille)
+2027-09-04 → 2027-09-19  Andrés → Mexico City       16    €1,007        –     10/0       Laura keeps working · suggested
+2027-10-23 → 2027-11-08  Andrés → Mexico City       17    €1,155        –     10/0       Laura keeps working · Late Oct to early Nov, Andrés goes
 ```
 
 ## Commands
@@ -109,19 +111,21 @@ with `-c`.
 | `[names]` | Display names: `me` (Paris side), `her` (Mexico side) |
 | `[leave]` | Annual leave days for each |
 | `[trips]` | `min_days` / `max_days` for free trips, `min_gap` between trips, `max_gap` search window |
-| `[value]` | `day`: € value of a day together; `host_working_factor`: value when the host works; `travel_day_factor`; `trip_overhead` €; `gap_target` and `gap_lambda` for the gap penalty |
-| `[her_constraints]` | `month_end_days` she can't take off, `block_august`, `extra_blackout` dates |
+| `[value]` | `day`: € value of a day together; `host_working_factor`: value when the host works; `travel_day_factor`; `trip_overhead` €; `gap_target` and `gap_lambda` for the gap penalty; `cost_weight` (how much a euro counts, 0.6 = time first); `meet_cost_factor` (third-city cost counts ×0.7: an effort we choose to make); `trip_bonus` € per trip (frequency) |
+| `[focus]` | `month` (1–12): make sure one trip spends at least half its days in that month (default April); optional `where` |
+| `[her_constraints]` | Month turn: no leave on her `last_working_days` (1) of a month nor her `first_working_days` (3) of the next, counted in her working days so weekends are skipped; `block_august`; `extra_blackout` dates |
 | `[holidays]` | Public holidays per side; these days cost no leave |
 | `[fares]` | `scale`, weekend surcharges, the two daily fare `curve`s (Paris→CDMX, CDMX→Paris), the `quotes` they were calibrated on |
 | `[[fixed_trips]]` | Trips that must happen. `start` and `end` are `[earliest, latest]`; `where` is `me`, `her`, `home`, `meet:<city>`, `meet:any` or `anywhere` |
-| `[[cities]]` | Third-city options: reference fares from each side (`ref_me`, `ref_her`), `lodging` € per night for two, `bonus` € of extra value per holiday day, `enabled` |
+| `[[cities]]` | Third-city options: reference fares from each side (`ref_me`, `ref_her`), optional `seen = { 4 = { me = 84, her = 682 } }` (lowest fare observed in a month, overrides the estimate), `lodging` € per night for two, `bonus` € of extra value per holiday day, `enabled`. Includes Barcelona, Madrid, Málaga, Rome and Milan |
 
 ### The fare database (`data/fares.csv`)
 
 Every price the model uses comes from real searches, stored one row per quote: when it was checked, the source
 (`kiwi`, `lastminute`, `letsfg`), direction, dates, kind (`best_in_month` = cheapest departure day in a month,
 `fixed_dates`, `best_in_window` = cheapest pair in a flexible window), the cheapest price, the cheapest nonstop
-when known, carriers and notes. The first collection (20 Nov 2026) holds 42 quotes; LetsFG searches aggregate
+when known, carriers and notes. The first collection (20 Nov 2026) holds 42 quotes; a second (21 Nov) adds April
+fares and the European meeting cities (Barcelona, Rome, Milan, Málaga, Madrid); LetsFG searches aggregate
 450–620 offers each, Google Flights included. Expedia and eDreams did not return machine-readable prices.
 
 Findings: on identical dates the three sites differed by ~7%; the cheapest nonstop costs ×1.00–×1.69 the cheapest
@@ -141,12 +145,12 @@ Each month's curve value is the **lowest** fare seen. A ticket actually bought i
 ```
 $ uv run meetplan risk
 Plan with fares     Days  Trips  Cost (plan)      P10      P50      P90
-low                   87      6        7,862    8,395    8,561    8,739
-typical               70      5        7,610    7,447    7,604    7,774
-cautious              70      5        8,044    7,447    7,604    7,774
+low                   99      7        8,882    9,523    9,711    9,908
+typical               99      7        9,716    9,523    9,711    9,908
+cautious              99      7       10,322    9,523    9,711    9,908
 ```
 
-Planning on the cheapest fares adds a May trip that only pays off if a fare near the low is actually caught.
+With money weighted at 60%, the plan no longer depends on catching the lowest fare: all three bases agree.
 
 ### Updating fares
 
@@ -165,9 +169,14 @@ A candidate trip is a start day `s`, an end day `e`, a place and, for home trips
 - **Value:** `V` € per day together; × `β` on days the host works; × `travel_day_factor` on the first and last day;
   plus the city's `bonus` per day for third-city trips.
 - **Cost:** the fares (one ticket for home trips, two for a third city), hotel nights (third city only) and a fixed
-  `trip_overhead`.
+  `trip_overhead`. In the objective it is multiplied by `cost_weight` (and by `meet_cost_factor` for a third city);
+  reported costs are always the real ones.
+- **Frequency:** every trip adds `trip_bonus` €.
 - **Leave:** the traveller spends leave on each of their working days. The host does too if they take leave.
-  In a third city, both do. Her leave is never allowed on her blocked days.
+  In a third city, both do. Her leave is never allowed on her blocked days: her last working day of each month,
+  her first three of the next (weekends and holidays skipped), August and any `extra_blackout` date.
+- **Focus month:** with `[focus] month = 4`, one extra required trip must start in April and spend at least half of its
+  days there.
 - **Gaps:** a gap of `g` days apart (including before the first trip and after the last) costs
   `λ · max(0, g − gap_target)²`, so the plan spreads out.
 

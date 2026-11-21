@@ -27,6 +27,10 @@ def city_fare(cal: YearCalendar, cfg: Config, s: int, e: int, city: City, who: s
     """Round trip from who's home to a third city, scaled by that origin's seasonal curve."""
     curve, ref, base = (cal.curve_me, cal.ref_me, city.ref_me) if who == "me" else (cal.curve_her, cal.ref_her, city.ref_her)
     f = 1.0 + (cfg.weekend_surcharge if cal.dates[s].weekday() in (4, 5) else 0.0)
+    # A lowest fare actually observed for this city in the departure month beats the seasonal estimate.
+    for m, w, v in city.seen:
+        if m == cal.dates[s].month and w == who:
+            return cfg.fare_scale * basis_factor(cfg) * v * f
     return cfg.fare_scale * basis_factor(cfg) * base * (_blend(curve, s, e) / ref) * f
 
 

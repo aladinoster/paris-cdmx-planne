@@ -34,7 +34,7 @@ def basis_factor(cfg: Config) -> float:
 class Quote:
     checked: date
     source: str
-    direction: str  # "PAR-MEX" (me flies) or "MEX-PAR" (her flies)
+    direction: str  # "PAR-MEX" (me flies), "MEX-PAR" (her flies), or "PAR-BCN" / "MEX-BCN"… (third city)
     depart: date
     ret: date
     kind: str
@@ -45,7 +45,7 @@ class Quote:
 
     @property
     def who(self) -> str:
-        return "me" if self.direction == "PAR-MEX" else "her"
+        return {"PAR-MEX": "me", "MEX-PAR": "her"}.get(self.direction, "city")
 
 
 def load_quotes(path: str | Path = DATA) -> list[Quote]:
@@ -60,6 +60,8 @@ def monthly_summary(quotes: list[Quote]) -> dict[tuple[str, int], dict]:
     """Per (who, month): number of quotes, min, max, sources."""
     out: dict[tuple[str, int], dict] = {}
     for q in quotes:
+        if q.who == "city":
+            continue
         k = (q.who, q.depart.month)
         d = out.setdefault(k, {"n": 0, "min": math.inf, "max": 0.0, "sources": set()})
         d["n"] += 1

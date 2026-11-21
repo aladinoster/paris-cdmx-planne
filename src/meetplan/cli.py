@@ -111,7 +111,7 @@ def cmd_data(args) -> int:
             d = summ.get((who, m))
             cells.append(f"{d['n']:>13}{d['min']:>6,.0f}{d['max']:>6,.0f}" if d else f"{'–':>13}{'':>12}")
         print(f"{MONTHS[m - 1]:<7}{cells[0]:>28}{cells[1]:>30}")
-    ns = [q.nonstop / q.price for q in qs if q.nonstop]
+    ns = [q.nonstop / q.price for q in qs if q.nonstop and q.who != "city"]
     print(f"\nCheapest nonstop vs cheapest overall: ×{min(ns):.2f}–×{max(ns):.2f} (median ×{sorted(ns)[len(ns) // 2]:.2f})")
     return 0
 

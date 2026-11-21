@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import calendar as _cal
 from dataclasses import dataclass
+from datetime import date
 
 from .calendar import YearCalendar
-from .config import Config
+from .config import Config, FixedTrip
 from .fares import city_fare, home_fare
 
 HOME = ("me", "her")
@@ -23,7 +25,7 @@ class Trip:
     fare_me: float
     fare_her: float
     lodging: float
-    net: float             # value − fares − lodging − overhead
+    net: float             # value + trip bonus − cost weight × (fares + lodging + overhead)
     fixed: int = -1        # index of the fixed trip it satisfies, or -1 for a free trip
 
     @property
@@ -57,7 +59,10 @@ def evaluate_trip(cal: YearCalendar, cfg: Config, s: int, e: int, where: str, ho
             value += (V + city.bonus) * edge
         fm, fh = city_fare(cal, cfg, s, e, city, "me"), city_fare(cal, cfg, s, e, city, "her")
         lodging = city.lodging * (e - s)
-        return Trip(s, e, where, False, la, lg, value, fm, fh, lodging, value - fm - fh - lodging - cfg.trip_overhead, fixed)
+        # Meeting halfway is an effort we choose to make: its cost counts at meet_cost_factor.
+        wc = cfg.cost_weight * cfg.meet_cost_factor
+        net = value + cfg.trip_bonus - wc * (fm + fh + lodging + cfg.trip_overhead)
+        return Trip(s, e, where, False, la, lg, value, fm, fh, lodging, net, fixed)
 
     for i in range(s, e + 1):
         edge = edge_f if i in (s, e) else 1.0
@@ -81,13 +86,15 @@ def evaluate_trip(cal: YearCalendar, cfg: Config, s: int, e: int, where: str, ho
         value += V * edge * (beta if host_at_work else 1.0)
     fare = home_fare(cal, cfg, s, e, where)
     fm, fh = (fare, 0.0) if where == "me" else (0.0, fare)
-    return Trip(s, e, where, host_leave, la, lg, value, fm, fh, 0.0, value - fare - cfg.trip_overhead, fixed)
+    net = value + cfg.trip_bonus - cfg.cost_weight * (fare + cfg.trip_overhead)
+    return Trip(s, e, where, host_leave, la, lg, value, fm, fh, 0.0, net, fixed)
 
 
 def expand_where(cfg: Config, where: str) -> list[str]:
     cities = [f"meet:{c.id}" for c in cfg.cities if c.enabled]
     return {
         "home": list(HOME),
+        "any": list(HOME),
         "meet:any": cities,
         "anywhere": list(HOME) + cities,
     }.get(where, [where])
@@ -118,10 +125,30 @@ def generate_trips(cal: YearCalendar, cfg: Config) -> list[list[Trip]]:
     for k, ft in enumerate(sorted_fixed(cfg)):
         for s in range(cal.index(ft.start_min), cal.index(ft.start_max) + 1):
             for e in range(max(cal.index(ft.end_min), s), cal.index(ft.end_max) + 1):
+                length = e - s + 1
+                if (ft.min_days and length < ft.min_days) or (ft.max_days and length > ft.max_days):
+                    continue
+                if ft.focus_month and 2 * sum(cal.dates[i].month == ft.focus_month for i in range(s, e + 1)) < length:
+                    continue
                 for w in expand_where(cfg, ft.where):
                     add(s, e, w, k)
     return by_start
 
 
-def sorted_fixed(cfg: Config):
-    return sorted(cfg.fixed_trips, key=lambda t: t.start_min)
+def focus_trip(cfg: Config) -> FixedTrip | None:
+    """'Make sure we meet in month M': a trip starting in M with at least half of its days in M."""
+    m = cfg.focus_month
+    if not m:
+        return None
+    last = _cal.monthrange(cfg.year, m)[1]
+    nxt = date(cfg.year, m + 1, 7) if m < 12 else date(cfg.year, 12, 31)
+    where = cfg.focus_where or {"home": "any", "meet": "meet:any", "both": "anywhere"}[cfg.mode]
+    return FixedTrip(f"{_cal.month_name[m]} together", date(cfg.year, m, 1), date(cfg.year, m, last - 6),
+                     date(cfg.year, m, 7), nxt, where, cfg.min_days, cfg.max_days, m)
+
+
+def sorted_fixed(cfg: Config) -> list[FixedTrip]:
+    trips = list(cfg.fixed_trips)
+    if (f := focus_trip(cfg)) is not None:
+        trips.append(f)
+    return sorted(trips, key=lambda t: t.start_min)

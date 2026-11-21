@@ -41,3 +41,19 @@ checked,source,direction,depart,return,kind,price_eur,cheapest_nonstop_eur,carri
 2026-11-20,letsfg,MEX-PAR,2027-06-12,2027-06-27,fixed_dates,977,1290,Air Canada via Montreal,522 offers; refundable 1451
 2026-11-20,letsfg,MEX-PAR,2027-08-26,2027-09-07,best_in_window,810,1367,Air Canada / Lufthansa,window 20 Aug-15 Oct 10-12 nights; refundable 1291
 2026-11-20,letsfg,MEX-PAR,2027-09-23,2027-10-04,best_in_window,836,,Air Canada,second-best pair in the same window
+2026-11-21,kiwi,PAR-MEX,2027-04-15,2027-04-27,best_in_window,963,,Iberia via Dallas / Madrid,departures 8-22 Apr (7-14 nights)
+2026-11-21,lastminute,PAR-MEX,2027-04-15,2027-04-27,date,862,,British Airways via London,
+2026-11-21,kiwi,MEX-PAR,2027-04-19,2027-04-29,best_in_window,767,,Air Canada via Toronto,departures 8-22 Apr (7-14 nights)
+2026-11-21,kiwi,PAR-BCN,2027-05-13,2027-05-23,date,94,94,Vueling direct,third city
+2026-11-21,kiwi,MEX-BCN,2027-05-13,2027-05-23,date,934,,Iberia / Ryanair / WestJet,third city
+2026-11-21,kiwi,PAR-BCN,2027-04-13,2027-04-20,best_in_window,84,84,Vueling direct,third city
+2026-11-21,kiwi,MEX-BCN,2027-04-13,2027-04-21,best_in_window,682,,Air Canada via Montreal / Toronto,third city
+2026-11-21,lastminute,MEX-BCN,2027-04-13,2027-04-21,date,739,,Air Canada,third city
+2026-11-21,kiwi,PAR-ROM,2027-05-13,2027-05-23,date,111,111,Transavia direct,third city
+2026-11-21,kiwi,MEX-ROM,2027-05-13,2027-05-23,date,964,,Air Canada / ITA / Ryanair,third city
+2026-11-21,lastminute,MEX-ROM,2027-04-13,2027-04-21,date,751,,Air Canada,third city
+2026-11-21,kiwi,PAR-MIL,2027-05-13,2027-05-23,date,76,76,Ryanair / easyJet direct,third city
+2026-11-21,kiwi,MEX-MIL,2027-05-13,2027-05-23,date,962,,Aeromexico / Ryanair / Aer Lingus,third city
+2026-11-21,kiwi,PAR-AGP,2027-05-13,2027-05-23,date,126,126,Vueling / Transavia direct,third city
+2026-11-21,kiwi,MEX-AGP,2027-05-13,2027-05-23,date,968,,Avianca / Air Europa,third city
+2026-11-21,kiwi,MEX-MAD,2027-04-13,2027-04-25,best_in_window,838,,Iberia / Avianca,third city

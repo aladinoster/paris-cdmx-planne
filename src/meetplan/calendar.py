@@ -57,13 +57,16 @@ def build_calendar(cfg: Config) -> YearCalendar:
     weekend = np.array([d.weekday() >= 5 for d in dates])
     hol_me = np.array([d in cfg.holidays_me for d in dates])
     hol_her = np.array([d in cfg.holidays_her for d in dates])
-    blocked = np.array([
-        (cfg.block_august and d.month == 8)
-        or (_cal.monthrange(d.year, d.month)[1] - d.day < cfg.month_end_days)
-        or d in cfg.extra_blackout
-        for d in dates
-    ])
+    work_her = ~weekend & ~hol_her
+    blocked = np.array([(cfg.block_august and d.month == 8) or d in cfg.extra_blackout for d in dates])
+    # Month turn: no leave on her last `last_working_days` working days of a month, nor her first
+    # `first_working_days` of the next. Counted in her working days: weekends and holidays are skipped.
+    for m in range(1, 13):
+        idx = [i for i, d in enumerate(dates) if d.month == m and work_her[i]]
+        tail = idx[len(idx) - cfg.last_working_days:] if cfg.last_working_days > 0 else []
+        for i in tail + idx[: cfg.first_working_days]:
+            blocked[i] = True
     cme, cher = _curve(dates, cfg.curve_me), _curve(dates, cfg.curve_her)
     ri = next(i for i, d in enumerate(dates) if d.strftime("%m-%d") == cfg.reference_day)
-    return YearCalendar(cfg.year, dates, ~weekend & ~hol_me, ~weekend & ~hol_her, blocked, hol_me, hol_her,
+    return YearCalendar(cfg.year, dates, ~weekend & ~hol_me, work_her, blocked, hol_me, hol_her,
                         cme, cher, float(cme[ri]), float(cher[ri]))
