@@ -84,6 +84,7 @@ h3 { margin: 0; }
 .night .date { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .night .date .big { font: 400 clamp(30px, 8vw, 44px)/1.05 var(--font-script); color: #fff; }
 .night .date .small { font: 500 12px/1.3 var(--font-body); letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.night .date .flight { margin-top: 4px; letter-spacing: .08em; text-transform: none; font-size: 12.5px; color: rgba(255,228,238,.8); }
 .night .phrase { margin: 18px 0 0; font: 400 clamp(21px, 5.6vw, 38px)/1.3 var(--font-script); color: #ffe4ee; text-wrap: balance;
   text-shadow: 0 0 22px rgba(255, 190, 215, .35); }
 .night .phrase span { display: block; }
@@ -318,6 +319,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
     <div class="date">
       <span class="big" id="cdDate">8 December 2026</span>
       <span class="small" id="cdDow">Tuesday · the next time we meet</span>
+      <span class="small flight" id="cdFlight">✈ Paris CDG 13:50 → Ciudad de México 20:50</span>
     </div>
     <p class="phrase" lang="es"><span>Que las alas del cielo y sus melodías</span> <span class="l2">nos lleven a bailar juntos en este amor.</span></p>
   </div>
@@ -1482,14 +1484,20 @@ w(d) = 1 (both free) · β (host working) · ½ (travel day)</pre>
     }, 60);
   }
 
-  /* ---- Night: countdown to 8 December 2026 (local time) + starry sky ---- */
-  const MEET = new Date(2026, 11, 8, 0, 0, 0);
+  /* ---- Night: countdown to landing in CDMX, 8 Dec 2026 20:50 CST (UTC−6, no DST) ---- */
+  const MEET = new Date(Date.UTC(2026, 11, 9, 2, 50, 0));   // = 20:50 Mexico City, 8 Dec
+  const DEPART = new Date(Date.UTC(2026, 11, 8, 12, 50, 0)); // = 13:50 Paris (CET, UTC+1)
   (function countdown() {
     const dEl = document.getElementById("cdDays"), uEl = document.getElementById("cdUnit");
     const h = document.getElementById("cdH"), mi = document.getElementById("cdM"), se = document.getElementById("cdS");
-    document.getElementById("cdDate").textContent = MEET.toLocaleDateString(LOC, { day: "numeric", month: "long", year: "numeric" });
-    const dow = MEET.toLocaleDateString(LOC, { weekday: "long" });
+    const MX = "America/Mexico_City", PA = "Europe/Paris";
+    document.getElementById("cdDate").textContent = MEET.toLocaleDateString(LOC, { day: "numeric", month: "long", year: "numeric", timeZone: MX });
+    const dow = MEET.toLocaleDateString(LOC, { weekday: "long", timeZone: MX });
     document.getElementById("cdDow").textContent = tr(`${dow} · the next time we meet`, `${dow} · la próxima vez que nos vemos`);
+    const hm = (d, tz) => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz });
+    document.getElementById("cdFlight").textContent = tr(
+      `✈ Paris ${hm(DEPART, PA)} → CDMX ${hm(MEET, MX)} · local times`,
+      `✈ París ${hm(DEPART, PA)} → CDMX ${hm(MEET, MX)} · horas locales`);
     const pad = n => String(n).padStart(2, "0");
     const tick = () => {
       const ms = MEET - new Date();
