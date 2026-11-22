@@ -58,13 +58,16 @@ sunday_return_surcharge = 0.03    # home trips only
 reference_day = "05-13"           # third-city fares are quoted for this departure day
 # Which fare the optimiser plans with: "low" (cheapest seen), "typical" (expected), "cautious" (90th percentile).
 basis = "typical"
+# Fare model built from data/fares.csv by `uv run meetplan refresh`. When the file exists, its curves and per-month
+# city fares replace the seed curves below (which still define the segments and fill months with no quotes).
+model = "../data/fare_model.json"
 # Price band: a ticket actually bought = lowest-seen fare × m, m ~ Triangular(band_low, band_mode, band_high).
 # Calibrated on data/fares.csv: identical dates differed ~7% across sites; nonstop / unlucky booking up to +30%.
 band_low = 1.00
 band_mode = 1.08
 band_high = 1.30
-# LOWEST round-trip economy fare (EUR, 9–11 nights) seen per month across Kiwi.com, lastminute.com and LetsFG
-# (see data/fares.csv), piecewise constant from each MM-DD, then 5-day smoothed. Dec, early Jan and Nov for her are
+# SEED curves: LOWEST round-trip economy fare (EUR, 9–11 nights) per segment, piecewise constant from each MM-DD,
+# then 5-day smoothed. `meetplan refresh` replaces each segment that has quotes with the latest survey's minimum. Dec, early Jan and Nov for her are
 # estimates (not yet on sale / thin inventory).
 curve.me = [["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 862], ["05-01", 838],
             ["06-01", 1097], ["07-01", 1101], ["08-01", 1085], ["09-01", 835], ["10-01", 983], ["11-01", 990],
@@ -79,24 +82,28 @@ curve.her = [["01-01", 1350], ["01-06", 766], ["02-01", 876], ["03-01", 876], ["
 #        "meet:<city id>", "meet:any" (optimiser picks the city), "anywhere".
 [[fixed_trips]]
 label = "February, Andrés goes"
+label_es = "Febrero, Andrés va"
 start = ["2027-02-04", "2027-02-04"]
 end = ["2027-02-15", "2027-02-15"]
 where = "me"
 
 [[fixed_trips]]
 label = "March, New York together"
+label_es = "Marzo, Nueva York juntos"
 start = ["2027-03-18", "2027-03-18"]
 end = ["2027-03-28", "2027-03-28"]
 where = "meet:nyc"
 
 [[fixed_trips]]
 label = "June, Laura comes (Marseille)"
+label_es = "Junio, Laura viene (Marsella)"
 start = ["2027-06-12", "2027-06-12"]
 end = ["2027-06-27", "2027-06-27"]
 where = "her"
 
 [[fixed_trips]]
 label = "Late Oct to early Nov, Andrés goes"
+label_es = "Finales de oct a inicios de nov, Andrés va"
 start = ["2027-10-22", "2027-10-31"]
 end = ["2027-11-01", "2027-11-10"]
 where = "me"
@@ -106,6 +113,7 @@ where = "me"
 # lodging: € per night for two. bonus: extra € value per day of holiday there. enabled: allow it.
 [[cities]]
 id = "nyc"
+code = "NYC"   # as in data/fares.csv directions, e.g. "MEX-NYC"
 name = "New York"
 beach = false
 ref_me = 610
@@ -117,6 +125,7 @@ quotes = "May 762 / 514 · Mar 567 / 507"
 
 [[cities]]
 id = "mia"
+code = "MIA"
 name = "Miami"
 beach = true
 ref_me = 690
@@ -128,6 +137,7 @@ quotes = "May 649 / 342 · Mar 723 / 595"
 
 [[cities]]
 id = "cun"
+code = "CUN"
 name = "Cancún"
 beach = true
 ref_me = 800
@@ -139,6 +149,7 @@ quotes = "May 959 / 176 · Mar 749 / 181"
 
 [[cities]]
 id = "puj"
+code = "PUJ"
 name = "Punta Cana"
 beach = true
 ref_me = 890
@@ -150,6 +161,7 @@ quotes = "May 890 / 426"
 
 [[cities]]
 id = "sju"
+code = "SJU"
 name = "San Juan"
 beach = true
 ref_me = 932
@@ -161,6 +173,7 @@ quotes = "May 932 / 578"
 
 [[cities]]
 id = "fdf"
+code = "FDF"
 name = "Martinique"
 beach = true
 ref_me = 632
@@ -172,6 +185,7 @@ quotes = "May 632 / 1228"
 
 [[cities]]
 id = "yul"
+code = "YMQ"
 name = "Montréal"
 beach = false
 ref_me = 439
@@ -183,6 +197,7 @@ quotes = "May 439 / 540"
 
 [[cities]]
 id = "mad"
+code = "MAD"
 name = "Madrid"
 beach = false
 ref_me = 135
@@ -191,10 +206,10 @@ lodging = 120
 bonus = 25
 enabled = true
 quotes = "May 135 / 841 · Apr – / 838"
-seen = { 4 = { her = 838 } }
 
 [[cities]]
 id = "bcn"
+code = "BCN"
 name = "Barcelona"
 beach = true
 ref_me = 94
@@ -203,10 +218,10 @@ lodging = 140
 bonus = 25
 enabled = true
 quotes = "May 94 / 934 · Apr 84 / 682–739"
-seen = { 4 = { me = 84, her = 682 } }   # lowest fare observed in a month overrides the seasonal estimate
 
 [[cities]]
 id = "fco"
+code = "ROM"
 name = "Rome"
 beach = false
 ref_me = 111
@@ -215,10 +230,10 @@ lodging = 140
 bonus = 25
 enabled = true
 quotes = "May 111 / 964 · Apr – / 751"
-seen = { 4 = { her = 751 } }
 
 [[cities]]
 id = "mxp"
+code = "MIL"
 name = "Milan"
 beach = false
 ref_me = 76
@@ -230,6 +245,7 @@ quotes = "May 76 / 962"
 
 [[cities]]
 id = "agp"
+code = "AGP"
 name = "Málaga"
 beach = true
 ref_me = 126

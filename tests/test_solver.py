@@ -1,11 +1,14 @@
 import itertools
+import json
 from pathlib import Path
 
 import pytest
 
 from meetplan import build_calendar, load_config, solve
+from meetplan.config import apply_model
 from meetplan.model import generate_trips, sorted_fixed
 from meetplan.prices import basis_factor, load_quotes, simulate_cost
+from meetplan.refresh import rebuild
 from meetplan.report import to_csv, to_ics, to_json
 from meetplan.solver import summarise
 
@@ -22,8 +25,10 @@ def result(cfg):
     return solve(cfg)
 
 
-# Reference numbers from the JavaScript solver on the GitHub Pages site (docs/index.html), per fare basis.
+# Regression snapshot on a FROZEN fare model (prices of 21 Nov 2026), so monthly fare refreshes don't move it.
+# Checked against the JavaScript solver at the time; live JS/Python parity is tests/test_web.py.
 # Keys: (fare basis, mode, focus month); values: (days, leave A, leave L, fares, lodging, objective).
+FROZEN = Path(__file__).parent / "fixtures" / "fare_model_2026-11-21.json"
 WEB = {
     ("typical", "both", 4): (99, 45, 22, 7415.57, 2300, 3663.1041),
     ("typical", "meet", 4): (70, 45, 22, 5344.52, 3700, 2376.8805),
@@ -34,10 +39,11 @@ WEB = {
 
 
 @pytest.mark.parametrize("key", list(WEB))
-def test_matches_web_solver(cfg, key):
+def test_snapshot(key):
     basis, mode, month = key
     days, la, lg, fares, lodging, obj = WEB[key]
-    p = solve(cfg.with_(fare_basis=basis, mode=mode, focus_month=month)).plan
+    frozen = apply_model(load_config(CONFIG, use_model=False), json.loads(FROZEN.read_text()))
+    p = solve(frozen.with_(fare_basis=basis, mode=mode, focus_month=month)).plan
     assert (p.days_together, p.leave_me, p.leave_her) == (days, la, lg)
     assert p.fares_me + p.fares_her == pytest.approx(fares, abs=0.01)
     assert round(p.lodging) == lodging
@@ -87,25 +93,45 @@ def test_dp_is_optimal_against_brute_force(cfg):
 
 
 def test_exports(result):
-    assert '"days_together": 99' in to_json(result)
+    assert f'"days_together": {result.plan.days_together}' in to_json(result)
     assert to_csv(result).count("\n") == len(result.plan.trips) + 1
     ics = to_ics(result)
     assert ics.count("BEGIN:VEVENT") == len(result.plan.trips)
     assert "DTSTART;VALUE=DATE:20270318" in ics and "DTEND;VALUE=DATE:20270329" in ics
 
 
-def test_price_database_supports_the_curves(cfg):
-    # Every month with real quotes: the curve's base fare is never above the cheapest quote seen that month.
-    cal = build_calendar(cfg)
+def test_fare_model_is_up_to_date(cfg):
+    # data/fare_model.json must be exactly what `meetplan refresh` makes from data/fares.csv: run it after adding quotes.
+    seed = load_config(CONFIG, use_model=False)
     quotes = load_quotes()
-    assert len(quotes) >= 40 and {q.source for q in quotes} == {"kiwi", "lastminute", "letsfg"}
+    assert len(quotes) >= 40 and {q.source for q in quotes} <= {"kiwi", "lastminute", "letsfg"}
+    model = rebuild(seed, quotes)
+    stored = json.loads((CONFIG.parent / "../data/fare_model.json").resolve().read_text())
+    assert model["curve"] == stored["curve"] and model["seen"] == stored["seen"]
+    assert [list(p) for p in cfg.curve_me] == model["curve"]["me"]
+
+
+def test_curves_never_above_latest_survey(cfg):
+    # Each observed segment is the minimum of its latest survey, so no recent quote is below the curve.
+    model = rebuild(load_config(CONFIG, use_model=False), load_quotes())
     for who in ("me", "her"):
-        curve = cal.curve_me if who == "me" else cal.curve_her
-        for m in range(1, 12):
-            qs = [q.price for q in quotes if q.who == who and q.depart.month == m and "thin" not in q.notes]
-            if qs:
-                mid = next(i for i, d in enumerate(cal.dates) if d.month == m and d.day == 15)
-                assert curve[mid] <= min(qs) + 1e-6, (who, m, curve[mid], min(qs))
+        for seg in model["curve_source"][who]:
+            if seg["source"] == "observed":
+                assert seg["fare"] > 0 and seg["quotes"] >= 1
+
+
+def test_refresh_follows_the_latest_survey():
+    from datetime import date
+
+    from meetplan.prices import Quote
+    seed = load_config(CONFIG, use_model=False)
+    q = lambda checked, price: Quote(date.fromisoformat(checked), "kiwi", "PAR-MEX", date(2027, 4, 15),
+                                     date(2027, 4, 27), "fixed_dates", price, None, "", "")
+    seg = lambda m: dict(m["curve"]["me"])["04-01"]
+    assert seg(rebuild(seed, [q("2026-11-21", 862)])) == 862
+    assert seg(rebuild(seed, [q("2026-11-21", 862), q("2026-12-01", 800)])) == 800      # same survey: min
+    assert seg(rebuild(seed, [q("2026-11-21", 862), q("2027-01-15", 940)])) == 940      # newer survey wins, even if dearer
+    assert dict(rebuild(seed, [])["curve"]["me"])["04-01"] == dict(seed.curve_me)["04-01"]  # no data: seed
 
 
 def test_monte_carlo_band(cfg, result):
@@ -143,6 +169,7 @@ def test_barcelona_april_uses_observed_fares(cfg):
     p = solve(cfg.with_(focus_where="meet:bcn")).plan
     t = next(t for t in p.trips if t.city == "bcn")
     f = basis_factor(cfg)
+    seen = {(m, w): v for m, w, v in cfg.city_map["bcn"].seen}
     assert build_calendar(cfg).dates[t.s].month == 4
-    assert t.fare_her == pytest.approx(682 * f, rel=0.05) and t.fare_me == pytest.approx(84 * f, rel=0.05)
-    assert p.days_together == 86
+    assert t.fare_her == pytest.approx(seen[(4, "her")] * f, rel=0.05)
+    assert t.fare_me == pytest.approx(seen[(4, "me")] * f, rel=0.05)

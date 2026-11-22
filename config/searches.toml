@@ -1,0 +1,28 @@
+# What the monthly fare refresh searches (see REFRESH.md). Every result goes into data/fares.csv.
+# Prices: EUR, return, 1 adult, economy, cheapest itinerary (any stops).
+# Only departures at least 7 days in the future and within the planning year are searched.
+
+year = 2027
+
+# Home routes: one search per remaining month and direction, on Kiwi.com, with a departure range covering the
+# whole month (departureDate = 1st, departureDateTo = last day) and 9–11 nights, one_for_city = true.
+# Stored as kind = "best_in_month".
+[home]
+routes = [
+  { direction = "PAR-MEX", from = "Paris", to = "MEX" },
+  { direction = "MEX-PAR", from = "MEX", to = "Paris" },
+]
+nights = [9, 11]
+
+# Cross-check on lastminute.com for the months we care most about (fixed trips and the focus month):
+# fixed dates, stored as kind = "fixed_dates". Use the trip dates of the current plan (`uv run meetplan solve`)
+# that fall in these months.
+crosscheck_months = [2, 3, 4, 6, 10]
+
+# Third cities: Kiwi.com departure range over the month, 7–12 nights, from both origins.
+# Stored as kind = "best_in_window", direction "PAR-<code>" / "MEX-<code>" (codes in config/2027.toml).
+[cities]
+months = [4, 5]
+codes = ["BCN", "MAD", "ROM", "NYC", "CUN"]
+origins = [{ prefix = "PAR", from = "Paris" }, { prefix = "MEX", from = "MEX" }]
+nights = [7, 12]

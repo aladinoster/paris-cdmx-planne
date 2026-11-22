@@ -453,7 +453,7 @@ footer .script { font-size: 28px; color: var(--rose); display: block; }
   </section>
 
   <section class="card">
-    <div class="card-head"><h2 data-es="De dónde vienen las tarifas">Where the fares come from</h2><span class="muted" data-es="Base de precios · 20 nov 2026">Price database · 20 Nov 2026</span></div>
+    <div class="card-head"><h2 data-es="De dónde vienen las tarifas">Where the fares come from</h2><span class="muted" id="checkedTag"></span></div>
     <p class="lead" id="fareFinding"></p>
     <div class="scroll"><table class="cmp" id="evidence"></table></div>
     <div class="scroll"><table class="cmp" id="evidence2"></table></div>
@@ -542,76 +542,15 @@ m = 0.7  meeting halfway, 1 at home</pre>
   function ymd(d) { return d.toISOString().slice(0, 10); }
   function parseD(s) { return new Date(s + "T00:00:00Z"); }
 
-  // Daily round-trip price curves (EUR, 1 adult economy), calibrated on Kiwi.com quotes (Nov 2026).
-  // Each entry: [from MM-DD, price]. Piecewise constant, then lightly smoothed.
-  // Daily round-trip price curves (EUR, 1 adult economy, 9–11 nights), piecewise constant from each MM-DD.
-  // Rebuilt Nov 2026 from the CHEAPEST fare observed per month across two sources:
-  //   Kiwi.com (best departure day in the month) and lastminute.com (fixed-date samples).
-  // Dec, early Jan and Nov for her are estimates (fares not yet on sale / thin inventory).
-  const CURVE = {
-    me: [ // Paris -> Mexico City (Andrés flies)
-      ["01-01", 1250], ["01-06", 882], ["02-01", 854], ["03-01", 936], ["04-01", 862], ["05-01", 838],
-      ["06-01", 1097], ["07-01", 1101], ["08-01", 1085], ["09-01", 835], ["10-01", 983], ["11-01", 990],
-      ["11-15", 950], ["12-01", 1000], ["12-15", 1400]
-    ],
-    her: [ // Mexico City -> Paris (Laura flies)
-      ["01-01", 1350], ["01-06", 766], ["02-01", 876], ["03-01", 876], ["04-01", 738], ["05-01", 731],
-      ["06-01", 798], ["07-01", 999], ["08-01", 736], ["09-01", 735], ["10-01", 735], ["11-01", 950],
-      ["12-01", 1000], ["12-12", 1350]
-    ]
-  };
-  // Evidence: every fare actually returned by the flight tools (EUR, return, 1 adult economy).
-  // kind "month" = cheapest itinerary over every departure day of the month (9–11 nights); "date" = fixed dates.
-  const QUOTES = [
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-01-29", end: "2027-02-10", price: 882, via: "Aeroméxico direct" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-02-16", end: "2027-02-28", price: 872, via: "Aeroméxico direct" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-03-25", end: "2027-04-04", price: 971, via: "Aeroméxico direct" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-04-02", end: "2027-04-13", price: 931, via: "Avianca / Iberia" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-05-05", end: "2027-05-15", price: 938, via: "Avianca / Iberia" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-06-11", end: "2027-06-21", price: 1097, via: "Avianca / Iberia" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-07-05", end: "2027-07-14", price: 1154, via: "Iberia via Dallas" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-08-30", end: "2027-09-10", price: 1085, via: "Air France / KLM" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-09-15", end: "2027-09-25", price: 980, via: "Avianca / Iberia" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-10-03", end: "2027-10-14", price: 983, via: "Avianca / Iberia" },
-    { dir: "me", src: "Kiwi", kind: "month", start: "2027-11-01", end: "2027-11-11", price: 1132, via: "Air France direct" },
-    { dir: "me", src: "Kiwi", kind: "date", start: "2027-02-04", end: "2027-02-15", price: 914, via: "Aeroméxico direct" },
-    { dir: "me", src: "Kiwi", kind: "date", start: "2027-09-10", end: "2027-09-20", price: 1106, via: "Avianca / Iberia" },
-    { dir: "me", src: "lastminute", kind: "date", start: "2027-02-04", end: "2027-02-15", price: 854, via: "British Airways + Iberia" },
-    { dir: "me", src: "lastminute", kind: "date", start: "2027-05-15", end: "2027-05-25", price: 838, via: "British Airways" },
-    { dir: "me", src: "lastminute", kind: "date", start: "2027-07-15", end: "2027-07-25", price: 1101, via: "British Airways" },
-    { dir: "me", src: "lastminute", kind: "date", start: "2027-09-15", end: "2027-09-25", price: 835, via: "British Airways" },
-    { dir: "me", src: "lastminute", kind: "date", start: "2027-10-22", end: "2027-11-07", price: 1095, via: "Air Canada, 2 stops" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-01-13", end: "2027-01-25", price: 766, via: "Air Canada via Toronto" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-02-15", end: "2027-02-25", price: 876, via: "Air France direct" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-03-28", end: "2027-04-09", price: 876, via: "Air France direct" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-04-04", end: "2027-04-15", price: 738, via: "Air Canada via Montréal" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-05-13", end: "2027-05-25", price: 731, via: "Air Canada via Montréal" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-06-14", end: "2027-06-24", price: 798, via: "Air Canada via Montréal" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-07-04", end: "2027-07-15", price: 999, via: "Air Canada via Montréal" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-08-19", end: "2027-08-31", price: 736, via: "Air Canada via Montréal" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-09-23", end: "2027-10-05", price: 735, via: "Air Canada via Montréal" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-10-18", end: "2027-10-28", price: 735, via: "Air Canada via Montréal" },
-    { dir: "her", src: "Kiwi", kind: "month", start: "2027-11-04", end: "2027-11-13", price: 1250, via: "Iberia (thin inventory)" },
-    { dir: "her", src: "Kiwi", kind: "date", start: "2027-03-18", end: "2027-03-29", price: 1065, via: "Air Canada" },
-    { dir: "her", src: "Kiwi", kind: "date", start: "2027-06-12", end: "2027-06-27", price: 922, via: "Air Canada via Montréal" },
-    { dir: "her", src: "lastminute", kind: "date", start: "2027-01-15", end: "2027-01-25", price: 845, via: "Iberia" },
-    { dir: "her", src: "lastminute", kind: "date", start: "2027-05-15", end: "2027-05-25", price: 899, via: "Air Canada" },
-    { dir: "her", src: "lastminute", kind: "date", start: "2027-06-12", end: "2027-06-27", price: 993, via: "Air Canada" },
-    { dir: "her", src: "lastminute", kind: "date", start: "2027-09-09", end: "2027-09-20", price: 975, via: "Air Canada / Lufthansa" },
-    { dir: "me", src: "LetsFG", kind: "date", start: "2027-02-04", end: "2027-02-15", price: 870, via: "Aeroméxico direct (455 offers)", nonstop: 870 },
-    { dir: "me", src: "LetsFG", kind: "window", start: "2027-05-12", end: "2027-05-26", price: 850, via: "British Airways via London", nonstop: 1036 },
-    { dir: "me", src: "LetsFG", kind: "date", start: "2027-10-22", end: "2027-11-08", price: 986, via: "Aer Lingus / British Airways", nonstop: 1230 },
-    { dir: "her", src: "LetsFG", kind: "date", start: "2027-06-12", end: "2027-06-27", price: 977, via: "Air Canada via Montréal (522 offers)", nonstop: 1290 },
-    { dir: "her", src: "LetsFG", kind: "window", start: "2027-08-26", end: "2027-09-07", price: 810, via: "Air Canada / Lufthansa", nonstop: 1367 },
-    { dir: "her", src: "LetsFG", kind: "window", start: "2027-09-23", end: "2027-10-04", price: 836, via: "Air Canada" },
-    { dir: "me", src: "Kiwi", kind: "window", start: "2027-04-15", end: "2027-04-27", price: 963, via: "Iberia via Dallas / Madrid" },
-    { dir: "me", src: "lastminute", kind: "date", start: "2027-04-15", end: "2027-04-27", price: 862, via: "British Airways via London" },
-    { dir: "her", src: "Kiwi", kind: "window", start: "2027-04-19", end: "2027-04-29", price: 767, via: "Air Canada via Toronto" }
-  ];
-  // Price uncertainty. The curves above are the LOWEST fare seen per month. A ticket actually bought is modelled as
-  // low × m, m ~ Triangular(1.00, 1.08, 1.30): identical dates differed by ~7% across sources (mode), and the cheapest
-  // nonstop / less lucky booking ran 13–32% above the cheapest one-stop fare (upper bound).
-  const BAND = { a: 1.0, c: 1.08, b: 1.30 };
+  // All fare data is generated from config/2027.toml + data/fares.csv by `meetplan build-web` (see meetplan/web.py):
+  // curves = lowest fare of the latest survey per segment, QUOTES = every observation, CITIES = third-city options.
+  const DATA = {"checked": "2026-11-21", "curve": {"me": [["01-01", 1250.0], ["01-06", 882.0], ["02-01", 854.0], ["03-01", 936.0], ["04-01", 862.0], ["05-01", 838.0], ["06-01", 1097.0], ["07-01", 1101.0], ["08-01", 1085.0], ["09-01", 835.0], ["10-01", 983.0], ["11-01", 990.0], ["11-15", 950.0], ["12-01", 1000.0], ["12-15", 1400.0]], "her": [["01-01", 1350.0], ["01-06", 766.0], ["02-01", 876.0], ["03-01", 876.0], ["04-01", 738.0], ["05-01", 731.0], ["06-01", 798.0], ["07-01", 999.0], ["08-01", 736.0], ["09-01", 735.0], ["10-01", 735.0], ["11-01", 950.0], ["12-01", 1000.0], ["12-12", 1350.0]]}, "curveSource": {"me": [{"from": "01-01", "fare": 1250.0, "source": "seed"}, {"from": "01-06", "fare": 882.0, "source": "observed", "checked": "2026-11-20", "quotes": 1}, {"from": "02-01", "fare": 854.0, "source": "observed", "checked": "2026-11-20", "quotes": 4}, {"from": "03-01", "fare": 936.0, "source": "observed", "checked": "2026-11-20", "quotes": 2}, {"from": "04-01", "fare": 862.0, "source": "observed", "checked": "2026-11-21", "quotes": 3}, {"from": "05-01", "fare": 838.0, "source": "observed", "checked": "2026-11-20", "quotes": 3}, {"from": "06-01", "fare": 1097.0, "source": "observed", "checked": "2026-11-20", "quotes": 1}, {"from": "07-01", "fare": 1101.0, "source": "observed", "checked": "2026-11-20", "quotes": 2}, {"from": "08-01", "fare": 1085.0, "source": "observed", "checked": "2026-11-20", "quotes": 1}, {"from": "09-01", "fare": 835.0, "source": "observed", "checked": "2026-11-20", "quotes": 3}, {"from": "10-01", "fare": 983.0, "source": "observed", "checked": "2026-11-20", "quotes": 3}, {"from": "11-01", "fare": 990.0, "source": "seed"}, {"from": "11-15", "fare": 950.0, "source": "seed"}, {"from": "12-01", "fare": 1000.0, "source": "seed"}, {"from": "12-15", "fare": 1400.0, "source": "seed"}], "her": [{"from": "01-01", "fare": 1350.0, "source": "seed"}, {"from": "01-06", "fare": 766.0, "source": "observed", "checked": "2026-11-20", "quotes": 2}, {"from": "02-01", "fare": 876.0, "source": "observed", "checked": "2026-11-20", "quotes": 1}, {"from": "03-01", "fare": 876.0, "source": "observed", "checked": "2026-11-20", "quotes": 2}, {"from": "04-01", "fare": 738.0, "source": "observed", "checked": "2026-11-21", "quotes": 2}, {"from": "05-01", "fare": 731.0, "source": "observed", "checked": "2026-11-20", "quotes": 2}, {"from": "06-01", "fare": 798.0, "source": "observed", "checked": "2026-11-20", "quotes": 4}, {"from": "07-01", "fare": 999.0, "source": "observed", "checked": "2026-11-20", "quotes": 1}, {"from": "08-01", "fare": 736.0, "source": "observed", "checked": "2026-11-20", "quotes": 2}, {"from": "09-01", "fare": 735.0, "source": "observed", "checked": "2026-11-20", "quotes": 3}, {"from": "10-01", "fare": 735.0, "source": "observed", "checked": "2026-11-20", "quotes": 1}, {"from": "11-01", "fare": 950.0, "source": "seed"}, {"from": "12-01", "fare": 1000.0, "source": "seed"}, {"from": "12-12", "fare": 1350.0, "source": "seed"}]}, "band": {"a": 1.0, "c": 1.08, "b": 1.3}, "weekend": 0.04, "sunday": 0.03, "refDay": "05-13", "quotes": [{"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-01-13", "end": "2027-01-25", "price": 766.0, "via": "Air Canada via Toronto", "checked": "2026-11-20"}, {"dir": "her", "src": "lastminute", "kind": "date", "start": "2027-01-15", "end": "2027-01-25", "price": 845.0, "via": "Iberia", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-02-15", "end": "2027-02-25", "price": 876.0, "via": "Air France direct", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "date", "start": "2027-03-18", "end": "2027-03-29", "price": 1065.0, "via": "Air Canada", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-03-28", "end": "2027-04-09", "price": 876.0, "via": "Air France direct", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-04-04", "end": "2027-04-15", "price": 738.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "window", "start": "2027-04-19", "end": "2027-04-29", "price": 767.0, "via": "Air Canada via Toronto", "checked": "2026-11-21"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-05-13", "end": "2027-05-25", "price": 731.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "lastminute", "kind": "date", "start": "2027-05-15", "end": "2027-05-25", "price": 899.0, "via": "Air Canada", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "date", "start": "2027-06-12", "end": "2027-06-27", "price": 922.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "lastminute", "kind": "date", "start": "2027-06-12", "end": "2027-06-27", "price": 993.0, "via": "Air Canada", "checked": "2026-11-20"}, {"dir": "her", "src": "LetsFG", "kind": "date", "start": "2027-06-12", "end": "2027-06-27", "price": 977.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-06-14", "end": "2027-06-24", "price": 798.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-07-04", "end": "2027-07-15", "price": 999.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-08-19", "end": "2027-08-31", "price": 736.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "LetsFG", "kind": "window", "start": "2027-08-26", "end": "2027-09-07", "price": 810.0, "via": "Air Canada / Lufthansa", "checked": "2026-11-20"}, {"dir": "her", "src": "lastminute", "kind": "date", "start": "2027-09-09", "end": "2027-09-20", "price": 975.0, "via": "Air Canada / Lufthansa", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-09-23", "end": "2027-10-05", "price": 735.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "LetsFG", "kind": "window", "start": "2027-09-23", "end": "2027-10-04", "price": 836.0, "via": "Air Canada", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-10-18", "end": "2027-10-28", "price": 735.0, "via": "Air Canada via Montreal", "checked": "2026-11-20"}, {"dir": "her", "src": "Kiwi", "kind": "month", "start": "2027-11-04", "end": "2027-11-13", "price": 1250.0, "via": "Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-01-29", "end": "2027-02-10", "price": 882.0, "via": "Aeromexico direct", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "date", "start": "2027-02-04", "end": "2027-02-15", "price": 914.0, "via": "Aeromexico direct", "checked": "2026-11-20"}, {"dir": "me", "src": "lastminute", "kind": "date", "start": "2027-02-04", "end": "2027-02-15", "price": 854.0, "via": "British Airways + Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "LetsFG", "kind": "date", "start": "2027-02-04", "end": "2027-02-15", "price": 870.0, "via": "Aeromexico direct", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-02-16", "end": "2027-02-28", "price": 872.0, "via": "Aeromexico direct", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "date", "start": "2027-03-18", "end": "2027-03-29", "price": 936.0, "via": "Avianca / Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-03-25", "end": "2027-04-04", "price": 971.0, "via": "Aeromexico direct", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-04-02", "end": "2027-04-13", "price": 931.0, "via": "Avianca / Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "window", "start": "2027-04-15", "end": "2027-04-27", "price": 963.0, "via": "Iberia via Dallas / Madrid", "checked": "2026-11-21"}, {"dir": "me", "src": "lastminute", "kind": "date", "start": "2027-04-15", "end": "2027-04-27", "price": 862.0, "via": "British Airways via London", "checked": "2026-11-21"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-05-05", "end": "2027-05-15", "price": 938.0, "via": "Avianca / Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "LetsFG", "kind": "window", "start": "2027-05-12", "end": "2027-05-26", "price": 850.0, "via": "British Airways via London", "checked": "2026-11-20"}, {"dir": "me", "src": "lastminute", "kind": "date", "start": "2027-05-15", "end": "2027-05-25", "price": 838.0, "via": "British Airways", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-06-11", "end": "2027-06-21", "price": 1097.0, "via": "Avianca / Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-07-05", "end": "2027-07-14", "price": 1154.0, "via": "Iberia via Dallas", "checked": "2026-11-20"}, {"dir": "me", "src": "lastminute", "kind": "date", "start": "2027-07-15", "end": "2027-07-25", "price": 1101.0, "via": "British Airways", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-08-30", "end": "2027-09-10", "price": 1085.0, "via": "Air France / KLM", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "date", "start": "2027-09-10", "end": "2027-09-20", "price": 1106.0, "via": "Avianca / Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-09-15", "end": "2027-09-25", "price": 980.0, "via": "Avianca / Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "lastminute", "kind": "date", "start": "2027-09-15", "end": "2027-09-25", "price": 835.0, "via": "British Airways", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-10-03", "end": "2027-10-14", "price": 983.0, "via": "Avianca / Iberia", "checked": "2026-11-20"}, {"dir": "me", "src": "lastminute", "kind": "date", "start": "2027-10-22", "end": "2027-11-07", "price": 1095.0, "via": "Air Canada", "checked": "2026-11-20"}, {"dir": "me", "src": "LetsFG", "kind": "date", "start": "2027-10-22", "end": "2027-11-08", "price": 986.0, "via": "Aer Lingus / British Airways", "checked": "2026-11-20"}, {"dir": "me", "src": "Kiwi", "kind": "month", "start": "2027-11-01", "end": "2027-11-11", "price": 1132.0, "via": "Air France direct", "checked": "2026-11-20"}], "cities": [{"id": "nyc", "name": "New York", "beach": false, "ref": {"me": 610.0, "her": 470.0}, "lodging": 230.0, "q": "May 762 / 514 · Mar 567 / 507"}, {"id": "mia", "name": "Miami", "beach": true, "ref": {"me": 690.0, "her": 400.0}, "lodging": 190.0, "q": "May 649 / 342 · Mar 723 / 595"}, {"id": "cun", "name": "Cancún", "beach": true, "ref": {"me": 800.0, "her": 180.0}, "lodging": 120.0, "q": "May 959 / 176 · Mar 749 / 181"}, {"id": "puj", "name": "Punta Cana", "beach": true, "ref": {"me": 890.0, "her": 426.0}, "lodging": 150.0, "q": "May 890 / 426"}, {"id": "sju", "name": "San Juan", "beach": true, "ref": {"me": 932.0, "her": 578.0}, "lodging": 170.0, "q": "May 932 / 578"}, {"id": "fdf", "name": "Martinique", "beach": true, "ref": {"me": 632.0, "her": 1228.0}, "lodging": 130.0, "q": "May 632 / 1228"}, {"id": "yul", "name": "Montréal", "beach": false, "ref": {"me": 439.0, "her": 540.0}, "lodging": 150.0, "q": "May 439 / 540"}, {"id": "mad", "name": "Madrid", "beach": false, "ref": {"me": 135.0, "her": 841.0}, "lodging": 120.0, "q": "May 135 / 841 · Apr – / 838", "seen": {"4": {"her": 838.0}}}, {"id": "bcn", "name": "Barcelona", "beach": true, "ref": {"me": 94.0, "her": 800.0}, "lodging": 140.0, "q": "May 94 / 934 · Apr 84 / 682–739", "seen": {"4": {"her": 682.0, "me": 84.0}, "5": {"her": 934.0, "me": 94.0}}}, {"id": "fco", "name": "Rome", "beach": false, "ref": {"me": 111.0, "her": 850.0}, "lodging": 140.0, "q": "May 111 / 964 · Apr – / 751", "seen": {"4": {"her": 751.0}, "5": {"her": 964.0, "me": 111.0}}}, {"id": "mxp", "name": "Milan", "beach": false, "ref": {"me": 76.0, "her": 950.0}, "lodging": 140.0, "q": "May 76 / 962", "seen": {"5": {"her": 962.0, "me": 76.0}}}, {"id": "agp", "name": "Málaga", "beach": true, "ref": {"me": 126.0, "her": 950.0}, "lodging": 110.0, "q": "May 126 / 968", "seen": {"5": {"her": 968.0, "me": 126.0}}}], "defaults": {"nameMe": "Andrés", "nameHer": "Laura", "year": 2027, "leaveMe": 45, "leaveHer": 22, "Lmin": 7, "Lmax": 16, "minGap": 14, "maxGap": 200, "V": 120.0, "beta": 0.6, "travelDayValue": 0.5, "C": 150.0, "priceScale": 1.0, "gapTarget": 45.0, "lambda": 0.15, "lastWD": 1, "firstWD": 3, "blockAugust": true, "costWeight": 0.6, "meetCostFactor": 0.7, "tripBonus": 100.0, "focusMonth": 3, "focusWhere": null, "holidaysMe": ["2027-01-01", "2027-03-29", "2027-05-01", "2027-05-06", "2027-05-08", "2027-05-17", "2027-07-14", "2027-08-15", "2027-11-01", "2027-11-11", "2027-12-25"], "holidaysHer": ["2027-01-01", "2027-02-01", "2027-03-15", "2027-03-25", "2027-03-26", "2027-05-01", "2027-09-16", "2027-11-02", "2027-11-15", "2027-12-25"], "blackoutHerExtra": [], "mode": "both", "fareBasis": "typical", "citiesOff": [], "cityBonus": {"nyc": 25.0, "mia": 25.0, "cun": 25.0, "puj": 25.0, "sju": 25.0, "fdf": 25.0, "yul": 25.0, "mad": 25.0, "bcn": 25.0, "fco": 25.0, "mxp": 25.0, "agp": 25.0}, "lodging": {"nyc": 230.0, "mia": 190.0, "cun": 120.0, "puj": 150.0, "sju": 170.0, "fdf": 130.0, "yul": 150.0, "mad": 120.0, "bcn": 140.0, "fco": 140.0, "mxp": 140.0, "agp": 110.0}, "required": [{"label": "February, Andrés goes", "label_es": "Febrero, Andrés va", "sMin": "2027-02-04", "sMax": "2027-02-04", "eMin": "2027-02-15", "eMax": "2027-02-15", "dir": "me"}, {"label": "March, New York together", "label_es": "Marzo, Nueva York juntos", "sMin": "2027-03-18", "sMax": "2027-03-18", "eMin": "2027-03-28", "eMax": "2027-03-28", "dir": "meet:nyc"}, {"label": "June, Laura comes (Marseille)", "label_es": "Junio, Laura viene (Marsella)", "sMin": "2027-06-12", "sMax": "2027-06-12", "eMin": "2027-06-27", "eMax": "2027-06-27", "dir": "her"}, {"label": "Late Oct to early Nov, Andrés goes", "label_es": "Finales de oct a inicios de nov, Andrés va", "sMin": "2027-10-22", "sMax": "2027-10-31", "eMin": "2027-11-01", "eMax": "2027-11-10", "dir": "me"}]}};
+  const CURVE = DATA.curve;   // { me: [[MM-DD, €], ...] Paris→CDMX, her: [...] CDMX→Paris }
+  const QUOTES = DATA.quotes; // evidence table rows
+
+  // Price uncertainty. The curves are the LOWEST fare seen. A ticket actually bought is modelled as
+  // low × m, m ~ Triangular(a, c, b) (from the TOML band).
+  const BAND = DATA.band;
   const triMean = (BAND.a + BAND.b + BAND.c) / 3;
   function triQuantile(u) {
     const { a, b, c } = BAND, f = (c - a) / (b - a);
@@ -620,23 +559,10 @@ m = 0.7  meeting halfway, 1 at home</pre>
   const BASIS = { low: 1, typical: triMean, cautious: triQuantile(0.9) };
   const basisF = p => BASIS[p.fareBasis || "typical"] || 1;
 
-  // Third-city meetups. Fares = Kiwi.com cheapest return (EUR) for 13–23 May 2027 and, where marked, 18–28 Mar 2027.
-  // ref.me / ref.her = normalised midweek fare from Paris / Mexico City at the reference date (13 May).
-  const CITIES = [
-    { id: "nyc", name: "New York", beach: false, ref: { me: 610, her: 470 }, lodging: 230, q: "May 762 / 514 · Mar 567 / 507" },
-    { id: "mia", name: "Miami", beach: true, ref: { me: 690, her: 400 }, lodging: 190, q: "May 649 / 342 · Mar 723 / 595" },
-    { id: "cun", name: "Cancún", beach: true, ref: { me: 800, her: 180 }, lodging: 120, q: "May 959 / 176 · Mar 749 / 181" },
-    { id: "puj", name: "Punta Cana", beach: true, ref: { me: 890, her: 426 }, lodging: 150, q: "May 890 / 426" },
-    { id: "sju", name: "San Juan", beach: true, ref: { me: 932, her: 578 }, lodging: 170, q: "May 932 / 578" },
-    { id: "fdf", name: "Martinique", beach: true, ref: { me: 632, her: 1228 }, lodging: 130, q: "May 632 / 1228" },
-    { id: "yul", name: "Montréal", beach: false, ref: { me: 439, her: 540 }, lodging: 150, q: "May 439 / 540" },
-    { id: "mad", name: "Madrid", beach: false, ref: { me: 135, her: 841 }, lodging: 120, q: "May 135 / 841 · Apr – / 838", seen: { 4: { her: 838 } } },
-    { id: "bcn", name: "Barcelona", beach: true, ref: { me: 94, her: 800 }, lodging: 140, q: "May 94 / 934 · Apr 84 / 682–739", seen: { 4: { me: 84, her: 682 } } },
-    { id: "fco", name: "Rome", beach: false, ref: { me: 111, her: 850 }, lodging: 140, q: "May 111 / 964 · Apr – / 751", seen: { 4: { her: 751 } } },
-    { id: "mxp", name: "Milan", beach: false, ref: { me: 76, her: 950 }, lodging: 140, q: "May 76 / 962" },
-    { id: "agp", name: "Málaga", beach: true, ref: { me: 126, her: 950 }, lodging: 110, q: "May 126 / 968" }
-  ];
-  const REF_DAY = "05-13";
+  // Third-city meetups: ref = normalised midweek fare from each origin at REF_DAY; seen = lowest fare observed in a
+  // departure month (overrides the seasonal estimate); q = the quotes, for display.
+  const CITIES = DATA.cities;
+  const REF_DAY = DATA.refDay;
 
   function buildCalendar(p) {
     const y = p.year, start = Date.UTC(y, 0, 1);
@@ -683,15 +609,15 @@ m = 0.7  meeting halfway, 1 at home</pre>
     const c = cal.curve[dir];
     const dowS = cal.days[s].dow, dowE = cal.days[e].dow;
     let f = 1;
-    if (dowS === 5 || dowS === 6) f += 0.04;   // weekend departures cost a bit more
-    if (dowE === 0) f += 0.03;                 // Sunday returns too
+    if (dowS === 5 || dowS === 6) f += DATA.weekend;   // weekend departures cost a bit more
+    if (dowE === 0) f += DATA.sunday;           // Sunday returns too
     return p.priceScale * basisF(p) * (0.6 * c[s] + 0.4 * c[e]) * f;
   }
 
   function cityPrice(cal, p, s, e, city, who) {
     const c = cal.curve[who], ref = cal.refCurve[who];
     const dowS = cal.days[s].dow;
-    let f = 1; if (dowS === 5 || dowS === 6) f += 0.04;
+    let f = 1; if (dowS === 5 || dowS === 6) f += DATA.weekend;
     // A lowest fare actually observed for this city in the departure month beats the seasonal estimate.
     const seen = city.seen && city.seen[cal.days[s].m + 1];
     if (seen && seen[who] != null) return p.priceScale * basisF(p) * seen[who] * f;
@@ -873,7 +799,7 @@ m = 0.7  meeting halfway, 1 at home</pre>
     return { p10: q(0.1), p50: q(0.5), p90: q(0.9), min: out[0], max: out[n - 1], tickets: tickets.length };
   }
 
-  const api = { simulate, BAND, BASIS, solve, buildCalendar, tripPrice, cityPrice, CURVE, QUOTES, CITIES };
+  const api = { simulate, BAND, BASIS, solve, buildCalendar, tripPrice, cityPrice, CURVE, QUOTES, CITIES, DATA };
   if (typeof module !== "undefined") module.exports = api; else root.Planner = api;
 })(this);
 
@@ -898,30 +824,15 @@ m = 0.7  meeting halfway, 1 at home</pre>
     });
   });
   try { const y = sessionStorage.getItem("tc-y"); if (y) { sessionStorage.removeItem("tc-y"); requestAnimationFrame(() => window.scrollTo(0, +y)); } } catch (e) {}
-  const DEFAULTS = {
-    nameMe: "Andrés", nameHer: "Laura",
-    year: 2027, leaveMe: 45, leaveHer: 22, Lmin: 7, Lmax: 16, minGap: 14, maxGap: 200,
-    V: 120, beta: 0.6, travelDayValue: 0.5, C: 150, priceScale: 1, gapTarget: 45, lambda: 0.15,
-    lastWD: 1, firstWD: 3, blockAugust: true,
-    costWeight: 0.6, meetCostFactor: 0.7, tripBonus: 100, focusMonth: 3, focusWhere: null,
-    holidaysMe: ["2027-01-01","2027-03-29","2027-05-01","2027-05-06","2027-05-08","2027-05-17","2027-07-14","2027-08-15","2027-11-01","2027-11-11","2027-12-25"],
-    holidaysHer: ["2027-01-01","2027-02-01","2027-03-15","2027-03-25","2027-03-26","2027-05-01","2027-09-16","2027-11-02","2027-11-15","2027-12-25"],
-    blackoutHerExtra: [],
-    mode: "both", citiesOff: [], fareBasis: "typical",
-    cityBonus: { nyc: 25, mia: 25, cun: 25, puj: 25, sju: 25, fdf: 25, yul: 25, mad: 25, bcn: 25, fco: 25, mxp: 25, agp: 25 },
-    lodging: { nyc: 230, mia: 190, cun: 120, puj: 150, sju: 170, fdf: 130, yul: 150, mad: 120, bcn: 140, fco: 140, mxp: 140, agp: 110 },
-    required: [
-      { label: tr("February, Andrés goes", "Febrero, Andrés va"), sMin: "2027-02-04", sMax: "2027-02-04", eMin: "2027-02-15", eMax: "2027-02-15", dir: "me" },
-      { label: tr("New York together", "Nueva York juntos"), sMin: "2027-03-18", sMax: "2027-03-18", eMin: "2027-03-28", eMax: "2027-03-28", dir: "meet:nyc" },
-      { label: tr("June, Marseille", "Junio, Marsella"), sMin: "2027-06-12", sMax: "2027-06-12", eMin: "2027-06-27", eMax: "2027-06-27", dir: "her" },
-      { label: tr("Late Oct to early Nov", "Finales de oct a inicios de nov"), sMin: "2027-10-22", sMax: "2027-10-31", eMin: "2027-11-01", eMax: "2027-11-10", dir: "me" }
-    ]
-  };
+  // Defaults come from config/2027.toml (generated into Planner.DATA by `meetplan build-web`).
+  const DEFAULTS = JSON.parse(JSON.stringify(Planner.DATA.defaults));
+  DEFAULTS.required.forEach(r => { r.label = tr(r.label, r.label_es || r.label); delete r.label_es; });
   const KEY = "todo-contigo-v7";
   let P;
   try { P = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { P = null; }
   if (!P) P = JSON.parse(JSON.stringify(DEFAULTS));
   for (const k in DEFAULTS) if (P[k] === undefined) P[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
+  for (const k of ["cityBonus", "lodging"]) for (const id in DEFAULTS[k]) if (P[k][id] === undefined) P[k][id] = DEFAULTS[k][id];
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
   const CITY = Object.fromEntries(Planner.CITIES.map(c => [c.id, c]));
   if (ES) Object.entries({ nyc: "Nueva York", fco: "Roma", mxp: "Milán", fdf: "Martinica", yul: "Montreal" }).forEach(([k, v]) => { if (CITY[k]) CITY[k].name = v; });
@@ -1444,7 +1355,8 @@ m = 0.7  meeting halfway, 1 at home</pre>
       for (let m = 0; m < 12; m++) {
         const mid = res.cal.days.find(d => d.m === m && +d.iso.slice(8) === 15).i;
         const low = res.cal.curve[dir][mid] * P.priceScale;
-        const est = (m === 11) || (dir === "her" && m === 10);
+        const seg = Planner.DATA.curveSource[dir].filter(x => x.from <= res.cal.days[mid].iso.slice(5)).pop();
+        const est = !seg || seg.source !== "observed";
         html += `<tr><td>${MONTHS[m]}${est ? "*" : ""}</td>${cell("Kiwi", m)}${cell("lastminute", m)}${cell("LetsFG", m)}<td class="best">${Math.round(low)}</td><td>${Math.round(low * Planner.BASIS.typical)}</td><td>${Math.round(low * Planner.BAND.b)}</td></tr>`;
       }
       return html + `</tbody>`;
@@ -1452,6 +1364,8 @@ m = 0.7  meeting halfway, 1 at home</pre>
     document.getElementById("evidence").innerHTML = one("me", P.nameMe);
     document.getElementById("evidence2").innerHTML = one("her", P.nameHer);
     const n = qs.length;
+    const ck = Planner.DATA.checked ? fmtD(Planner.DATA.checked) + " " + Planner.DATA.checked.slice(0, 4) : "";
+    document.getElementById("checkedTag").textContent = tr(`Prices checked · ${ck}`, `Precios revisados · ${ck}`);
     document.getElementById("fareFinding").innerHTML = ES ? `<b>${n} precios reales de 3 sitios</b> (Kiwi.com, lastminute.com y LetsFG, que además agrega Google Flights y agencias: 450–620 ofertas por búsqueda). Destacan tres cosas. <b>El billete de ${esc(P.nameHer)} suele ser 100–250 € más barato</b>: Air Canada vía Montreal a 731–810 € en abr–may y ago–oct. <b>Para ${esc(P.nameMe)}, mediados de mayo y de septiembre bajan a 835–850 €</b> (British Airways vía Londres). En <b>las mismas fechas, los tres sitios difieren en un 7%</b>, pero los vuelos directos cuestan un 13–69% más que la escala más barata. Precios en €, ida y vuelta, turista, recogidos el 20 nov 2026.` : `<b>${n} real quotes from 3 sites</b> (Kiwi.com, lastminute.com, LetsFG, which also aggregates Google Flights and travel agencies, 450–620 offers per search). Three things stand out. <b>${esc(P.nameHer)}’s ticket is usually €100–250 cheaper</b>, with Air Canada via Montréal at €731–810 in Apr–May and Aug–Oct. <b>For ${esc(P.nameMe)}, mid-May and mid-September dip to €835–850</b> (British Airways via London). On the <b>same dates the three sites differ by about 7%</b>, but direct flights cost 13–69% more than the cheapest one-stop. Prices are €, return, economy, collected 20 Nov 2026.`;
   }
 

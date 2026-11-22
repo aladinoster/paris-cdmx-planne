@@ -1,14 +1,15 @@
-"""Command-line interface: `meetplan solve | compare | where | fares`."""
+"""Command-line interface: `meetplan solve | compare | risk | where | fares | refresh | build-web`."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 from pathlib import Path
 
 from .calendar import build_calendar
-from .config import MODES, load_config
+from .config import MODES, load_config, model_path
 from .fares import reference_fare
 from .prices import load_quotes, monthly_summary, simulate_cost
 from .report import text_report, to_csv, to_ics, to_json, where_to_meet
@@ -143,6 +144,79 @@ def cmd_fares(args) -> int:
     return 0
 
 
+def _model_file(config: str) -> Path:
+    import tomllib
+    rel = tomllib.loads(Path(config).read_text(encoding="utf-8"))["fares"].get("model", "../data/fare_model.json")
+    return model_path(config, rel)
+
+
+def cmd_refresh(args) -> int:
+    """Rebuild data/fare_model.json from data/fares.csv (latest survey's lowest fare per segment / city-month)."""
+    from .refresh import diff, rebuild, write_model
+
+    seed = load_config(args.config, use_model=False)
+    quotes = load_quotes(args.data) if args.data else load_quotes()
+    out = _model_file(args.config)
+    old = json.loads(out.read_text(encoding="utf-8")) if out.exists() else None
+    model = rebuild(seed, quotes, args.window)
+    changes = diff(old, model)
+    write_model(model, out)
+    print(f"Fare model: {len(quotes)} quotes, newest checked {model['checked']} → {out}")
+    obs = sum(s["source"] == "observed" for w in ("me", "her") for s in model["curve_source"][w])
+    tot = sum(len(model["curve_source"][w]) for w in ("me", "her"))
+    print(f"  {obs}/{tot} curve segments observed, {sum(len(v) for v in model['seen'].values())} city-months")
+    print("  Changes:" if changes else "  No changes.")
+    for line in changes:
+        print("   ", line)
+    return 0
+
+
+def cmd_add_quote(args) -> int:
+    """Append one observed fare to data/fares.csv (skips exact duplicates)."""
+    import csv
+    from datetime import date
+
+    from .prices import DATA
+
+    path = Path(args.data) if args.data else DATA
+    for d in (args.depart, args.ret):
+        date.fromisoformat(d)
+    if args.source not in ("kiwi", "lastminute", "letsfg"):
+        raise ValueError("source must be kiwi, lastminute or letsfg")
+    if args.kind not in ("best_in_month", "best_in_window", "fixed_dates"):
+        raise ValueError("kind must be best_in_month, best_in_window or fixed_dates")
+    o, _, d = args.direction.partition("-")
+    if not (len(o) == 3 and len(d) == 3 and o.isupper() and d.isupper()) or "PAR" not in (o, d) and "MEX" not in (o, d):
+        raise ValueError("direction must look like PAR-MEX, MEX-PAR, PAR-BCN, MEX-ROM…")
+    checked = args.checked or date.today().isoformat()
+    row = [checked, args.source, args.direction, args.depart, args.ret, args.kind, f"{args.price:g}",
+           f"{args.nonstop:g}" if args.nonstop else "", args.carriers, args.notes]
+    with open(path, newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    key = lambda r: (r[0], r[1], r[2], r[3], r[4], float(r[6]))  # noqa: E731
+    if any(key(r) == key(row) for r in rows[1:]):
+        print("duplicate, skipped:", ",".join(row))
+        return 0
+    with open(path, "a", newline="", encoding="utf-8") as f:
+        csv.writer(f, lineterminator="\n").writerow(row)
+    print("added:", ",".join(row))
+    return 0
+
+
+def cmd_build_web(args) -> int:
+    """Write docs/index.html from web/ + config + fare model + quotes."""
+    from .web import build_page, web_data
+
+    cfg = load_config(args.config)
+    mf = _model_file(args.config)
+    model = json.loads(mf.read_text(encoding="utf-8")) if mf.exists() else None
+    html = build_page(web_data(cfg, load_quotes(), model))
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).write_text(html, encoding="utf-8")
+    print(f"Wrote {args.out} ({len(html) / 1024:.0f} KB, prices checked {cfg.fares_checked})")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="meetplan", description="Plan a long-distance year of trips, exactly.")
     ap.add_argument("-c", "--config", default=DEFAULT_CONFIG, help=f"input TOML (default: {DEFAULT_CONFIG})")
@@ -175,6 +249,29 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("fares", help="who should fly each month (home trips)")
     p.set_defaults(func=cmd_fares)
+
+    p = sub.add_parser("refresh", help="rebuild the fare model (data/fare_model.json) from data/fares.csv")
+    p.add_argument("--data", help="path to a fares CSV (default: data/fares.csv)")
+    p.add_argument("--window", type=int, default=45, help="days that count as one survey (default 45)")
+    p.set_defaults(func=cmd_refresh)
+
+    p = sub.add_parser("add-quote", help="append one observed fare to data/fares.csv")
+    p.add_argument("--source", required=True, help="kiwi | lastminute | letsfg")
+    p.add_argument("--direction", required=True, help="PAR-MEX, MEX-PAR, PAR-BCN, MEX-ROM…")
+    p.add_argument("--depart", required=True, help="YYYY-MM-DD")
+    p.add_argument("--return", dest="ret", required=True, help="YYYY-MM-DD")
+    p.add_argument("--kind", required=True, help="best_in_month | best_in_window | fixed_dates")
+    p.add_argument("--price", type=float, required=True, help="cheapest return fare, EUR")
+    p.add_argument("--nonstop", type=float, help="cheapest nonstop fare, EUR, if seen")
+    p.add_argument("--carriers", default="")
+    p.add_argument("--notes", default="")
+    p.add_argument("--checked", help="date checked (default: today)")
+    p.add_argument("--data", help="path to a fares CSV (default: data/fares.csv)")
+    p.set_defaults(func=cmd_add_quote)
+
+    p = sub.add_parser("build-web", help="build the web page from web/ and the data")
+    p.add_argument("-o", "--out", default="docs/index.html")
+    p.set_defaults(func=cmd_build_web)
 
     args = ap.parse_args(argv)
     try:

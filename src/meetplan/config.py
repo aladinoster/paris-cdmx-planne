@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import tomllib
 from dataclasses import dataclass, field, replace
 from datetime import date
@@ -22,6 +23,7 @@ class City:
     enabled: bool = True
     quotes: str = ""
     seen: tuple[tuple[int, str, float], ...] = ()  # (month, "me"|"her", lowest fare observed that month)
+    code: str = ""  # metro IATA code used in data/fares.csv directions, e.g. "BCN" in "MEX-BCN"
 
 
 @dataclass(frozen=True)
@@ -35,6 +37,7 @@ class FixedTrip:
     min_days: int | None = None   # optional length limits (used by the focus-month trip)
     max_days: int | None = None
     focus_month: int | None = None  # if set, at least half of the trip's days fall in this month (1-12)
+    label_es: str = ""  # Spanish label for the web page
 
 
 @dataclass(frozen=True)
@@ -85,6 +88,7 @@ class Config:
     trip_bonus: float = 0.0        # € value of each trip, rewarding frequency
     focus_month: int | None = None  # 1-12: make sure one trip falls in this month
     focus_where: str | None = None  # where that trip goes (default: follows `mode`)
+    fares_checked: str | None = None  # date of the newest quote behind the fare model
 
     def with_(self, **kw) -> Config:
         """Return a copy with some fields replaced (used for scenarios)."""
@@ -99,9 +103,38 @@ def _d(s: str) -> date:
     return date.fromisoformat(s)
 
 
-def load_config(path: str | Path) -> Config:
-    raw = tomllib.loads(Path(path).read_text(encoding="utf-8"))
-    return parse_config(raw)
+def load_config(path: str | Path, *, use_model: bool = True) -> Config:
+    """Read a TOML config. If ``[fares] model`` points to an existing fare model (built by
+    ``meetplan refresh``), its curves and observed city fares replace the seed values from the TOML."""
+    path = Path(path)
+    raw = tomllib.loads(path.read_text(encoding="utf-8"))
+    cfg = parse_config(raw)
+    if use_model and (m := raw["fares"].get("model")):
+        mp = model_path(path, m)
+        if mp.exists():
+            cfg = apply_model(cfg, json.loads(mp.read_text(encoding="utf-8")))
+    return cfg
+
+
+def model_path(config_path: str | Path, rel: str) -> Path:
+    return (Path(config_path).parent / rel).resolve()
+
+
+def apply_model(cfg: Config, model: dict) -> Config:
+    """Use a fare model's curves and per-month city fares (observed fares win over TOML values)."""
+    def city(c: City) -> City:
+        seen = {(m, w): v for m, w, v in c.seen}
+        for m, sides in model.get("seen", {}).get(c.id, {}).items():
+            for w, v in sides.items():
+                seen[(int(m), w)] = float(v)
+        return replace(c, seen=tuple((m, w, v) for (m, w), v in sorted(seen.items())))
+    cfg = replace(cfg,
+                  curve_me=tuple((k, float(v)) for k, v in model["curve"]["me"]),
+                  curve_her=tuple((k, float(v)) for k, v in model["curve"]["her"]),
+                  cities=tuple(city(c) for c in cfg.cities),
+                  fares_checked=model.get("checked"))
+    validate(cfg)
+    return cfg
 
 
 def parse_config(raw: dict) -> Config:
@@ -135,13 +168,15 @@ def parse_config(raw: dict) -> Config:
         curve_her=tuple((k, float(v)) for k, v in fares["curve"]["her"]),
         quotes=(),
         fixed_trips=tuple(
-            FixedTrip(t["label"], _d(t["start"][0]), _d(t["start"][1]), _d(t["end"][0]), _d(t["end"][1]), t["where"])
+            FixedTrip(t["label"], _d(t["start"][0]), _d(t["start"][1]), _d(t["end"][0]), _d(t["end"][1]), t["where"],
+                      label_es=t.get("label_es", ""))
             for t in raw.get("fixed_trips", [])
         ),
         cities=tuple(
             City(c["id"], c["name"], bool(c.get("beach", False)), float(c["ref_me"]), float(c["ref_her"]),
                  float(c["lodging"]), float(c.get("bonus", 0)), bool(c.get("enabled", True)), c.get("quotes", ""),
-                 tuple((int(m), who, float(v)) for m, sides in c.get("seen", {}).items() for who, v in sides.items()))
+                 tuple((int(m), who, float(v)) for m, sides in c.get("seen", {}).items() for who, v in sides.items()),
+                 c.get("code", ""))
             for c in raw.get("cities", [])
         ),
     )

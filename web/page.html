@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Todo contigo · 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a love letter that is also a planner. Dusk banner and a scroll scene up top, then one column of
+   highlights, the trips, the calendar with fares, places to meet, and the knobs folded away at the bottom. */
+:root {
+  color-scheme: light;
+  --bg: #f7f4f6;
+  --surface: #ffffff;
+  --ink: #1b1620;
+  --ink-2: #4f4756;
+  --ink-3: #847b8a;
+  --line: #e9e2e8;
+  --rose: #c2185b;          /* accent: love notes, title, hearts */
+  --me: #2a78d6;            /* Andrés flies Paris → CDMX */
+  --her: #eb6834;           /* she flies CDMX → Paris */
+  --meet: #1baf7a;          /* together in a third city */
+  --me-soft: #d6e6f8;
+  --her-soft: #fbe1d6;
+  --block: #cfc6cf;
+  --sky-1: #2b2350; --sky-2: #8a3d6b; --sky-3: #f2a07b;
+  --font-script: "Great Vibes", "Snell Roundhand", "Apple Chancery", cursive;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #141116; --surface: #1d1920; --ink: #f3eef3; --ink-2: #c4bcc6; --ink-3: #91889a; --line: #2f2934;
+    --rose: #f06292; --me: #3987e5; --her: #d95926; --meet: #199e70; --me-soft: #1d3350; --her-soft: #4a2617; --block: #463e48;
+    --sky-1: #120f26; --sky-2: #4d2245; --sky-3: #a4566a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141116; --surface: #1d1920; --ink: #f3eef3; --ink-2: #c4bcc6; --ink-3: #91889a; --line: #2f2934;
+  --rose: #f06292; --me: #3987e5; --her: #d95926; --meet: #199e70; --me-soft: #1d3350; --her-soft: #4a2617; --block: #463e48;
+  --sky-1: #120f26; --sky-2: #4d2245; --sky-3: #a4566a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 72px; display: flex; flex-direction: column; gap: 18px; }
+h2 { font: 700 20px/1.2 var(--font-display); margin: 0; text-wrap: balance; }
+h3 { margin: 0; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.num { font-variant-numeric: tabular-nums; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.script { font-family: var(--font-script); font-weight: 400; }
+
+/* ---------- Language switch ---------- */
+.lang { position: absolute; top: max(10px, env(safe-area-inset-top)); right: 10px; z-index: 50; display: flex; gap: 2px; padding: 3px; border-radius: 999px;
+  background: rgba(20, 14, 40, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.18); }
+.lang button { font: 600 12px/1 var(--font-body); letter-spacing: .06em; color: rgba(255,255,255,.75); background: transparent; border: 0; border-radius: 999px; padding: 7px 10px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: #fff; color: #2b2350; }
+
+/* ---------- Night: countdown ---------- */
+.night { position: relative; min-height: 100vh; min-height: 100svh; overflow: hidden; color: #fff; text-align: center;
+  background: radial-gradient(120% 70% at 50% 0%, #1b1640 0%, #0c0a22 55%, #0a0820 70%, var(--sky-1) 100%);
+  display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 72px 18px 90px; }
+.night canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.night .moon { position: absolute; top: 9%; right: 12%; width: 54px; height: 54px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fffaf0, #f3e6c8 60%, #e0cfa8); box-shadow: 0 0 40px 10px rgba(255, 244, 214, .25); }
+.night .moon::after { content: ""; position: absolute; inset: -2px -14px 6px 12px; border-radius: 50%; background: transparent; box-shadow: inset 12px 2px 0 0 rgba(12,10,34,.0); }
+.night .inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 560px; will-change: transform, opacity; }
+.night .eyebrow { font: 400 clamp(30px, 8.5vw, 46px)/1.1 var(--font-script); color: #fff; opacity: .95; text-shadow: 0 0 18px rgba(255, 200, 220, .35); }
+.night .count { display: flex; align-items: baseline; gap: 12px; }
+.night .count .d { font: 400 clamp(130px, 40vw, 220px)/0.95 var(--font-script); letter-spacing: 0; padding: 0 .12em;
+  background: linear-gradient(180deg, #fff 0%, #ffd9e6 60%, #f7a8c4 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 40px rgba(247, 168, 196, .25); font-variant-numeric: tabular-nums; }
+.night .count .u { font: 400 clamp(34px, 9vw, 52px)/1 var(--font-script); color: #ffd9e6; }
+.night .clock { display: flex; gap: 14px; font: 500 15px/1 var(--font-mono); opacity: .9; }
+.night .clock span b { font: 600 22px/1 var(--font-mono); display: block; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.night .clock span { display: flex; flex-direction: column; align-items: center; min-width: 46px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.65); }
+.night .date { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.night .date .big { font: 400 clamp(30px, 8vw, 44px)/1.05 var(--font-script); color: #fff; }
+.night .date .small { font: 500 12px/1.3 var(--font-body); letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.night .date .flight { margin-top: 4px; letter-spacing: .08em; text-transform: none; font-size: 12.5px; color: rgba(255,228,238,.8); }
+.night .phrase { margin: 18px 0 0; font: 400 clamp(21px, 5.6vw, 38px)/1.3 var(--font-script); color: #ffe4ee; text-wrap: balance;
+  text-shadow: 0 0 22px rgba(255, 190, 215, .35); }
+.night .phrase span { display: block; }
+.night .cue { position: absolute; bottom: 22px; left: 0; right: 0; z-index: 1; font: 500 12px/1.4 var(--font-body); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.night .cue i { display: block; font-style: normal; font-size: 18px; margin-top: 4px; }
+@media (prefers-reduced-motion: no-preference) { .night .cue i { animation: cue 2.2s ease-in-out infinite; } }
+@keyframes cue { 0%, 100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(6px); opacity: 1; } }
+.banner { background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 58%, var(--sky-3) 100%) !important; padding-top: 18px !important; }
+
+/* ---------- Banner ---------- */
+.banner { position: relative; color: #fff; text-align: center; overflow: hidden;
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 58%, var(--sky-3) 100%); padding: 28px 16px 0; }
+.banner h1 { font: 400 clamp(56px, 16vw, 104px)/1 var(--font-script); margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,.25); }
+.banner .sub { margin: 6px 0 0; font: 500 14px/1.4 var(--font-body); letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.banner svg { display: block; width: 100%; max-width: 760px; height: auto; margin: 18px auto 0; }
+.stars circle { fill: #fff; }
+
+/* ---------- Highlights ---------- */
+.hero { margin-top: -6px; }
+.big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.big .n { font: 700 56px/1 var(--font-display); color: var(--rose); font-variant-numeric: tabular-nums; }
+.big .l { font: 400 34px/1 var(--font-script); color: var(--ink); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fact { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.fact .k { font-size: 11.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+.fact .v { font: 700 21px/1.15 var(--font-display); font-variant-numeric: tabular-nums; }
+.fact .d { font-size: 12.5px; color: var(--ink-2); }
+.meter { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 5px; }
+.meter > i { display: block; height: 100%; border-radius: 3px; }
+.next { display: flex; gap: 12px; align-items: center; border-radius: 12px; padding: 12px; background: color-mix(in srgb, var(--rose) 9%, transparent); }
+.next .icon { font-size: 22px; }
+.notes { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: var(--ink-2); }
+.notes b { color: var(--ink); }
+.yearbar { position: relative; height: 34px; border-radius: 8px; background: var(--line); overflow: hidden; }
+.yearbar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.yearbar-axis { display: grid; grid-template-columns: repeat(12, 1fr); font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
+
+/* ---------- Scroll scene ---------- */
+.scene { height: 210vh; position: relative; }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+.stage .panel { border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, var(--sky-1), var(--sky-2) 65%, var(--sky-3)); color: #fff; padding: 18px 12px 8px; text-align: center; }
+.stage .caption { font: 400 clamp(30px, 8vw, 44px)/1.1 var(--font-script); min-height: 1.2em; }
+.stage .small { font-size: 13px; opacity: .85; min-height: 1.4em; }
+.stage svg { width: 100%; height: auto; display: block; }
+.scroll-hint { text-align: center; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---------- Pills, tags ---------- */
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+.pill.me { background: var(--me-soft); }
+.pill.her { background: var(--her-soft); }
+.pill.meet { background: color-mix(in srgb, var(--meet) 22%, transparent); }
+.tag { display: inline-block; font-size: 11px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+
+/* ---------- Trips timeline ---------- */
+.trips { display: flex; flex-direction: column; gap: 10px; }
+.trip { display: grid; grid-template-columns: 6px 1fr; gap: 12px; }
+.trip .bar { border-radius: 3px; }
+.trip .body { display: flex; flex-direction: column; gap: 6px; padding: 2px 0 10px; border-bottom: 1px solid var(--line); }
+.trip:last-child .body { border-bottom: 0; }
+.trip .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.trip .dates { font: 700 17px/1.2 var(--font-display); }
+.trip .stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-2); }
+.trip .stats b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------- Scenario ---------- */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { font: 600 13px/1.25 var(--font-body); border: 0; background: transparent; color: var(--ink-2); padding: 8px 6px; border-radius: 9px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.scen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.scen div { border: 1px solid var(--line); border-radius: 10px; padding: 8px; font-size: 12.5px; color: var(--ink-2); }
+.scen div.win { border-color: var(--rose); }
+.scen b { display: block; font: 700 18px/1.2 var(--font-display); color: var(--ink); }
+
+/* ---------- Calendar ---------- */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.months { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px 12px; }
+.month { border-radius: 14px; padding: 8px 8px 10px; background: linear-gradient(180deg, color-mix(in srgb, var(--rose) 6%, var(--surface)), var(--surface) 60%); border: 1px solid color-mix(in srgb, var(--rose) 14%, var(--line)); }
+.month h3 { font: 400 27px/1 var(--font-script); color: var(--rose); display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 2px; }
+.month h3 .tog { font: 600 11px/1 var(--font-body); color: var(--rose); background: color-mix(in srgb, var(--rose) 12%, transparent); border-radius: 999px; padding: 3px 7px; }
+.month h3 .tog.none { color: var(--ink-3); background: var(--line); }
+.mprice { font: 500 10.5px/1.3 var(--font-mono); color: var(--ink-3); margin: 3px 0 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+.mprice .cheap { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+.grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.grid7 .dh { font-size: 10px; color: var(--ink-3); text-align: center; }
+.day { aspect-ratio: 1; border-radius: 5px; font-size: 10.5px; display: flex; align-items: center; justify-content: center; color: var(--ink-2);
+  background: transparent; border: 0; padding: 0; font-family: var(--font-mono); position: relative; cursor: pointer; min-width: 0; }
+.day.blk { background-image: repeating-linear-gradient(135deg, var(--block) 0 2px, transparent 2px 5px); }
+.day.me, .day.her, .day.meet { border-radius: 50%; font-weight: 600; }
+.day.me { background: var(--me); color: #fff; }
+.day.her { background: var(--her); color: #fff; }
+.day.first::before { content: "♥"; position: absolute; top: -5px; right: -3px; font-size: 10px; color: var(--rose); text-shadow: 0 0 2px var(--surface), 0 0 2px var(--surface); }
+.day.meet { background: var(--meet); color: #fff; }
+.day.me.hw { background: var(--me-soft); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--me); }
+.day.her.hw { background: var(--her-soft); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--her); }
+.day.hol::after { content: ""; position: absolute; bottom: 2px; left: 50%; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: currentColor; }
+.day.sel { outline: 2px solid var(--rose); outline-offset: 1px; }
+.dayinfo { border-radius: 12px; background: var(--bg); padding: 10px 12px; font-size: 13.5px; color: var(--ink-2); min-height: 44px; }
+.dayinfo b { color: var(--ink); }
+
+/* ---------- Where to meet ---------- */
+.places { display: flex; flex-direction: column; }
+.place { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.place:last-child { border-bottom: 0; }
+.place .nm { font-weight: 600; }
+.place .tot { font: 700 17px/1.2 var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
+.place .br { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.place.best .tot { color: var(--rose); }
+.place.off { opacity: .5; }
+.place .ctl { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+.place .ctl label { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.place .ctl input[type=number] { width: 64px; padding: 3px 6px; font-size: 16px; }
+
+/* ---------- Chart ---------- */
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 12.5px; box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; display: none; }
+
+/* ---------- Compare ---------- */
+.lead { margin: 0; color: var(--ink-2); font-size: 14px; }
+.guide { border-radius: 14px; padding: 12px 14px; background: color-mix(in srgb, var(--rose) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--rose) 25%, var(--line)); display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: var(--ink-2); }
+.guide b { color: var(--ink); }
+.guide ol { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.rec { display: inline-block; font: 700 9.5px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--rose); background: color-mix(in srgb, var(--rose) 12%, transparent); border-radius: 999px; padding: 3px 6px; margin-top: 4px; }
+.seg button[aria-pressed="true"] .rec { color: #fff; background: color-mix(in srgb, #fff 22%, transparent); }
+details.info { font-size: 13px; color: var(--ink-2); }
+details.info summary { cursor: pointer; color: var(--rose); font-weight: 600; list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+details.info summary::-webkit-details-marker { display: none; }
+details.info summary::before { content: "i"; display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--rose); font: 700 11px/1 var(--font-body); }
+details.info[open] summary { margin-bottom: 6px; }
+details.info ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.seg button { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.lead b { color: var(--ink); }
+.sub3 { font: 600 14.5px/1.3 var(--font-body); margin-top: 6px; }
+.breakdown { display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; border-radius: 12px; background: var(--bg); padding: 10px 12px; }
+.breakdown .row { display: flex; justify-content: space-between; gap: 10px; font-variant-numeric: tabular-nums; }
+.breakdown .row.neg span:last-child { color: var(--ink-2); }
+.breakdown .row.tot { border-top: 1px solid var(--line); padding-top: 5px; margin-top: 2px; font-weight: 700; }
+.breakdown .hint { color: var(--ink-3); font-size: 12px; }
+table.cmp { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.cmp th, table.cmp td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.cmp th:first-child, table.cmp td:first-child { text-align: left; white-space: normal; }
+table.cmp th { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+table.cmp td.best { font-weight: 700; color: var(--rose); }
+table.cmp tr.cur td:first-child { font-weight: 700; }
+.scroll { overflow-x: auto; }
+.range { font-size: 12.5px; color: var(--ink-2); }
+.scards { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 620px) { .scards { grid-template-columns: repeat(3, 1fr); } }
+.sc { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; background: var(--surface); text-align: left; font: inherit; color: inherit; }
+.sc.cur { border-color: var(--rose); box-shadow: 0 0 0 2px color-mix(in srgb, var(--rose) 25%, transparent); }
+.sc .t { font: 600 14px var(--font-body); display: flex; justify-content: space-between; }
+.sc .big2 { font: 700 26px/1 var(--font-display); }
+.sc .big2 small { font: 400 20px var(--font-script); color: var(--ink-2); margin-left: 4px; }
+.sc dl { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; margin: 0; font-size: 13px; }
+.sc dt { color: var(--ink-3); }
+.sc dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.sc dd.best { color: var(--rose); font-weight: 700; }
+.sc dd.best::before { content: "♥ "; }
+.range b { color: var(--ink); }
+
+/* ---------- Floating hearts ---------- */
+#hearts { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+.fh { position: absolute; left: -40px; will-change: transform; animation: fh-x linear forwards; }
+.fh i { display: block; animation: fh-y ease-in-out infinite alternate; }
+.fh svg { display: block; }
+@keyframes fh-x { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 80px)); } }
+@keyframes fh-y { from { transform: translateY(-14px) rotate(-12deg); } to { transform: translateY(14px) rotate(12deg); } }
+
+/* ---------- Method ---------- */
+.pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.pipe div { border-radius: 10px; padding: 8px; background: color-mix(in srgb, var(--rose) 7%, var(--surface)); font-size: 12px; color: var(--ink-2); }
+.pipe b { display: block; font: 700 13.5px/1.2 var(--font-display); color: var(--ink); margin-bottom: 2px; }
+pre.math { margin: 0; padding: 12px; border-radius: 12px; background: var(--bg); font: 12px/1.6 var(--font-mono); color: var(--ink); overflow-x: auto; white-space: pre; }
+.method h3 { font: 600 15px/1.3 var(--font-body); margin: 6px 0 0; }
+.method p, .method li { color: var(--ink-2); font-size: 14px; margin: 0; }
+.method ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+.method b { color: var(--ink); }
+.results { border-left: 3px solid var(--rose); padding: 4px 0 4px 12px; display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 480px) { .pipe { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- Settings ---------- */
+details.card > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::after { content: "＋"; color: var(--ink-3); font-size: 18px; }
+details.card[open] > summary::after { content: "－"; }
+.form { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 13px; font-weight: 500; }
+.field small { color: var(--ink-3); font-size: 12px; }
+input, select, textarea { font: inherit; font-size: 16px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; width: 100%; }
+textarea { font-family: var(--font-mono); font-size: 13px; min-height: 110px; }
+.chk { flex-direction: row; align-items: center; gap: 8px; }
+.chk input { width: auto; }
+.fixed { display: flex; flex-direction: column; gap: 12px; }
+.fx { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fx .full { grid-column: 1 / -1; }
+.fx label { font-size: 11.5px; color: var(--ink-3); display: flex; flex-direction: column; gap: 3px; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+button.btn { font: 600 14px var(--font-body); border-radius: 10px; padding: 9px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+button.btn.primary { background: var(--rose); color: #fff; border-color: var(--rose); }
+button.x { border: 0; background: transparent; color: var(--ink-3); font-size: 13px; cursor: pointer; text-align: left; padding: 0; }
+.status { font-size: 12.5px; color: var(--ink-3); }
+.status.bad { color: var(--rose); font-weight: 600; }
+.prose { color: var(--ink-2); font-size: 14px; }
+.prose code { font-family: var(--font-mono); font-size: 12.5px; }
+footer { text-align: center; color: var(--ink-3); font-size: 12.5px; }
+footer .script { font-size: 28px; color: var(--rose); display: block; }
+:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+@media (min-width: 620px) { .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: no-preference) { .meter > i { transition: width .4s; } }
+</style>
+</head>
+<body>
+
+<div id="hearts" aria-hidden="true"></div>
+<div class="lang" role="group" aria-label="Language / Idioma"><button type="button" data-lang="en">EN</button><button type="button" data-lang="es">ES</button></div>
+
+<section class="night" id="night" aria-label="Countdown">
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+  <div class="inner" id="nightInner">
+    <div class="eyebrow" data-es="No puedo esperar a verte">Can’t wait to see you</div>
+    <div class="count"><span class="d" id="cdDays">–</span><span class="u" id="cdUnit" data-es="días">days</span></div>
+    <div class="clock" aria-live="off">
+      <span><b id="cdH">00</b><span data-es="horas">hours</span></span>
+      <span><b id="cdM">00</b><span data-es="min">min</span></span>
+      <span><b id="cdS">00</b><span data-es="seg">sec</span></span>
+    </div>
+    <div class="date">
+      <span class="big" id="cdDate">8 December 2026</span>
+      <span class="small" id="cdDow">Tuesday · the next time we meet</span>
+      <span class="small flight" id="cdFlight">✈ Paris CDG 13:50 → Ciudad de México 20:50</span>
+    </div>
+    <p class="phrase" lang="es"><span>Que las alas del cielo y sus melodías</span> <span class="l2">nos lleven a bailar juntos en este amor.</span></p>
+  </div>
+  <div class="cue" aria-hidden="true"><span data-es="Desliza hacia el horizonte">Scroll to the horizon</span><i>↓</i></div>
+</section>
+<header class="banner" aria-label="Todo contigo">
+  <h1>Todo contigo</h1>
+  <p class="sub"><span id="nm-her-b">Laura</span> &amp; <span id="nm-me-b">Andrés</span> · Ciudad de México ⇄ <span data-es="París">Paris</span> · 2027</p>
+  <svg id="bannerSvg" viewBox="0 0 400 165" aria-hidden="true"></svg>
+</header>
+
+<div class="wrap">
+  <section class="card hero" aria-label="Highlights">
+    <div class="card-head"><span class="muted" id="status" data-es="Calculando…">Solving…</span><span class="muted" id="modeLabel"></span></div>
+    <div class="big"><span class="n" id="hDays">–</span><span class="l">días juntos</span></div>
+    <div class="next" id="hNext"></div>
+    <div>
+      <div class="yearbar" id="yearbar" role="img" aria-label="Trips across the year"></div>
+      <div class="yearbar-axis"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div>
+    </div>
+    <div class="facts" id="facts"></div>
+    <ul class="notes" id="notes"></ul>
+  </section>
+
+  <section class="scene" id="scene" aria-label="Animation: the two of you meeting">
+    <div class="stage">
+      <div class="panel">
+        <div class="caption" id="sceneCaption" data-es="9 200 km de distancia…">9,200 km apart…</div>
+        <div class="small" id="sceneSmall" data-es="Sigue bajando">Keep scrolling</div>
+        <svg id="sceneSvg" viewBox="0 0 400 170" aria-hidden="true"></svg>
+      </div>
+      <div class="scroll-hint" data-es="↓ el plan">↓ the plan</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 data-es="Los viajes">The trips</h2><span class="muted" data-es="Tarifas estimadas de ida y vuelta, turista">Fares are estimated return tickets, economy</span></div>
+    <div class="trips" id="trips"></div>
+  </section>
+
+  <section class="card" id="compare">
+    <div class="card-head"><h2 data-es="Cómo se comparan los planes">How plans are compared</h2></div>
+    <p class="lead" data-es="Cada plan maximiza un solo número, la &lt;b&gt;puntuación&lt;/b&gt;: el valor de nuestros días juntos menos todo lo que cuestan. El &lt;b&gt;valor por día&lt;/b&gt; es el tipo de cambio entre tiempo y dinero. Si sube, el optimizador compra más días; si baja, ahorra dinero.">Every plan maximises one number, the <b>score</b>: the value of our days together minus everything they cost. <b>Value per day</b> is the exchange rate between time and money. Raise it and the optimiser buys more days; lower it and it saves money.</p>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="guide" data-es="&lt;b&gt;Cómo usar esto, amor (30 segundos)&lt;/b&gt;
+      &lt;ol&gt;
+        &lt;li&gt;Las tres filas de botones de abajo son &lt;b&gt;preguntas para nosotros dos&lt;/b&gt;. Cada respuesta cambia el plan.&lt;/li&gt;
+        &lt;li&gt;Toca un botón y &lt;b&gt;todo se reoptimiza al instante&lt;/b&gt;: los viajes, el calendario y los totales.&lt;/li&gt;
+        &lt;li&gt;Los botones marcados como &lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt; ya están seleccionados. Es el plan que yo elegiría para nosotros: precios realistas, equilibrio entre tiempo y dinero, y cualquier destino permitido.&lt;/li&gt;
+        &lt;li&gt;Ninguna combinación está “mal”. Miremos los &lt;b&gt;días juntos&lt;/b&gt; y el &lt;b&gt;rango de coste&lt;/b&gt; que da cada una, y quedémonos con la que sintamos mejor.&lt;/li&gt;
+      &lt;/ol&gt;"><b>How to use this, my love (30 seconds)</b>
+      <ol>
+        <li>The three rows of buttons below are <b>questions for the two of us</b>. Each answer changes the plan.</li>
+        <li>Tap a button and <b>everything re-optimises instantly</b>: the trips, the calendar, the totals and the countdown highlights.</li>
+        <li>The buttons marked <span class="rec">recommended</span> are already selected. That’s the plan I’d pick for us: realistic prices, balanced between time and money, any destination allowed.</li>
+        <li>No combination is “wrong”. Let’s look at the <b>days together</b> and the <b>cost range</b> each one gives, and keep the one that feels right to us.</li>
+      </ol></div>
+
+    <h3 class="sub3" data-es="1 · ¿Con qué tarifas planificamos?">1 · Which fares should we plan with?</h3>
+    <div class="seg" role="group" aria-label="Fare basis">
+      <button type="button" data-basis="low" data-es="La más barata vista">Cheapest seen</button>
+      <button type="button" data-basis="typical" data-es="Típica&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Typical<span class="rec">recommended</span></button>
+      <button type="button" data-basis="cautious" data-es="Prudente">Cautious</button>
+    </div>
+    <div class="muted" id="basisNote"></div>
+    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;La más barata vista&lt;/b&gt;: supone que encontramos el precio más bajo que vi. Da más días, pero es optimista.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Típica&lt;/b&gt;: el precio que probablemente pagaremos. Es la mejor para decidir.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Prudente&lt;/b&gt;: supone precios altos. Si un viaje sigue entrando aquí, es una apuesta segura para reservar.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li><b>Cheapest seen</b>: assumes we catch the lowest price I found. Most days, but optimistic.</li><li><b>Typical</b>: the price we’ll most likely pay. Best for deciding.</li><li><b>Cautious</b>: assumes prices are high. If a trip still makes it in here, it’s a safe bet to book.</li></ul></details>
+
+    <h3 class="sub3" data-es="2 · ¿Qué es lo más importante para nosotros?">2 · What matters most to us?</h3>
+    <div class="seg" role="group" aria-label="Priority">
+      <button type="button" data-preset="save" data-es="Ahorrar">Save money</button>
+      <button type="button" data-preset="balanced" data-es="Equilibrado&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Balanced<span class="rec">recommended</span></button>
+      <button type="button" data-preset="time" data-es="Más tiempo juntos">Most time together</button>
+    </div>
+    <div class="muted" id="presetNote"></div>
+    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;Define cuánto “vale” un día juntos frente al dinero.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Ahorrar&lt;/b&gt;: solo los viajes que salen muy bien por día.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Equilibrado&lt;/b&gt;: nuestra opción por defecto.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Más tiempo juntos&lt;/b&gt;: usa cada día de vacaciones posible, aunque cueste más.&lt;/li&gt;&lt;li&gt;El gráfico muestra todas las opciones a la vez. Cada punto es un plan óptimo completo, y puedes tocar uno para probarlo.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li>This sets how much a day together is “worth” against money.</li><li><b>Save money</b>: only trips that are very good value per day.</li><li><b>Balanced</b>: our default.</li><li><b>Most time together</b>: uses every possible day of leave, even if it costs more.</li><li>The chart shows all options at once. Each dot is a complete optimal plan, and you can tap one to try it.</li></ul></details>
+    <div class="chart" id="frontier"><div class="tip" id="ftip"></div></div>
+    <div class="muted" data-es="Cada punto es el plan &lt;b&gt;óptimo&lt;/b&gt; para un valor por día. La barra rosa indica dónde cae su coste en el 80% de 1 500 simulaciones de tarifas. Hacia la derecha hay más días; hacia arriba, más coste. Toca un punto para usar ese plan.">Each dot is the <b>optimal</b> plan for one value per day. The pink bar is where its cost lands in 80% of 1,500 simulated fare draws. Moving right buys more days, moving up costs more. Tap a dot to use that plan.</div>
+
+    <h3 class="sub3" data-es="3 · ¿A dónde vamos en los viajes extra?">3 · Where shall we go on the extra trips?</h3>
+    <div class="seg" role="group" aria-label="Scenario">
+      <button type="button" data-mode="home" data-es="Solo en casa">Only home</button>
+      <button type="button" data-mode="both" data-es="Casa u otro lugar&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Home or elsewhere<span class="rec">recommended</span></button>
+      <button type="button" data-mode="meet" data-es="Solo otro lugar">Only elsewhere</button>
+    </div>
+    <details class="info" data-es="&lt;summary&gt;¿Qué cambia esto?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;Se aplica a los viajes que añade el optimizador. Los fijos, como Nueva York, se quedan como están.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo en casa&lt;/b&gt;: París o Ciudad de México. Lo más barato, porque uno de los dos recibe al otro.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Casa u otro lugar&lt;/b&gt;: también permite una ciudad intermedia (Barcelona, Madrid, Roma, Cancún…) cuando compensa.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Solo otro lugar&lt;/b&gt;: siempre un sitio nuevo, más vacaciones, pero dos billetes más hotel.&lt;/li&gt;&lt;li&gt;Las tarjetas de abajo comparan los tres. ♥ marca el mejor valor de cada línea, y puedes tocar una tarjeta para ver ese plan.&lt;/li&gt;&lt;/ul&gt;"><summary>What does this change?</summary><ul><li>Applies to the trips the optimiser adds on its own. The fixed ones, like New York, stay as they are.</li><li><b>Only home</b>: Paris or Mexico City. Cheapest, because one of you hosts.</li><li><b>Home or elsewhere</b>: also allows a city in between (Barcelona, Madrid, Rome, Cancún…) when it’s worth it.</li><li><b>Only elsewhere</b>: always somewhere new, more like holidays, but two tickets plus a hotel.</li><li>The cards below compare the three. ♥ marks the best value on each line, and you can tap a card to show that plan.</li></ul></details>
+    <div class="scards" id="scen"></div>
+    <span class="muted" data-es="“Casa” es París o Ciudad de México. Los viajes fijos mantienen su propia opción. ♥ marca el mejor valor de cada línea.">“Home” is Paris or Mexico City. Fixed trips keep their own setting. ♥ marks the best value on each line.</span>
+
+    <h3 class="sub3"><span data-es="4 · ¿Nos vemos en">4 · Do we see each other in</span> <select id="focusSel" aria-label="Month" style="width:auto;display:inline-block;font:inherit;padding:2px 6px"></select>?</h3>
+    <div class="seg" role="group" aria-label="Focus month">
+      <button type="button" data-focus="off" data-es="Que decida el plan">Let the plan decide</button>
+      <button type="button" data-focus="on" data-es="Sí, seguro&lt;span class=&quot;rec&quot;&gt;recomendado&lt;/span&gt;">Yes, for sure<span class="rec">recommended</span></button>
+    </div>
+    <div class="muted" id="focusNote"></div>
+    <details class="info" data-es="&lt;summary&gt;¿Cómo funciona?&lt;/summary&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;Sí, seguro&lt;/b&gt; añade un viaje obligatorio que empieza ese mes y pasa allí al menos la mitad de sus días.&lt;/li&gt;&lt;li&gt;La tabla compara cada forma de vernos ese mes. Cada fila es el &lt;b&gt;mejor año completo&lt;/b&gt; con esa elección, así que ves lo que cuesta de verdad, también en días que se pierden en otros viajes.&lt;/li&gt;&lt;li&gt;Toca una fila para usarla. “Lo que elija el plan” deja que el optimizador escoja.&lt;/li&gt;&lt;/ul&gt;"><summary>How does this work?</summary><ul><li><b>Yes, for sure</b> adds a required trip that starts in that month and spends at least half of its days there.</li><li>The table compares every way of meeting that month. Each row is the <b>best full year</b> with that choice, so you see what it really costs, including days lost on other trips.</li><li>Tap a row to use it. “Whatever the plan picks” lets the optimiser choose.</li></ul></details>
+    <div class="scroll"><table class="cmp" id="focusOpts"></table></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 data-es="El año">The year</h2></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--me)"></i><span class="nm-me">Andrés</span> <span data-es="en CDMX">in CDMX</span></span>
+      <span><i class="sw" style="background:var(--her)"></i><span class="nm-her">Laura</span> <span data-es="en París">in Paris</span></span>
+      <span><i class="sw" style="background:var(--meet)"></i><span data-es="Juntos en otro lugar">Together elsewhere</span></span>
+      <span><i class="sw" style="background:var(--me-soft);box-shadow:inset 0 0 0 1.5px var(--ink-3)"></i><span data-es="Anfitrión trabajando">Host at work</span></span>
+      <span><i class="sw" style="background-image:repeating-linear-gradient(135deg,var(--block) 0 2px,transparent 2px 5px);border:1px solid var(--line)"></i><span class="nm-her">Laura</span> <span data-es="no puede tomar vacaciones">can’t take leave</span></span>
+      <span data-es="• festivo">• holiday</span>
+    </div>
+    <div class="muted" data-es="Los círculos de color son nuestros días juntos; ♥ marca el día en que empieza un viaje. Bajo el nombre de cada mes: &lt;b&gt;A&lt;/b&gt; = tarifa media de ida y vuelta si vuela &lt;span class=&quot;nm-me&quot;&gt;Andrés&lt;/span&gt;, &lt;b&gt;L&lt;/b&gt; = si vuela &lt;span class=&quot;nm-her&quot;&gt;Laura&lt;/span&gt; (la más barata subrayada). La etiqueta indica cuántos días compartimos ese mes.">Coloured circles are our days together; ♥ marks the day a trip starts. Under each month’s name: <b>A</b> = average return fare if <span class="nm-me">Andrés</span> flies, <b>L</b> = if <span class="nm-her">Laura</span> flies (cheaper one underlined). The chip shows how many days we share that month.</div>
+    <div class="months" id="months"></div>
+    <div class="dayinfo" id="dayinfo" data-es="Toca cualquier día para ver dónde está cada uno y cuánto costarían los vuelos que salen ese día.">Tap any day to see who’s where and what flights departing that day would cost.</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 data-es="Dónde encontrarse">Where to meet</h2>
+      <label class="muted" for="wmMonth"><span data-es="10 noches desde el 15 de">10 nights from the 15th of</span>
+        <select id="wmMonth" style="width:auto;display:inline-block;margin-left:4px;font-size:14px;padding:4px 6px"></select></label></div>
+    <span class="muted" data-es="Ordenado por coste total. “€/noche” es el hotel para dos; “+€/día” es cuánto más vale para nosotros un día de vacaciones allí. Otro lugar significa dos billetes, hotel y vacaciones para ambos. Casa significa un billete, sin hotel, y el anfitrión puede seguir trabajando.">Ranked by total cost. “€/night” is the hotel for two; “+€/day” is how much extra a holiday day there is worth to us. Elsewhere means two tickets, a hotel, and leave for both of us. Home means one ticket, no hotel, and the host can keep working.</span>
+    <div class="places" id="where"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 data-es="Tarifas a lo largo del año">Fares through the year</h2><span class="muted" data-es="Ida y vuelta de 10 noches, por fecha de salida · línea = tarifas que usa el plan">10-night return, by departure date · line = fares the plan uses</span></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--me)"></i><span class="nm-me">Andrés</span> <span data-es="vuela París → CDMX">flies Paris → CDMX</span></span>
+      <span><i class="sw" style="background:var(--her)"></i><span class="nm-her">Laura</span> <span data-es="vuela CDMX → París">flies CDMX → Paris</span></span>
+      <span><i class="sw" style="background:var(--ink);border-radius:50%"></i><span data-es="Precio real">Real quote</span></span>
+      <span><i class="sw" style="background:var(--me);opacity:.25"></i><span data-es="Rango: de la más baja vista a la alta">Range: lowest seen to high</span></span>
+    </div>
+    <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 data-es="De dónde vienen las tarifas">Where the fares come from</h2><span class="muted" id="checkedTag"></span></div>
+    <p class="lead" id="fareFinding"></p>
+    <div class="scroll"><table class="cmp" id="evidence"></table></div>
+    <div class="scroll"><table class="cmp" id="evidence2"></table></div>
+    <span class="muted" data-es="Cada celda es la tarifa de ida y vuelta más barata encontrada ese mes (€). Kiwi = mejor día de salida del mes; lastminute = muestras de fechas fijas; LetsFG = búsqueda de todo el mercado. &lt;b&gt;Baja&lt;/b&gt; = la más barata vista (base del modelo). &lt;b&gt;Típica&lt;/b&gt; y &lt;b&gt;Alta&lt;/b&gt; salen de la banda de precios (×1,13 esperada, ×1,30 superior). * = estimación, aún no a la venta. Expedia y eDreams no devolvieron precios legibles y Skyscanner no tiene conector. La base completa está en &lt;code&gt;data/fares.csv&lt;/code&gt; del repositorio.">Cells are the cheapest return fare found in that month (€). Kiwi = best departure day of the month; lastminute = fixed-date samples; LetsFG = full market search (fixed dates or the cheapest pair in a window). <b>Low</b> = cheapest seen, which the model uses as its base. <b>Typical</b> and <b>High</b> come from the price band (×1.13 expected, ×1.30 upper). * = estimate, not on sale yet. Hover a price for the airline and dates. Expedia and eDreams didn’t return readable prices, and Skyscanner has no connector. The full database is <code>data/fares.csv</code> in the repository.</span>
+  </section>
+
+  <details class="card" id="adjust">
+    <summary><h2 data-es="Ajustar el plan">Adjust the plan</h2></summary>
+    <div class="form">
+      <div class="field"><label for="f-nameMe" data-es="Tu nombre">Your name</label><input id="f-nameMe" autocomplete="off"></div>
+      <div class="field"><label for="f-nameHer" data-es="Su nombre">Her name</label><input id="f-nameHer" autocomplete="off"></div>
+    </div>
+    <h3 style="font:600 15px var(--font-body)" data-es="Viajes fijos">Fixed trips</h3>
+    <span class="muted" data-es="Da un rango de fechas para que el optimizador pueda mover un viaje. Fechas iguales lo fijan.">Give a date range to let the optimiser slide a trip. Equal dates lock it.</span>
+    <div class="fixed" id="reqs"></div>
+    <div class="btns"><button class="btn" id="addReq" type="button" data-es="Añadir un viaje fijo">Add a fixed trip</button></div>
+    <h3 style="font:600 15px var(--font-body)" data-es="Restricciones y preferencias">Constraints and preferences</h3>
+    <div class="form" id="form"></div>
+    <div class="form">
+      <div class="field"><label for="holidaysMe" data-es="Tus festivos (Francia)">Your days off (France)</label><textarea id="holidaysMe"></textarea><small data-es="Una fecha por línea, AAAA-MM-DD">One date per line, YYYY-MM-DD</small></div>
+      <div class="field"><label for="holidaysHer" data-es="Sus festivos (México)">Her days off (Mexico)</label><textarea id="holidaysHer"></textarea><small data-es="Festivos federales, Jueves y Viernes Santo, Día de Muertos">Federal holidays, Holy Thursday and Friday, Día de Muertos</small></div>
+      <div class="field"><label for="blackoutHerExtra" data-es="Otras fechas en que no puede tomar vacaciones">Extra dates she can’t take off</label><textarea id="blackoutHerExtra"></textarea><small data-es="Además del cambio de mes y agosto">On top of month-ends and August</small></div>
+    </div>
+    <div class="btns"><button class="btn primary" id="run" type="button" data-es="Reoptimizar">Re-optimise</button><button class="btn" id="reset" type="button" data-es="Restablecer">Reset to defaults</button></div>
+  </details>
+
+  <section class="card method" id="method">
+    <div class="card-head"><h2 data-es="Cómo optimizamos">How we optimise</h2><span class="muted" data-es="para la científica de datos curiosa">for the curious data scientist</span></div>
+    <div class="pipe">
+      <div><b data-es="1 · Datos">1 · Data</b><span id="mData">fares from 3 sites</span></div>
+      <div><b data-es="2 · Modelo">2 · Model</b><span data-es="cada viaje posible, su valor, coste y vacaciones">every possible trip, its value, cost and leave</span></div>
+      <div><b data-es="3 · Solucionador">3 · Solver</b><span data-es="programación dinámica exacta">exact dynamic programme</span></div>
+      <div><b data-es="4 · Robustez">4 · Robustness</b><span data-es="banda de precios + Monte Carlo">fare band + Monte Carlo</span></div>
+    </div>
+
+    <h3 data-es="La pregunta">The question</h3>
+    <p data-es="Elegir los viajes de 2027 (día de salida, de regreso, quién vuela o a qué ciudad, y si el anfitrión también toma vacaciones) para que el año juntos sea lo mejor posible. Las restricciones son las vacaciones de ambos, los días bloqueados de Laura y los viajes fijos.">Choose the trips of 2027 (start day, end day, who flies or which city, and whether the host also takes leave) to make the year as good as possible together. The constraints are both leave budgets, Laura’s blocked days and the fixed trips.</p>
+
+    <h3 data-es="Formulación">Formulation</h3>
+<pre class="math">maximise   Σ trips [ Σ days V · w(d)  +  F  −  κ · m · ( fare + hotel + C ) ]
+           − Σ gaps  λ · max(0, g − g*)²
+
+subject to Σ leave_A ≤ 45      Σ leave_L ≤ 22
+           trips don’t overlap, gaps ≥ 14 days
+           no leave for L on her last working day of a month
+             nor her first 3 of the next (weekends skipped), nor in August
+           every fixed trip starts/ends in its window
+           (optional) one trip with ≥ ½ of its days in April
+
+w(d) = 1 (both free) · β (host working) · ½ (travel day)
+κ = 0.6  weight of money        F = €100 per trip (frequency)
+m = 0.7  meeting halfway, 1 at home</pre>
+    <p data-es="Es un &lt;b&gt;problema de planificación con recursos limitados&lt;/b&gt;: una mochila con dos presupuestos (los días de vacaciones) sobre una línea de tiempo, más una penalización convexa por las separaciones.">It’s a <b>resource-constrained scheduling problem</b>: a knapsack with two budgets (the leave days) on a timeline, plus a convex penalty on gaps.</p>
+
+    <h3 data-es="Solucionador">Solver</h3>
+    <ul data-es="&lt;li&gt;&lt;b&gt;Programación dinámica exacta&lt;/b&gt; sobre los 365 días. El estado es (día, próximo viaje fijo, vacaciones restantes de Andrés, vacaciones restantes de Laura): unos &lt;span id=&quot;mStates&quot;&gt;1,9 M&lt;/span&gt; de estados. Cada viaje candidato es una transición.&lt;/li&gt;
+      &lt;li&gt;Las dimensiones de vacaciones se manejan como matrices completas, así que resolver todo tarda &lt;b id=&quot;mTime&quot;&gt;~0,3 s&lt;/b&gt; en un teléfono. Esta página lo ejecuta en JavaScript; el paquete de Python &lt;code&gt;meetplan&lt;/code&gt; ejecuta el mismo modelo con numpy.&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;La optimalidad está demostrada, no supuesta.&lt;/b&gt; Una prueba enumera todos los planes posibles de un caso pequeño y comprueba que el algoritmo encuentra el mismo óptimo. Los solucionadores en JS y Python coinciden al céntimo.&lt;/li&gt;
+      &lt;li&gt;Un solucionador MILP o CP-SAT (OR-Tools) también funcionaría, pero esta programación dinámica es exacta, no necesita servidor y corre al instante en tu navegador.&lt;/li&gt;">
+      <li><b>Exact dynamic programming</b> over the 365 days. The state is (day, next fixed trip, Andrés’s leave left, Laura’s leave left), about <span id="mStates">1.9 M</span> states. Each candidate trip is one transition, and there are <span id="mCands">tens of thousands</span> of them.</li>
+      <li>The leave dimensions are handled as whole arrays at once, so a full solve takes <b id="mTime">~0.3 s</b> on a phone. This page runs it in JavaScript; the <code>meetplan</code> Python package runs the same model with numpy.</li>
+      <li><b>Optimality is proven, not hoped for.</b> A test enumerates every feasible plan of a small instance and checks the DP finds the same optimum. The JS and Python solvers agree to the cent.</li>
+      <li>A MILP or CP-SAT solver (OR-Tools) would also work, but this DP is exact, needs no server and runs instantly in your browser.</li>
+    </ul>
+
+    <h3 data-es="Incertidumbre">Uncertainty</h3>
+    <ul data-es="&lt;li&gt;Para cada mes y dirección, la base es la &lt;b&gt;tarifa más baja vista&lt;/b&gt; en Kiwi, lastminute y LetsFG. Un billete real cuesta &lt;code&gt;base × m&lt;/code&gt;, con &lt;code&gt;m ~ Triangular(1,00; 1,08; 1,30)&lt;/code&gt;. El 1,08 es la diferencia entre sitios para las mismas fechas; el 1,30 cubre vuelos directos o comprar en mal momento.&lt;/li&gt;
+      &lt;li&gt;Por defecto, el optimizador planifica con la tarifa esperada (&lt;b&gt;×1,13&lt;/b&gt;). “La más barata vista” y “Prudente” (percentil 90, ×1,22) muestran cuánto depende el plan de los precios.&lt;/li&gt;
+      &lt;li&gt;Después, cada plan se valora &lt;b&gt;4 000 veces&lt;/b&gt; con tarifas aleatorias (Monte Carlo) para dar un rango de coste del 80%.&lt;/li&gt;">
+      <li>For each month and direction, the <b>lowest fare seen</b> across Kiwi, lastminute and LetsFG is the base. A ticket you actually buy is <code>base × m</code>, with <code>m ~ Triangular(1.00, 1.08, 1.30)</code>. The 1.08 is the spread between sites on identical dates; the 1.30 covers direct flights or booking at a bad moment.</li>
+      <li>The optimiser plans with the expected fare (<b>×1.13</b>) by default. “Cheapest seen” and “Cautious” (90th percentile, ×1.22) show how sensitive the plan is to prices.</li>
+      <li>Each plan is then priced <b>4,000 times</b> with random fares (Monte Carlo) to give an 80% cost range.</li>
+    </ul>
+
+    <h3 data-es="Lo que encontramos">What we found</h3>
+    <div class="results" id="mResults"><p class="muted" data-es="Calculando…">Computing…</p></div>
+  </section>
+
+  <footer><span class="script">Todo contigo</span><span data-es="Hecho para nosotros dos.">Made for the two of us.</span></footer>
+</div>
+
+<script>
+/*__SOLVER__*/
+</script>
+<script>
+(function () {
+  "use strict";
+  // ---- Language: #es in the link or the saved choice; switching reloads at the same scroll position ----
+  let LANG = "en";
+  try { LANG = location.hash === "#es" ? "es" : location.hash === "#en" ? "en" : (localStorage.getItem("tc-lang") || "en"); } catch (e) { LANG = location.hash === "#es" ? "es" : "en"; }
+  const ES = LANG === "es";
+  const tr = (en, es) => ES ? es : en;
+  const LOC = ES ? "es-ES" : "en-GB";
+  document.documentElement.lang = LANG;
+  if (ES) document.querySelectorAll("[data-es]").forEach(el => { el.innerHTML = el.getAttribute("data-es"); });
+  document.querySelectorAll("[data-lang]").forEach(b => {
+    b.setAttribute("aria-pressed", String(b.dataset.lang === LANG));
+    b.addEventListener("click", () => {
+      if (b.dataset.lang === LANG) return;
+      try { localStorage.setItem("tc-lang", b.dataset.lang); sessionStorage.setItem("tc-y", String(window.scrollY)); } catch (e) {}
+      location.hash = b.dataset.lang; location.reload();
+    });
+  });
+  try { const y = sessionStorage.getItem("tc-y"); if (y) { sessionStorage.removeItem("tc-y"); requestAnimationFrame(() => window.scrollTo(0, +y)); } } catch (e) {}
+  // Defaults come from config/2027.toml (generated into Planner.DATA by `meetplan build-web`).
+  const DEFAULTS = JSON.parse(JSON.stringify(Planner.DATA.defaults));
+  DEFAULTS.required.forEach(r => { r.label = tr(r.label, r.label_es || r.label); delete r.label_es; });
+  const KEY = "todo-contigo-v7";
+  let P;
+  try { P = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { P = null; }
+  if (!P) P = JSON.parse(JSON.stringify(DEFAULTS));
+  for (const k in DEFAULTS) if (P[k] === undefined) P[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
+  for (const k of ["cityBonus", "lodging"]) for (const id in DEFAULTS[k]) if (P[k][id] === undefined) P[k][id] = DEFAULTS[k][id];
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
+  const CITY = Object.fromEntries(Planner.CITIES.map(c => [c.id, c]));
+  if (ES) Object.entries({ nyc: "Nueva York", fco: "Roma", mxp: "Milán", fdf: "Martinica", yul: "Montreal" }).forEach(([k, v]) => { if (CITY[k]) CITY[k].name = v; });
+  const MONTHS = ES ? ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"] : ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const MONTH_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  if (ES) document.querySelector(".yearbar-axis").innerHTML = "EFMAMJJASOND".split("").map(c => `<span>${c}</span>`).join("");
+  const MONTH_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const k = v => ES ? (v >= 1000 ? (v / 1000).toFixed(1).replace(".", ",") + " k€" : Math.round(v) + " €") : "€" + (v >= 1000 ? (v / 1000).toFixed(1) + "k" : Math.round(v));
+  const eur = v => ES ? Math.round(v).toLocaleString("es-ES") + " €" : "€" + Math.round(v).toLocaleString("en-GB");
+  const num = v => Math.round(v).toLocaleString(LOC);
+  const fmtD = iso => new Date(iso + "T00:00:00Z").toLocaleDateString(LOC, { day: "numeric", month: "short", timeZone: "UTC" });
+  const fmtW = iso => new Date(iso + "T00:00:00Z").toLocaleDateString(LOC, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function names() {
+    document.querySelectorAll(".nm-me").forEach(e => e.textContent = P.nameMe);
+    document.querySelectorAll(".nm-her").forEach(e => e.textContent = P.nameHer);
+    document.getElementById("nm-me-b").textContent = P.nameMe;
+    document.getElementById("nm-her-b").textContent = P.nameHer;
+  }
+
+  /* ================= Figures (SVG) ================= */
+  // Each figure is drawn facing right, feet at (0,0), about 72 units tall. Running and standing legs are separate groups.
+  function figure(kind) {
+    // Laura: runner — cap, high ponytail, t-shirt, shorts, running shoes. Andrés: shirt, trousers, scarf.
+    const isHer = kind === "her";
+    const skin = isHer ? "#c98b65" : "#e2ad86";
+    const hairC = isHer ? "#2a1810" : "#33241a";
+    const top = isHer ? "var(--her)" : "var(--me)";
+    const rot = (vals, dur) => `<animateTransform attributeName="transform" type="rotate" values="${vals}" dur="${dur}s" repeatCount="indefinite"/>`;
+    const hipY = -28, shY = -50;
+    // legs: thigh/shin in one line; her bare legs + bright shoes, his trousers + dark shoes
+    const legC = isHer ? skin : "#2f3542", shoe = isHer ? "#ff4f9a" : "#1e1e24";
+    const leg = r => `<g>${r}<line x1="0" y1="${hipY}" x2="0" y2="-3" stroke="${legC}" stroke-width="${isHer ? 4.5 : 5.5}" stroke-linecap="round"/><path d="M-2,-3 L6,-3 L6,0 L-2,0 Z" fill="${shoe}"/></g>`;
+    // arms: short sleeve for her, full sleeve for him
+    const arm = r => isHer
+      ? `<g>${r}<line x1="0" y1="${shY}" x2="0" y2="-45" stroke="${top}" stroke-width="5.5" stroke-linecap="round"/><line x1="0" y1="-45" x2="0" y2="-36" stroke="${skin}" stroke-width="3.8" stroke-linecap="round"/></g>`
+      : `<g>${r}<line x1="0" y1="${shY}" x2="0" y2="-38" stroke="${top}" stroke-width="5" stroke-linecap="round"/><circle cx="0" cy="-36" r="2" fill="${skin}"/></g>`;
+    const torso = isHer
+      ? `<rect x="-6.5" y="-53" width="13" height="22" rx="4" fill="${top}"/>
+         <path d="M-7,-33 L7,-33 L7.5,-24 L1,-24 L0,-27 L-1,-24 L-7.5,-24 Z" fill="#26304a"/>`
+      : `<rect x="-6.5" y="-54" width="13" height="25" rx="4" fill="${top}"/>`;
+    const head = isHer
+      ? `<g class="pony"><path d="M-6,-68 C-14,-68 -18,-62 -20,-54" stroke="${hairC}" stroke-width="5.5" stroke-linecap="round" fill="none">${rot("-10 -6 -68;12 -6 -68;-10 -6 -68", 0.5)}</path></g>
+         <circle cx="0" cy="-61" r="8.5" fill="${skin}"/>
+         <path d="M-8.5,-61 C-8.5,-58 -7,-55 -5.5,-54 L-5,-61 Z" fill="${hairC}"/>
+         <path d="M-8.8,-62 A8.8,8.8 0 0 1 8.8,-62 Z" fill="#fff"/>
+         <path d="M6,-63 L15,-62.5 Q15,-60.5 13,-60.5 L6,-61 Z" fill="#fff"/>
+         <circle cx="0" cy="-69.6" r="1.2" fill="${top}"/><path d="M-8.8,-62 L8.8,-62" stroke="${top}" stroke-width="1.6"/>
+         <circle cx="4.5" cy="-59.5" r="1" fill="#2a1810"/>`
+      : `<circle cx="0" cy="-62" r="8.5" fill="${skin}"/>
+         <path d="M-8.9,-57 C-10.5,-63 -9.5,-70 -4,-73 C0,-75.5 5,-77 10,-75 C11.5,-74.5 11.6,-72.5 10.2,-71.5 C11,-69.5 10,-67.5 8.6,-66.5 C6,-67.5 3,-67.2 0.5,-66.8 C-2,-66 -3.5,-64.5 -4.5,-62.5 C-5.5,-60.5 -6.5,-58.5 -8.9,-57 Z" fill="${hairC}"/>
+         <path d="M-2,-72.5 C1.5,-74.5 5,-75 8.5,-74" stroke="#5a4232" stroke-width="1" fill="none" stroke-linecap="round"/>
+         <circle cx="4.5" cy="-61" r="1" fill="#2a1810"/>`;
+    const scarf = isHer ? "" : (running) =>
+      `<rect x="-7" y="-55.5" width="14" height="5" rx="2.5" fill="var(--rose)"/>
+       <path d="M-5,-53 C-12,-52 -16,-48 -21,-49" stroke="var(--rose)" stroke-width="4" stroke-linecap="round" fill="none">${running ? rot("-8 -5 -53;10 -5 -53;-8 -5 -53", 0.35) : ""}</path>`;
+    const scarfRun = isHer ? "" : scarf(true), scarfStand = isHer ? "" : scarf(false).replace("C-12,-52 -16,-48 -21,-49", "C-8,-50 -8,-44 -7,-40");
+    return `
+      <g class="run">
+        ${arm(rot(`40 0 ${shY};-40 0 ${shY};40 0 ${shY}`, 0.5))}
+        ${leg(rot(`-34 0 ${hipY};34 0 ${hipY};-34 0 ${hipY}`, 0.5))}
+        ${leg(rot(`34 0 ${hipY};-34 0 ${hipY};34 0 ${hipY}`, 0.5))}
+        ${torso}${scarfRun}
+        ${arm(rot(`-40 0 ${shY};40 0 ${shY};-40 0 ${shY}`, 0.5))}
+        ${head}
+      </g>
+      <g class="stand" style="display:none">
+        <g transform="translate(-2.5,0)">${leg("")}</g><g transform="translate(2.5,0)">${leg("")}</g>
+        ${torso}${scarfStand}
+        <path d="M0,${shY} Q9,-45 14,-49" stroke="${isHer ? skin : top}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        ${head.replace(/<animateTransform[^>]*\/>/g, "")}
+      </g>`;
+  }
+  const HEART = `<path d="M0,6 C-14,-4 -10,-16 0,-9 C10,-16 14,-4 0,6 Z" fill="var(--rose)" stroke="#fff" stroke-width="1.2"/>`;
+
+  function landmarks(groundY) {
+    // CDMX on the left (pyramid + Ángel), Paris on the right (Eiffel tower)
+    const g = groundY;
+    // Mexico: Popocatépetl (smoking cone) and Iztaccíhuatl (the sleeping woman), snow-capped, with Teotihuacan in front
+    const volcanoes = `<g>
+      <path d="M-6,${g} L18,${g - 30} Q26,${g - 38} 34,${g - 36} Q44,${g - 42} 52,${g - 37} Q62,${g - 33} 70,${g - 26} L96,${g} Z" fill="#3a2a55" opacity=".75"/>
+      <path d="M26,${g - 36} Q30,${g - 39} 34,${g - 36} Q44,${g - 42} 52,${g - 37} Q58,${g - 34} 62,${g - 31} Q54,${g - 32} 48,${g - 34} Q40,${g - 33} 34,${g - 33} Q30,${g - 33} 26,${g - 36} Z" fill="#f4eef8" opacity=".85"/>
+      <path d="M40,${g} L84,${g - 58} L92,${g - 58} L136,${g} Z" fill="#2c2046" opacity=".85"/>
+      <path d="M77,${g - 49} L84,${g - 58} L92,${g - 58} L99,${g - 49} Q95,${g - 51} 92,${g - 48} Q88,${g - 52} 84,${g - 48} Q81,${g - 51} 77,${g - 49} Z" fill="#f7f1fa"/>
+      <path d="M88,${g - 60} C84,${g - 70} 94,${g - 74} 90,${g - 84}" stroke="#e9e3f0" stroke-opacity=".55" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    </g>`;
+    return volcanoes + `<g opacity=".55" fill="#1a1230">
+      <path d="M8,${g} L16,${g - 7} L24,${g - 7} L30,${g - 13} L38,${g - 13} L44,${g - 7} L52,${g - 7} L60,${g} Z"/>
+      <path d="M352,${groundY} L362,${groundY - 22} L364,${groundY - 62} L366,${groundY - 62} L368,${groundY - 22} L378,${groundY} L373,${groundY} Q365,${groundY - 14} 357,${groundY} Z"/>
+      <rect x="358" y="${groundY - 24}" width="14" height="2.5"/>
+    </g>
+    <text x="62" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">CDMX</text>
+    <text x="365" y="${groundY + 15}" text-anchor="middle" font-size="9" fill="#fff" opacity=".8" font-family="IBM Plex Sans, sans-serif" letter-spacing="1">${tr("PARIS", "PARÍS")}</text>
+    <line x1="0" y1="${groundY}" x2="400" y2="${groundY}" stroke="#fff" stroke-opacity=".35"/>`;
+  }
+  function stars(n, h) {
+    let s = `<g class="stars">`, seed = 7;
+    const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    for (let i = 0; i < n; i++) s += `<circle cx="${(rnd() * 400).toFixed(1)}" cy="${(rnd() * h).toFixed(1)}" r="${(rnd() * 0.9 + 0.3).toFixed(2)}" opacity="${(rnd() * 0.6 + 0.3).toFixed(2)}"/>`;
+    return s + `</g>`;
+  }
+
+  function makeScene(svg, groundY, scale) {
+    svg.innerHTML = stars(40, groundY - 50) + landmarks(groundY) +
+      `<g id="${svg.id}-her">${figure("her")}</g><g id="${svg.id}-me">${figure("me")}</g><g id="${svg.id}-heart" opacity="0">${HEART}</g>`;
+    const her = svg.querySelector(`#${svg.id}-her`), me = svg.querySelector(`#${svg.id}-me`), heart = svg.querySelector(`#${svg.id}-heart`);
+    let state = null;
+    return function pose(xHer, xMe, met, heartT) {
+      her.setAttribute("transform", `translate(${xHer},${groundY}) scale(${scale})${met ? " rotate(4)" : ""}`);
+      me.setAttribute("transform", `translate(${xMe},${groundY}) scale(${-scale},${scale})${met ? " rotate(4)" : ""}`);
+      if (state !== met) {
+        state = met;
+        [her, me].forEach(g => { g.querySelector(".run").style.display = met ? "none" : ""; g.querySelector(".stand").style.display = met ? "" : "none"; });
+      }
+      const k = Math.max(0, Math.min(1, heartT));
+      heart.setAttribute("opacity", k);
+      heart.setAttribute("transform", `translate(${(xHer + xMe) / 2},${groundY - 80 * scale - 10 - 22 * k}) scale(${0.4 + 0.9 * k})`);
+    };
+  }
+
+  // Banner: loop — she runs in from the left, he from the right, they meet, a heart rises, repeat.
+  const bannerPose = makeScene(document.getElementById("bannerSvg"), 147, 0.95);
+  const CYCLE = 7000, RUN = 3800;
+  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  function bannerFrame(now) {
+    const t = now % CYCLE;
+    if (t < RUN) {
+      const k = ease(t / RUN);
+      bannerPose(-20 + (188 - -20) * k, 420 - (420 - 212) * k, false, 0);
+    } else {
+      const h = (t - RUN) / 1400;
+      const fade = t > CYCLE - 500 ? (CYCLE - t) / 500 : 1;
+      bannerPose(188, 212, true, Math.min(1, h) * fade);
+    }
+    requestAnimationFrame(bannerFrame);
+  }
+  if (reduceMotion) bannerPose(188, 212, true, 1); else requestAnimationFrame(bannerFrame);
+
+  // Scroll scene: progress through the tall section moves them together; at the end they kiss.
+  const scenePose = makeScene(document.getElementById("sceneSvg"), 142, 1.15);
+  const scene = document.getElementById("scene"), cap = document.getElementById("sceneCaption"), small = document.getElementById("sceneSmall");
+  let lastCap = "";
+  function onScroll() {
+    const r = scene.getBoundingClientRect();
+    const total = scene.offsetHeight - window.innerHeight;
+    let p = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 1;
+    if (reduceMotion) p = 1;
+    const run = Math.min(1, p / 0.78);
+    const k = ease(run);
+    const met = p >= 0.78;
+    scenePose(met ? 186 : 20 + (186 - 20) * k, met ? 214 : 380 - (380 - 214) * k, met, (p - 0.8) / 0.15);
+    const km = Math.round(9200 * (1 - k));
+    const days = last && last.best ? last.best.ev.days : 0;
+    const c = met ? "Todo contigo" : km > 6000 ? tr("9,200 km apart…", "9 200 km de distancia…") : km > 2000 ? tr("…getting closer…", "…cada vez más cerca…") : tr("almost…", "casi…");
+    const sm = met ? tr(`${days} days together in 2027`, `${days} días juntos en 2027`) : tr(`${km.toLocaleString("en-GB")} km to go`, `faltan ${km.toLocaleString("es-ES")} km`);
+    if (c !== lastCap) { cap.textContent = c; lastCap = c; }
+    small.textContent = sm;
+  }
+  window.addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
+  window.addEventListener("resize", onScroll);
+
+  /* ================= Controls ================= */
+  const FIELDS = [
+    ["leaveMe", tr("Your leave days", "Tus días de vacaciones"), tr("45 per year", "45 al año"), 1], ["leaveHer", tr("Her leave days", "Sus días de vacaciones"), tr("22 per year", "22 al año"), 1],
+    ["Lmin", tr("Shortest trip (days)", "Viaje más corto (días)"), tr("Long-haul: a week is a sensible floor", "Largo recorrido: una semana es un mínimo sensato"), 1], ["Lmax", tr("Longest free trip (days)", "Viaje libre más largo (días)"), tr("Fixed trips may run longer", "Los viajes fijos pueden durar más"), 1],
+    ["minGap", tr("Min. days between trips", "Días mínimos entre viajes"), "", 1], ["V", tr("Value of a day together (€)", "Valor de un día juntos (€)"), tr("How much a day together is worth", "Cuánto vale un día juntos"), 5],
+    ["beta", tr("Value when host works (×)", "Valor si el anfitrión trabaja (×)"), tr("0.6 = evenings and weekends", "0,6 = tardes y fines de semana"), 0.05], ["C", tr("Overhead per trip (€)", "Gastos fijos por viaje (€)"), tr("Transfers, jet lag, logistics", "Traslados, jet lag, logística"), 10],
+    ["gapTarget", tr("Comfortable gap (days)", "Separación cómoda (días)"), tr("Longer gaps are penalised", "Las separaciones más largas se penalizan"), 1], ["lambda", tr("Gap penalty strength", "Fuerza de la penalización"), tr("€ per day² beyond the target", "€ por día² más allá del objetivo"), 0.01],
+    ["lastWD", tr("Her blocked days at month end", "Sus días bloqueados a fin de mes"), tr("Last N working days of every month", "Últimos N días laborables de cada mes"), 1],
+    ["firstWD", tr("Her blocked days at month start", "Sus días bloqueados a inicio de mes"), tr("First N working days (weekends skipped)", "Primeros N días laborables (sin contar fines de semana)"), 1],
+    ["costWeight", tr("Weight of money (×)", "Peso del dinero (×)"), tr("1 = every euro counts fully; 0.6 = time first", "1 = cada euro cuenta entero; 0,6 = primero el tiempo"), 0.05],
+    ["meetCostFactor", tr("Meeting halfway: cost counts (×)", "Vernos a mitad de camino: el coste cuenta (×)"), tr("0.7 = an effort we choose to make", "0,7 = un esfuerzo que elegimos hacer"), 0.05],
+    ["tripBonus", tr("Value of each extra trip (€)", "Valor de cada viaje extra (€)"), tr("Rewards seeing each other more often", "Premia vernos más a menudo"), 10],
+    ["priceScale", tr("Fare level (×)", "Nivel de tarifas (×)"), tr("1.0 = calibrated estimate", "1,0 = estimación calibrada"), 0.05]
+  ];
+  const form = document.getElementById("form");
+  for (const [k, label, help, step] of FIELDS) {
+    const d = document.createElement("div"); d.className = "field";
+    d.innerHTML = `<label for="f-${k}">${label}</label><input id="f-${k}" type="number" step="${step}" inputmode="decimal"><small>${help}</small>`;
+    form.appendChild(d);
+    const inp = d.querySelector("input"); inp.value = P[k];
+    inp.addEventListener("change", () => { const v = parseFloat(inp.value); if (!isNaN(v)) { P[k] = v; schedule(); } });
+  }
+  const aug = document.createElement("div"); aug.className = "field chk";
+  aug.innerHTML = `<input id="f-blockAugust" type="checkbox"><label for="f-blockAugust">${tr("She can’t take leave in August", "No puede tomar vacaciones en agosto")}</label>`;
+  form.appendChild(aug);
+  const augI = aug.querySelector("input"); augI.checked = P.blockAugust;
+  augI.addEventListener("change", () => { P.blockAugust = augI.checked; schedule(); });
+  for (const k of ["nameMe", "nameHer"]) {
+    const i = document.getElementById("f-" + k); i.value = P[k];
+    i.addEventListener("input", () => { P[k] = i.value.trim() || DEFAULTS[k]; names(); save(); if (last) render(last); });
+  }
+  for (const k of ["holidaysMe", "holidaysHer", "blackoutHerExtra"]) {
+    const ta = document.getElementById(k); ta.value = (P[k] || []).join("\n");
+    ta.addEventListener("change", () => { P[k] = ta.value.split(/[\s,]+/).filter(s => /^\d{4}-\d\d-\d\d$/.test(s)); schedule(); });
+  }
+  const dirOpts = () => `<option value="me">${esc(P.nameMe)} ${tr("flies to CDMX", "vuela a CDMX")}</option><option value="her">${esc(P.nameHer)} ${tr("flies to Paris", "vuela a París")}</option><option value="any">${tr("Home, optimiser picks who", "Casa, el optimizador elige quién")}</option>` +
+    Planner.CITIES.map(c => `<option value="meet:${c.id}">${tr("Both to", "Ambos a")} ${c.name}</option>`).join("") +
+    `<option value="meet:any">${tr("Both, optimiser picks city", "Ambos, el optimizador elige ciudad")}</option><option value="anywhere">${tr("Anywhere", "Cualquier lugar")}</option>`;
+  function renderReqs() {
+    const box = document.getElementById("reqs"); box.innerHTML = "";
+    P.required.forEach((r, i) => {
+      const el = document.createElement("div"); el.className = "fx";
+      el.innerHTML = `<label class="full">${tr("Name", "Nombre")}<input value="${esc(r.label)}" data-k="label"></label>
+        <label>${tr("Earliest start", "Salida más temprana")}<input type="date" value="${r.sMin}" data-k="sMin"></label>
+        <label>${tr("Latest start", "Salida más tardía")}<input type="date" value="${r.sMax}" data-k="sMax"></label>
+        <label>${tr("Earliest end", "Regreso más temprano")}<input type="date" value="${r.eMin}" data-k="eMin"></label>
+        <label>${tr("Latest end", "Regreso más tardío")}<input type="date" value="${r.eMax}" data-k="eMax"></label>
+        <label class="full">${tr("Where", "Dónde")}<select data-k="dir">${dirOpts()}</select></label>
+        <button class="x full" type="button">${tr("Remove this trip", "Quitar este viaje")}</button>`;
+      el.querySelector("select").value = r.dir;
+      el.querySelectorAll("[data-k]").forEach(x => x.addEventListener("change", () => { r[x.dataset.k] = x.value; schedule(); }));
+      el.querySelector("button").addEventListener("click", () => { P.required.splice(i, 1); renderReqs(); schedule(); });
+      box.appendChild(el);
+    });
+  }
+  renderReqs();
+  document.getElementById("addReq").addEventListener("click", () => {
+    P.required.push({ label: tr("New trip", "Nuevo viaje"), sMin: "2027-12-10", sMax: "2027-12-15", eMin: "2027-12-20", eMax: "2027-12-28", dir: "anywhere" });
+    renderReqs(); schedule();
+  });
+  document.getElementById("run").addEventListener("click", run);
+  document.getElementById("reset").addEventListener("click", () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => { P.mode = b.dataset.mode; syncSeg(); schedule(); }));
+  function syncSeg() { document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === P.mode))); }
+  syncSeg();
+  const wm = document.getElementById("wmMonth");
+  MONTHS.forEach((m, i) => { const o = document.createElement("option"); o.value = i; o.textContent = m; wm.appendChild(o); });
+  wm.value = 8; wm.addEventListener("change", () => last && renderWhere(last));
+
+  let timer = null;
+  function schedule() { clearTimeout(timer); document.getElementById("status").textContent = tr("Solving…", "Calculando…"); timer = setTimeout(run, 250); }
+
+  /* ================= Solve + render ================= */
+  let last = null;
+  function run() {
+    save();
+    const st = document.getElementById("status");
+    const t0 = performance.now();
+    let res;
+    try {
+      for (const r of P.required) if (!(r.sMin <= r.sMax && r.eMin <= r.eMax && r.sMin <= r.eMax)) throw new Error(tr(`“${r.label}” has its dates in the wrong order.`, `“${r.label}” tiene las fechas en orden incorrecto.`));
+      res = Planner.solve(P);
+    } catch (e) { st.className = "status bad"; st.textContent = e.message; return; }
+    last = res;
+    if (!res.best) {
+      st.className = "status bad";
+      st.textContent = tr("No plan fits: the fixed trips need more leave than you have, or one lands on a blocked day.", "Ningún plan cabe: los viajes fijos necesitan más vacaciones de las disponibles, o uno cae en un día bloqueado.");
+      return;
+    }
+    st.className = "status";
+    st.textContent = tr(`Optimal plan · ${Math.round(performance.now() - t0)} ms`, `Plan óptimo · ${Math.round(performance.now() - t0)} ms`);
+    render(res);
+    setTimeout(renderScenarios, 30);
+    setTimeout(renderFocus, 60);
+  }
+  function render(res) {
+    renderHighlights(res); renderBreakdown(res); renderTrips(res); renderCalendar(res); renderWhere(res); renderChart(res); renderEvidence(res); syncPreset(); syncBasis(); syncFocus(); renderFrontier(); renderMethod(res); onScroll();
+  }
+
+  const whereText = o => o.city ? tr(`Together in ${CITY[o.city].name}`, `Juntos en ${CITY[o.city].name}`) : o.dir === "me" ? tr(`${P.nameMe} flies to Mexico City`, `${P.nameMe} vuela a Ciudad de México`) : tr(`${P.nameHer} flies to Paris`, `${P.nameHer} vuela a París`);
+  const pill = o => o.city ? `<span class="pill meet"><i class="dot" style="background:var(--meet)"></i>${tr("Both", "Ambos")} → ${CITY[o.city].name}</span>`
+    : o.dir === "me" ? `<span class="pill me"><i class="dot" style="background:var(--me)"></i>${esc(P.nameMe)} → CDMX</span>`
+    : `<span class="pill her"><i class="dot" style="background:var(--her)"></i>${esc(P.nameHer)} → ${tr("Paris", "París")}</span>`;
+  const color = o => o.city ? "var(--meet)" : o.dir === "me" ? "var(--me)" : "var(--her)";
+  const MODE_LABEL = ES ? { home: "Viajes libres: solo en casa", both: "Viajes libres: casa u otro lugar", meet: "Viajes libres: solo otro lugar" } : { home: "Free trips: home only", both: "Free trips: home or elsewhere", meet: "Free trips: elsewhere only" };
+
+  let SIM = null;
+  function renderHighlights(res) {
+    const ev = res.best.ev, trips = res.best.trips, days = res.cal.days;
+    SIM = Planner.simulate(P, trips);
+    document.getElementById("hDays").textContent = ev.days;
+    document.getElementById("modeLabel").textContent = MODE_LABEL[P.mode];
+    // next trip relative to today (or the first one)
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const nxt = trips.find(o => days[o.e].iso >= todayIso) || trips[0];
+    const until = Math.round((new Date(days[nxt.s].iso) - new Date(todayIso)) / 864e5);
+    document.getElementById("hNext").innerHTML = `<span class="icon" aria-hidden="true">✈︎</span><div><b>${tr("Next", "Próximo")}: ${fmtD(days[nxt.s].iso)} → ${fmtD(days[nxt.e].iso)}</b><br><span class="muted" style="font-size:13.5px">${esc(whereText(nxt))} · ${nxt.e - nxt.s + 1} ${tr("days", "días")}${until > 0 ? tr(` · in ${until} days`, ` · en ${until} días`) : ""}</span></div>`;
+    const N = res.cal.N;
+    document.getElementById("yearbar").innerHTML = trips.map(o => `<i title="${fmtD(days[o.s].iso)}–${fmtD(days[o.e].iso)}" style="left:${o.s / N * 100}%;width:${(o.e - o.s + 1) / N * 100}%;background:${color(o)}"></i>`).join("");
+    const meter = (u, t, c) => `<div class="meter"><i style="width:${Math.min(100, u / t * 100)}%;background:${c}"></i></div>`;
+    const fact = (k, v, d, m) => `<div class="fact"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span>${m || ""}</div>`;
+    document.getElementById("facts").innerHTML =
+      fact(tr("Trips", "Viajes"), trips.length, `${trips.filter(o => o.dir === "me").length} ${esc(P.nameMe)} · ${trips.filter(o => o.dir === "her").length} ${esc(P.nameHer)} · ${trips.filter(o => o.city).length} ${tr("elsewhere", "en otro lugar")}`) +
+      fact(tr("Travel cost", "Coste de viaje"), eur(ev.price + ev.lodging), `${tr("likely", "probable")} ${k(SIM.p10)}–${k(SIM.p90)} · ${eur((ev.price + ev.lodging) / ev.days)}/${tr("day", "día")}`) +
+      fact(tr("Longest apart", "Mayor separación"), `${ev.maxGap} ${tr("days", "días")}`, tr(`about ${Math.round(ev.maxGap / 7)} weeks`, `unas ${Math.round(ev.maxGap / 7)} semanas`)) +
+      fact(tr(`${esc(P.nameMe)}’s leave`, `Vacaciones de ${esc(P.nameMe)}`), `${ev.la}/${P.leaveMe}`, tr(`${P.leaveMe - ev.la} left`, `quedan ${P.leaveMe - ev.la}`), meter(ev.la, P.leaveMe, "var(--me)")) +
+      fact(tr(`${esc(P.nameHer)}’s leave`, `Vacaciones de ${esc(P.nameHer)}`), `${ev.lg}/${P.leaveHer}`, tr(`${P.leaveHer - ev.lg} left`, `quedan ${P.leaveHer - ev.lg}`), meter(ev.lg, P.leaveHer, "var(--her)")) +
+      fact(tr("Fares", "Billetes"), k(ev.payMe + ev.payHer), `${esc(P.nameMe)} ${k(ev.payMe)} · ${esc(P.nameHer)} ${k(ev.payHer)}${ev.lodging ? ` · ${tr("hotels", "hoteles")} ${k(ev.lodging)}` : ""}`);
+    // plain-language notes
+    const notes = [];
+    const sugg = trips.filter(o => o.req < 0);
+    for (const o of sugg) notes.push(tr(`<b>Add ${fmtD(days[o.s].iso)}–${fmtD(days[o.e].iso)}:</b> ${esc(whereText(o))}. The optimiser found room for it.`, `<b>Añadir ${fmtD(days[o.s].iso)}–${fmtD(days[o.e].iso)}:</b> ${esc(whereText(o))}. El optimizador le encontró hueco.`));
+    const hostLeave = trips.filter(o => o.hl);
+    if (hostLeave.length) notes.push(tr(`<b>Host on holiday:</b> ${hostLeave.map(o => `${fmtD(days[o.s].iso)} (${o.dir === "me" ? esc(P.nameHer) : esc(P.nameMe)})`).join(", ")}. Full days together are worth the leave.`, `<b>Anfitrión de vacaciones:</b> ${hostLeave.map(o => `${fmtD(days[o.s].iso)} (${o.dir === "me" ? esc(P.nameHer) : esc(P.nameMe)})`).join(", ")}. Los días completos juntos valen las vacaciones.`));
+    if (ev.lg >= P.leaveHer - 1) notes.push(tr(`<b>${esc(P.nameHer)}’s ${P.leaveHer} days are the bottleneck.</b> Every extra day she can take off adds time together. Try it under “Adjust the plan”.`, `<b>Los ${P.leaveHer} días de ${esc(P.nameHer)} son el cuello de botella.</b> Cada día extra que pueda tomar suma tiempo juntos. Pruébalo en “Ajustar el plan”.`));
+    const elsewhere = trips.filter(o => o.city);
+    if (elsewhere.length) notes.push(tr(`<b>${elsewhere.map(o => CITY[o.city].name).join(", ")}</b> costs ${eur(elsewhere.reduce((a, o) => a + o.price + o.lodging, 0))} with the hotel, and uses leave for both of us.`, `<b>${elsewhere.map(o => CITY[o.city].name).join(", ")}</b> cuesta ${eur(elsewhere.reduce((a, o) => a + o.price + o.lodging, 0))} con hotel y usa vacaciones de los dos.`));
+    document.getElementById("notes").innerHTML = notes.map(n => `<li>${n}</li>`).join("");
+  }
+
+  function renderTrips(res) {
+    const days = res.cal.days;
+    document.getElementById("trips").innerHTML = res.best.trips.map(o => {
+      const a = days[o.s].iso, b = days[o.e].iso;
+      const rq = o.req >= 0 ? res.reqs[o.req] : null;
+      const tag = rq ? `<span class="tag">${rq.focus ? tr(`${MONTH_EN[res.cal.days[o.s].m]}, as we wanted`, `${MONTH_LONG[res.cal.days[o.s].m].replace(/^./, c => c.toUpperCase())}, como queríamos`) : esc(rq.label)}</span>` : `<span class="tag" style="color:var(--rose);border-color:var(--rose)">${tr("suggested", "sugerido")}</span>`;
+      const hostN = o.dir === "me" ? esc(P.nameHer) : esc(P.nameMe);
+      const host = o.city ? tr("both on holiday", "ambos de vacaciones") : o.hl ? tr(`${hostN} takes leave`, `${hostN} toma vacaciones`) : tr(`${hostN} keeps working`, `${hostN} sigue trabajando`);
+      const fares = o.city ? `${eur(o.priceMe)} + ${eur(o.priceHer)}` : eur(o.price);
+      return `<div class="trip"><span class="bar" style="background:${color(o)}"></span><div class="body">
+        <div class="top"><span class="dates num">${fmtD(a)} → ${fmtD(b)}</span>${tag}</div>
+        <div>${pill(o)} <span class="muted">· ${o.e - o.s + 1} ${tr("days", "días")} · ${host}</span></div>
+        <div class="stats"><span>${tr("Fares", "Billetes")} <b>${fares}</b></span>${o.lodging ? `<span>Hotel <b>${eur(o.lodging)}</b></span>` : ""}<span>${tr("Leave", "Vacaciones")} <b>${o.la}</b> ${esc(P.nameMe)} · <b>${o.lg}</b> ${esc(P.nameHer)}</span></div>
+      </div></div>`;
+    }).join("");
+  }
+
+  function renderScenarios() {
+    const lbl = ES ? { home: "Solo en casa", both: "Casa u otro lugar", meet: "Solo otro lugar" } : { home: "Only home", both: "Home or elsewhere", meet: "Only elsewhere" };
+    const rows = ["home", "both", "meet"].map(mode => { const q = { ...P, mode }, r = Planner.solve(q); return { mode, ev: r.best && r.best.ev, n: r.best ? r.best.trips.length : 0, sim: r.best ? Planner.simulate(q, r.best.trips) : null }; });
+    const ok = rows.filter(r => r.ev);
+    const metrics = [
+      [tr("Travel cost", "Coste de viaje"), r => r.ev.price + r.ev.lodging, "min", (v) => eur(v)],
+      [tr("If prices swing (80%)", "Si los precios varían (80%)"), r => r.sim.p90, "min", (v, r) => `${k(r.sim.p10)}–${k(r.sim.p90)}`],
+      [tr("Per day together", "Por día juntos"), r => (r.ev.price + r.ev.lodging) / r.ev.days, "min", v => eur(v)],
+      [tr("Longest apart", "Mayor separación"), r => r.ev.maxGap, "min", v => v + tr(" days", " días")],
+      [`${tr("Leave", "Vacaciones")} ${esc(P.nameMe)} / ${esc(P.nameHer)}`, r => 0, null, (v, r) => `${r.ev.la} / ${r.ev.lg}`],
+      [tr("Score (higher = better)", "Puntuación (más = mejor)"), r => r.ev.objective, "max", v => num(v)]
+    ];
+    const bestOf = metrics.map(([, f, goal]) => goal ? (goal === "max" ? Math.max(...ok.map(f)) : Math.min(...ok.map(f))) : null);
+    const maxDays = Math.max(...ok.map(r => r.ev.days));
+    document.getElementById("scen").innerHTML = rows.map(r => {
+      if (!r.ev) return `<div class="sc"><div class="t">${lbl[r.mode]}</div><span class="muted">${tr("No plan fits these constraints", "Ningún plan cumple estas restricciones")}</span></div>`;
+      return `<button type="button" class="sc ${r.mode === P.mode ? "cur" : ""}" data-mode2="${r.mode}">
+        <span class="t">${lbl[r.mode]}<span class="muted">${r.mode === P.mode ? tr("shown", "mostrado") : tr("tap to show", "toca para ver")}</span></span>
+        <span class="big2" style="color:${r.ev.days === maxDays ? "var(--rose)" : "var(--ink)"}">${r.ev.days}<small>días juntos</small></span>
+        <span class="muted">${r.n} ${tr("trips", "viajes")}</span>
+        <dl>${metrics.map(([name, f, goal, fmt], i) => `<dt>${name}</dt><dd class="${goal && f(r) === bestOf[i] && ok.length > 1 ? "best" : ""}">${fmt(f(r), r)}</dd>`).join("")}</dl>
+      </button>`;
+    }).join("");
+    document.querySelectorAll("[data-mode2]").forEach(b => b.addEventListener("click", () => { P.mode = b.dataset.mode2; syncSeg(); schedule(); }));
+  }
+
+  /* ---- Fare basis (price uncertainty) ---- */
+  const BASIS_NOTE = ES ? {
+    low: "Cada billete al precio más bajo visto en su mes. Optimista: tendríamos que pillar el mejor día en el sitio más barato.",
+    typical: "Cada billete a la tarifa esperada: la más baja vista × 1,13. Es la opción robusta por defecto.",
+    cautious: "Cada billete a un precio que mejoraremos 9 de cada 10 veces: la más baja vista × 1,22. Los planes que aún compensan aquí son apuestas seguras."
+  } : {
+    low: "Every ticket priced at the lowest fare seen in its month. Optimistic: we’d need to catch the best day on the cheapest site.",
+    typical: "Every ticket priced at the expected fare: the lowest seen × 1.13. This is the robust default.",
+    cautious: "Every ticket priced at a level we’ll beat 9 times out of 10: the lowest seen × 1.22. Plans that still pay off here are safe bets."
+  };
+  function syncBasis() {
+    document.querySelectorAll("[data-basis]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.basis === P.fareBasis)));
+    document.getElementById("basisNote").textContent = BASIS_NOTE[P.fareBasis];
+  }
+  document.querySelectorAll("[data-basis]").forEach(b => b.addEventListener("click", () => { P.fareBasis = b.dataset.basis; syncBasis(); frontierCache = null; schedule(); }));
+
+  /* ---- Presets: value per day + gap penalty ---- */
+  const PKEYS = ["V", "lambda", "costWeight", "tripBonus"];
+  const PRESETS = {
+    save: { V: 90, lambda: 0.05, costWeight: 1, tripBonus: 0, note: tr("Every euro counts fully and a day together is worth €90. Only trips that are cheap per day make it in.", "Cada euro cuenta entero y un día juntos vale 90 €. Solo entran los viajes baratos por día.") },
+    balanced: { V: 120, lambda: 0.15, costWeight: 0.6, tripBonus: 100, note: tr("Time first: money counts at 60%, each trip is worth an extra €100 (seeing each other often), and a day together €120.", "Primero el tiempo: el dinero cuenta al 60%, cada viaje vale 100 € extra (vernos a menudo) y un día juntos 120 €.") },
+    time: { V: 160, lambda: 0.3, costWeight: 0.4, tripBonus: 200, note: tr("Money counts at 40%, long gaps are heavily penalised and every trip is worth €200 more. We use all the leave we can.", "El dinero cuenta al 40%, las separaciones largas se penalizan mucho y cada viaje vale 200 € más. Usamos todas las vacaciones posibles.") }
+  };
+  function syncPreset() {
+    const k = Object.keys(PRESETS).find(k => PKEYS.every(f => PRESETS[k][f] === P[f]));
+    document.querySelectorAll("[data-preset]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === k)));
+    document.getElementById("presetNote").textContent = k ? PRESETS[k].note : tr(`Custom: a day together is worth €${P.V}, money counts at ${Math.round(P.costWeight * 100)}%, €${P.tripBonus} per trip.`, `Personalizado: un día juntos vale ${P.V} €, el dinero cuenta al ${Math.round(P.costWeight * 100)}%, ${P.tripBonus} € por viaje.`);
+  }
+  document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
+    const pr = PRESETS[b.dataset.preset]; for (const f of PKEYS) { P[f] = pr[f]; const el = document.getElementById("f-" + f); if (el) el.value = P[f]; }
+    syncPreset(); frontierCache = null; schedule();
+  }));
+
+  /* ---- Step 4: make sure we meet in a given month (default April) ---- */
+  const MONTH_LONG = ES ? ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"] : MONTH_EN;
+  const focusSel = document.getElementById("focusSel");
+  MONTH_LONG.forEach((m, i) => { const o = document.createElement("option"); o.value = i; o.textContent = m; focusSel.appendChild(o); });
+  let focusM = P.focusMonth != null && P.focusMonth >= 0 ? P.focusMonth : 3;
+  focusSel.value = focusM;
+  focusSel.addEventListener("change", () => { focusM = +focusSel.value; if (P.focusMonth >= 0) P.focusMonth = focusM; P.focusWhere = null; schedule(); });
+  function syncFocus() {
+    const on = P.focusMonth != null && P.focusMonth >= 0;
+    document.querySelectorAll("[data-focus]").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.focus === "on") === on)));
+    const m = MONTH_LONG[focusM], w = P.focusWhere;
+    const wl = !w ? null : w === "me" ? tr(`${P.nameMe} goes to Mexico City`, `${P.nameMe} va a Ciudad de México`) : w === "her" ? tr(`${P.nameHer} comes to Paris`, `${P.nameHer} viene a París`) : CITY[w.slice(5)].name;
+    document.getElementById("focusNote").textContent = on
+      ? (wl ? tr(`The plan always includes a trip in ${m}: ${wl}.`, `El plan siempre incluye un viaje en ${m}: ${wl}.`) : tr(`The plan always includes a trip in ${m}, wherever it works best.`, `El plan siempre incluye un viaje en ${m}, donde mejor encaje.`))
+      : tr(`No special rule for ${m}: the optimiser decides freely.`, `Sin regla especial para ${m}: el optimizador decide libremente.`);
+  }
+  document.querySelectorAll("[data-focus]").forEach(b => b.addEventListener("click", () => {
+    P.focusMonth = b.dataset.focus === "on" ? focusM : -1; if (P.focusMonth < 0) P.focusWhere = null; syncFocus(); frontierCache = null; schedule();
+  }));
+  let focusCache = null, focusJob = 0;
+  function renderFocus() {
+    const tbl = document.getElementById("focusOpts");
+    const base = { ...P, focusMonth: focusM }; delete base.focusWhere; delete base.nameMe; delete base.nameHer;
+    const key = JSON.stringify(base);
+    const ways = [null, "me", "her"].concat(Planner.CITIES.filter(c => !(P.citiesOff || []).includes(c.id)).map(c => "meet:" + c.id));
+    const label = w => !w ? tr("Whatever the plan picks", "Lo que elija el plan") : w === "me" ? `${esc(P.nameMe)} → CDMX` : w === "her" ? `${esc(P.nameHer)} → ${tr("Paris", "París")}` : `${tr("Both", "Ambos")} → ${CITY[w.slice(5)].name}`;
+    const head = `<tr><th>${tr(`How we meet in ${MONTH_LONG[focusM]}`, `Cómo nos vemos en ${MONTH_LONG[focusM]}`)}</th><th>${tr("Days in the year", "Días en el año")}</th><th>${tr("Year cost", "Coste del año")}</th></tr>`;
+    const draw = rows => {
+      const ok = rows.filter(r => r.best);
+      const maxD = Math.max(...ok.map(r => r.best.ev.days)), minC = Math.min(...ok.map(r => r.sim.p50));
+      const cur = P.focusMonth >= 0 ? (P.focusWhere || null) : undefined;
+      rows = rows.slice().sort((a, b) => (a.w === null ? -1 : b.w === null ? 1 : 0) || (!a.best) - (!b.best) || (a.best && b.best ? (b.best.ev.days - a.best.ev.days) || (a.sim.p50 - b.sim.p50) : 0));
+      tbl.innerHTML = head + rows.map(r => {
+        if (!r.best) return `<tr><td>${label(r.w)}</td><td colspan="2" class="muted" style="text-align:left">${tr("doesn’t fit (leave or blocked days)", "no cabe (vacaciones o días bloqueados)")}</td></tr>`;
+        const o = r.best.trips.find(t => t.req >= 0 && r.reqs[t.req].focus), d = r.cal.days;
+        return `<tr data-fw="${r.w || ""}" class="${cur !== undefined && cur === r.w ? "cur" : ""}" style="cursor:pointer" title="${tr("Tap to use this", "Toca para usar esta opción")}">
+          <td>${cur !== undefined && cur === r.w ? "♥ " : ""}${label(r.w)}${o && !r.w ? ` <span class="muted">(${o.city ? CITY[o.city].name : o.dir === "me" ? esc(P.nameMe) + " → CDMX" : esc(P.nameHer) + " → " + tr("Paris", "París")})</span>` : ""}
+            ${o ? `<br><span class="muted" style="font-weight:400;font-size:12px">${fmtD(d[o.s].iso)} → ${fmtD(d[o.e].iso)} · ${eur(o.price + o.lodging)} · ${tr(`${esc(P.nameHer)}’s leave`, `vacaciones de ${esc(P.nameHer)}`)} ${o.lg}</span>` : ""}</td>
+          <td class="${r.best.ev.days === maxD ? "best" : ""}">${r.best.ev.days}</td>
+          <td class="${r.sim.p50 === minC ? "best" : ""}">${k(r.sim.p50)}</td></tr>`;
+      }).join("") + (rows.length < ways.length ? `<tr><td colspan="3" class="muted" style="text-align:left">${tr("Computing…", "Calculando…")}</td></tr>` : "");
+      tbl.querySelectorAll("[data-fw]").forEach(tr_ => tr_.addEventListener("click", () => {
+        P.focusMonth = focusM; P.focusWhere = tr_.dataset.fw || null; syncFocus(); frontierCache = null; schedule();
+      }));
+    };
+    if (focusCache && focusCache.key === key) return draw(focusCache.rows);
+    const job = ++focusJob, rows = [];
+    tbl.innerHTML = head;
+    const step = () => {
+      if (job !== focusJob) return;
+      const w = ways[rows.length], q = { ...P, focusMonth: focusM, focusWhere: w };
+      const r = Planner.solve(q);
+      rows.push({ w, best: r.best, reqs: r.reqs, cal: r.cal, sim: r.best ? Planner.simulate(q, r.best.trips, 1500) : null });
+      draw(rows);
+      if (rows.length < ways.length) setTimeout(step, 0); else focusCache = { key, rows };
+    };
+    setTimeout(step, 0);
+  }
+
+  /* ---- Score breakdown of the current plan ---- */
+  function renderBreakdown(res) {
+    const trs = res.best.trips, ev = res.best.ev;
+    const value = trs.reduce((a, o) => a + o.value, 0), over = P.C * trs.length, bonus = (P.tripBonus || 0) * trs.length;
+    const real = ev.price + ev.lodging + over;
+    const weighted = trs.reduce((a, o) => a + (P.costWeight ?? 1) * (o.city ? (P.meetCostFactor ?? 1) : 1) * (o.price + o.lodging + P.C), 0);
+    const row = (k, v, cls, hint) => `<div class="row ${cls || ""}"><span>${k}${hint ? ` <span class="hint">${hint}</span>` : ""}</span><span>${v}</span></div>`;
+    document.getElementById("breakdown").innerHTML =
+      row(tr("Value of days together", "Valor de los días juntos"), "+" + eur(value), "", tr(`${ev.days} days × €${P.V}, less on travel days and host work days`, `${ev.days} días × ${P.V} €, menos en días de viaje y de trabajo del anfitrión`)) +
+      row(tr("Fares", "Billetes"), "−" + eur(ev.price), "neg") +
+      (ev.lodging ? row(tr("Hotels", "Hoteles"), "−" + eur(ev.lodging), "neg") : "") +
+      row(tr("Trip overhead", "Gastos fijos por viaje"), "−" + eur(over), "neg", `${trs.length} × ${eur(P.C)}`) +
+      (real - weighted > 0.5 ? row(tr("Time before money", "Primero el tiempo"), "+" + eur(real - weighted), "", tr(`money counts at ${Math.round(P.costWeight * 100)}%${trs.some(o => o.city) ? `, meeting halfway at ${Math.round(P.costWeight * P.meetCostFactor * 100)}%` : ""}`, `el dinero cuenta al ${Math.round(P.costWeight * 100)}%${trs.some(o => o.city) ? `, vernos a mitad de camino al ${Math.round(P.costWeight * P.meetCostFactor * 100)}%` : ""}`)) : "") +
+      (bonus ? row(tr("Seeing each other often", "Vernos a menudo"), "+" + eur(bonus), "", `${trs.length} × ${eur(P.tripBonus)}`) : "") +
+      row(tr("Gap penalty", "Penalización por separación"), "−" + eur(ev.gapPen), "neg", tr(`longest gap ${ev.maxGap} days`, `mayor separación ${ev.maxGap} días`)) +
+      row(tr("Score (this plan)", "Puntuación (este plan)"), num(ev.objective), "tot");
+  }
+
+  /* ---- Trade-off frontier: optimal plan for each value per day ---- */
+  let frontierCache = null, frontierJob = 0;
+  function frontierKey() { const q = { ...P }; delete q.V; delete q.nameMe; delete q.nameHer; return JSON.stringify(q); }
+  function renderFrontier() {
+    const key = frontierKey();
+    if (frontierCache && frontierCache.key === key) return drawFrontier(frontierCache.pts);
+    const Vs = [40, 60, 80, 100, 120, 150, 180, 220, 260, 320], pts = [], job = ++frontierJob;
+    let i = 0;
+    const step = () => {
+      if (job !== frontierJob) return;
+      const V = Vs[i++], r = Planner.solve({ ...P, V });
+      if (r.best) { const sm = Planner.simulate({ ...P, V }, r.best.trips, 1500); pts.push({ V, days: r.best.ev.days, cost: r.best.ev.price + r.best.ev.lodging, n: r.best.trips.length, gap: r.best.ev.maxGap, lo: sm.p10, hi: sm.p90 }); }
+      drawFrontier(pts);
+      if (i < Vs.length) setTimeout(step, 0); else frontierCache = { key, pts };
+    };
+    setTimeout(step, 0);
+  }
+  function drawFrontier(pts) {
+    const box = document.getElementById("frontier"), tip = document.getElementById("ftip");
+    const W = Math.max(320, Math.round(box.clientWidth || 640)), H = 220, m = { l: 52, r: 12, t: 12, b: 34 };
+    const cur = last && last.best ? { days: last.best.ev.days, cost: last.best.ev.price + last.best.ev.lodging } : null;
+    const all = pts.concat(cur ? [cur] : []).concat(pts.filter(p => p.lo).flatMap(p => [{ days: p.days, cost: p.lo }, { days: p.days, cost: p.hi }]));
+    if (!all.length) return;
+    const dmin = Math.min(...all.map(p => p.days)) - 4, dmax = Math.max(...all.map(p => p.days)) + 4;
+    const cmin = Math.floor((Math.min(...all.map(p => p.cost)) - 300) / 500) * 500, cmax = Math.ceil((Math.max(...all.map(p => p.cost)) + 300) / 500) * 500;
+    const x = d => m.l + (d - dmin) / (dmax - dmin) * (W - m.l - m.r), y = c => m.t + (1 - (c - cmin) / (cmax - cmin)) * (H - m.t - m.b);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Days together versus travel cost for each optimal plan">`;
+    for (let c = cmin; c <= cmax; c += 500) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(c)}" y2="${y(c)}" stroke="var(--line)"/><text x="${m.l - 6}" y="${y(c) + 4}" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">€${(c / 1000).toFixed(1)}k</text>`;
+    const step = Math.max(5, Math.round((dmax - dmin) / 6 / 5) * 5);
+    for (let d = Math.ceil(dmin / step) * step; d <= dmax; d += step) s += `<text x="${x(d)}" y="${H - 16}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${d}</text>`;
+    s += `<text x="${(m.l + W - m.r) / 2}" y="${H - 2}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${tr("days together →", "días juntos →")}</text>`;
+    const sorted = pts.slice().sort((a, b) => a.V - b.V);
+    if (sorted.length > 1) s += `<path d="${sorted.map((p, i) => `${i ? "L" : "M"}${x(p.days).toFixed(1)},${y(p.cost).toFixed(1)}`).join("")}" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    sorted.forEach(p => { if (p.lo) s += `<line x1="${x(p.days)}" x2="${x(p.days)}" y1="${y(p.lo)}" y2="${y(p.hi)}" stroke="var(--rose)" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/>`; });
+    sorted.forEach((p, i) => { s += `<circle class="fp" data-i="${i}" cx="${x(p.days)}" cy="${y(p.cost)}" r="7" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="2" style="cursor:pointer"/>`; });
+    if (cur) s += `<circle cx="${x(cur.days)}" cy="${y(cur.cost)}" r="8" fill="var(--rose)" stroke="var(--surface)" stroke-width="2.5" pointer-events="none"/><text x="${x(cur.days)}" y="${y(cur.cost) - 13}" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--rose)">${tr("our plan", "nuestro plan")}</text>`;
+    s += `</svg>`;
+    box.innerHTML = s; box.appendChild(tip);
+    box.querySelectorAll(".fp").forEach(c => {
+      const p = sorted[+c.dataset.i];
+      const show = ev => {
+        tip.innerHTML = tr(`<b>€${p.V} per day together</b><br>${p.days} days · ${p.n} trips<br>${eur(p.cost)} travel${p.lo ? ` (likely ${k(p.lo)}–${k(p.hi)})` : ""}<br>longest gap ${p.gap} d<br><span class="muted">tap to use this plan</span>`,
+          `<b>${p.V} € por día juntos</b><br>${p.days} días · ${p.n} viajes<br>${eur(p.cost)} de viaje${p.lo ? ` (probable ${k(p.lo)}–${k(p.hi)})` : ""}<br>mayor separación ${p.gap} d<br><span class="muted">toca para usar este plan</span>`);
+        tip.style.display = "block"; const bx = box.getBoundingClientRect();
+        tip.style.left = Math.min(bx.width - tip.offsetWidth - 4, Math.max(4, ev.clientX - bx.left + 10)) + "px"; tip.style.top = "4px";
+      };
+      c.addEventListener("pointerenter", show); c.addEventListener("pointermove", show);
+      c.addEventListener("pointerleave", () => tip.style.display = "none");
+      c.addEventListener("click", () => { P.V = p.V; const fv = document.getElementById("f-V"); if (fv) fv.value = P.V; syncPreset(); tip.style.display = "none"; schedule(); });
+    });
+  }
+
+  /* ---- Fare evidence ---- */
+  function renderEvidence(res) {
+    const qs = res.quotes;
+    const one = (dir, who) => {
+      let html = `<thead><tr><th>${tr(`${esc(who)} flies`, `Vuela ${esc(who)}`)}</th><th>Kiwi</th><th>lastminute</th><th>LetsFG</th><th>${tr("Low", "Baja")}</th><th>${tr("Typical", "Típica")}</th><th>${tr("High", "Alta")}</th></tr></thead><tbody>`;
+      const cell = (src, m) => {
+        const q = qs.filter(q => q.dir === dir && q.src === src && +q.start.slice(5, 7) === m + 1);
+        if (!q.length) return `<td class="muted">–</td>`;
+        const min = q.reduce((a, b) => a.price < b.price ? a : b);
+        return `<td title="${esc(min.via)} · ${fmtD(min.start)}–${fmtD(min.end)}">${min.price}</td>`;
+      };
+      for (let m = 0; m < 12; m++) {
+        const mid = res.cal.days.find(d => d.m === m && +d.iso.slice(8) === 15).i;
+        const low = res.cal.curve[dir][mid] * P.priceScale;
+        const seg = Planner.DATA.curveSource[dir].filter(x => x.from <= res.cal.days[mid].iso.slice(5)).pop();
+        const est = !seg || seg.source !== "observed";
+        html += `<tr><td>${MONTHS[m]}${est ? "*" : ""}</td>${cell("Kiwi", m)}${cell("lastminute", m)}${cell("LetsFG", m)}<td class="best">${Math.round(low)}</td><td>${Math.round(low * Planner.BASIS.typical)}</td><td>${Math.round(low * Planner.BAND.b)}</td></tr>`;
+      }
+      return html + `</tbody>`;
+    };
+    document.getElementById("evidence").innerHTML = one("me", P.nameMe);
+    document.getElementById("evidence2").innerHTML = one("her", P.nameHer);
+    const n = qs.length;
+    const ck = Planner.DATA.checked ? fmtD(Planner.DATA.checked) + " " + Planner.DATA.checked.slice(0, 4) : "";
+    document.getElementById("checkedTag").textContent = tr(`Prices checked · ${ck}`, `Precios revisados · ${ck}`);
+    document.getElementById("fareFinding").innerHTML = ES ? `<b>${n} precios reales de 3 sitios</b> (Kiwi.com, lastminute.com y LetsFG, que además agrega Google Flights y agencias: 450–620 ofertas por búsqueda). Destacan tres cosas. <b>El billete de ${esc(P.nameHer)} suele ser 100–250 € más barato</b>: Air Canada vía Montreal a 731–810 € en abr–may y ago–oct. <b>Para ${esc(P.nameMe)}, mediados de mayo y de septiembre bajan a 835–850 €</b> (British Airways vía Londres). En <b>las mismas fechas, los tres sitios difieren en un 7%</b>, pero los vuelos directos cuestan un 13–69% más que la escala más barata. Precios en €, ida y vuelta, turista, recogidos el 20 nov 2026.` : `<b>${n} real quotes from 3 sites</b> (Kiwi.com, lastminute.com, LetsFG, which also aggregates Google Flights and travel agencies, 450–620 offers per search). Three things stand out. <b>${esc(P.nameHer)}’s ticket is usually €100–250 cheaper</b>, with Air Canada via Montréal at €731–810 in Apr–May and Aug–Oct. <b>For ${esc(P.nameMe)}, mid-May and mid-September dip to €835–850</b> (British Airways via London). On the <b>same dates the three sites differ by about 7%</b>, but direct flights cost 13–69% more than the cheapest one-stop. Prices are €, return, economy, collected 20 Nov 2026.`;
+  }
+
+  function priceAt(res, i, dir) {
+    const e = Math.min(res.cal.N - 1, i + 10), c = res.cal.curve[dir];
+    return P.priceScale * Planner.BASIS[P.fareBasis || "typical"] * (0.6 * c[i] + 0.4 * c[e]);
+  }
+
+  function renderCalendar(res) {
+    const st = new Array(res.cal.N).fill(null);
+    res.best.trips.forEach(o => { for (let i = o.s; i <= o.e; i++) st[i] = o; });
+    const box = document.getElementById("months"), days = res.cal.days;
+    let html = "";
+    for (let m = 0; m < 12; m++) {
+      const md = days.filter(d => d.m === m);
+      const a = md.reduce((s, d) => s + priceAt(res, d.i, "me"), 0) / md.length;
+      const b = md.reduce((s, d) => s + priceAt(res, d.i, "her"), 0) / md.length;
+      const tog = md.filter(d => st[d.i]).length;
+      html += `<div class="month"><h3>${ES ? MONTH_ES[m] : MONTH_EN[m]}<span class="tog ${tog ? "" : "none"}">${tog ? "♥ " + tog : tr("apart", "lejos")}</span></h3><div class="mprice"><span class="${a < b ? "cheap" : ""}" title="${esc(P.nameMe)}">✈ A ${eur(a)}</span><span class="${b < a ? "cheap" : ""}" title="${esc(P.nameHer)}">L ${eur(b)}</span></div><div class="grid7">` +
+        (ES ? ["L","M","X","J","V","S","D"] : ["M","T","W","T","F","S","S"]).map(x => `<span class="dh">${x}</span>`).join("");
+      for (let i = 0; i < (md[0].dow + 6) % 7; i++) html += `<span></span>`;
+      for (const d of md) {
+        const o = st[d.i];
+        let cls = "day";
+        if (d.herBlocked && d.workHer) cls += " blk";
+        if (d.holMe || d.holHer) cls += " hol";
+        if (o) {
+          cls += " " + (o.city ? "meet" : o.dir);
+          if (d.i === o.s) cls += " first";
+          if (!o.city && (o.dir === "me" ? (d.workHer && !o.hl) : (d.workMe && !o.hl))) cls += " hw";
+        }
+        html += `<button type="button" class="${cls}" data-i="${d.i}" aria-label="${d.iso}">${+d.iso.slice(8)}</button>`;
+      }
+      html += "</div></div>";
+    }
+    box.innerHTML = html;
+    box.onclick = e => {
+      const btn = e.target.closest(".day"); if (!btn) return;
+      box.querySelectorAll(".sel").forEach(x => x.classList.remove("sel")); btn.classList.add("sel");
+      const d = days[+btn.dataset.i], o = st[d.i];
+      const where = !o ? tr("Apart", "Separados") : o.city ? whereText(o) : o.dir === "me" ? tr(`${P.nameMe} is in Mexico City with ${P.nameHer}`, `${P.nameMe} está en Ciudad de México con ${P.nameHer}`) : tr(`${P.nameHer} is in Paris with ${P.nameMe}`, `${P.nameHer} está en París con ${P.nameMe}`);
+      const bits = [];
+      if (d.holMe) bits.push(tr("holiday in France", "festivo en Francia"));
+      if (d.holHer) bits.push(tr("holiday in Mexico", "festivo en México"));
+      if (d.herBlocked && d.workHer) bits.push(tr(`${P.nameHer} can’t take leave`, `${P.nameHer} no puede tomar vacaciones`));
+      const e10 = Math.min(res.cal.N - 1, d.i + 10);
+      const cheapest = Planner.CITIES.filter(c => !(P.citiesOff || []).includes(c.id))
+        .map(c => ({ c, t: Planner.cityPrice(res.cal, P, d.i, e10, c, "me") + Planner.cityPrice(res.cal, P, d.i, e10, c, "her") }))
+        .sort((x, y) => x.t - y.t)[0];
+      document.getElementById("dayinfo").innerHTML = `<b>${fmtW(d.iso)}</b> · ${esc(where)}${bits.length ? " · " + esc(bits.join(" · ")) : ""}<br>
+        ${tr("10-night return leaving that day", "Ida y vuelta de 10 noches saliendo ese día")}: ${esc(P.nameMe)} ${eur(Planner.tripPrice(res.cal, P, d.i, e10, "me"))} · ${esc(P.nameHer)} ${eur(Planner.tripPrice(res.cal, P, d.i, e10, "her"))}` +
+        (cheapest ? tr(` · both to ${cheapest.c.name} ${eur(cheapest.t)} (fares only)`, ` · ambos a ${cheapest.c.name} ${eur(cheapest.t)} (solo billetes)`) : "");
+    };
+  }
+
+  function renderWhere(res) {
+    const mo = +wm.value, days = res.cal.days;
+    const s = days.findIndex(d => d.m === mo && +d.iso.slice(8) === 15), e = Math.min(res.cal.N - 1, s + 10), nights = e - s;
+    const rows = [
+      { name: tr("Paris", "París"), sub: tr(`${P.nameHer} flies`, `vuela ${P.nameHer}`), home: true, me: 0, her: Planner.tripPrice(res.cal, P, s, e, "her"), lodg: 0 },
+      { name: tr("Mexico City", "Ciudad de México"), sub: tr(`${P.nameMe} flies`, `vuela ${P.nameMe}`), home: true, me: Planner.tripPrice(res.cal, P, s, e, "me"), her: 0, lodg: 0 }
+    ];
+    for (const c of Planner.CITIES) rows.push({ c, name: c.name, sub: c.beach ? tr("beach", "playa") : tr("city", "ciudad"), me: Planner.cityPrice(res.cal, P, s, e, c, "me"), her: Planner.cityPrice(res.cal, P, s, e, c, "her"), lodg: (P.lodging[c.id] ?? c.lodging) * nights });
+    rows.forEach(r => r.total = r.me + r.her + r.lodg);
+    rows.sort((a, b) => a.total - b.total);
+    const off = id => (P.citiesOff || []).includes(id);
+    const minCity = Math.min(...rows.filter(r => r.c && !off(r.c.id)).map(r => r.total));
+    const box = document.getElementById("where");
+    box.innerHTML = rows.map(r => {
+      if (r.home) return `<div class="place"><span class="nm">${r.name} <span class="tag">${tr("home", "casa")} · ${esc(r.sub)}</span></span><span class="tot">${eur(r.total)}</span>
+        <span class="br">${tr("One ticket, no hotel", "Un billete, sin hotel")}</span></div>`;
+      const id = r.c.id;
+      return `<div class="place ${r.total === minCity ? "best" : ""} ${off(id) ? "off" : ""}">
+        <span class="nm">${r.name} <span class="tag">${r.sub}</span></span><span class="tot">${eur(r.total)}</span>
+        <span class="br">${esc(P.nameMe)} ${eur(r.me)} · ${esc(P.nameHer)} ${eur(r.her)} · hotel ${eur(r.lodg)}</span>
+        <span class="ctl"><label>${tr("€/night", "€/noche")} <input type="number" step="10" data-lodg="${id}" value="${P.lodging[id] ?? r.c.lodging}"></label>
+          <label>${tr("+€/day", "+€/día")} <input type="number" step="5" data-bonus="${id}" value="${P.cityBonus[id] ?? 0}"></label>
+          <label><input type="checkbox" data-on="${id}" ${off(id) ? "" : "checked"} style="width:auto">${tr("allow", "permitir")}</label></span>
+      </div>`;
+    }).join("");
+    box.querySelectorAll("[data-lodg]").forEach(i => i.addEventListener("change", () => { P.lodging[i.dataset.lodg] = +i.value || 0; schedule(); }));
+    box.querySelectorAll("[data-bonus]").forEach(i => i.addEventListener("change", () => { P.cityBonus[i.dataset.bonus] = +i.value || 0; schedule(); }));
+    box.querySelectorAll("[data-on]").forEach(i => i.addEventListener("change", () => {
+      const id = i.dataset.on; P.citiesOff = (P.citiesOff || []).filter(x => x !== id); if (!i.checked) P.citiesOff.push(id); schedule(); }));
+  }
+
+  function renderChart(res) {
+    const box = document.getElementById("chart"), tip = document.getElementById("tip");
+    const W = Math.max(320, Math.round(box.clientWidth || 640)), H = W < 560 ? 230 : 280, m = { l: 48, r: 8, t: 12, b: 26 };
+    const N = res.cal.N, days = res.cal.days;
+    const me = days.map(d => priceAt(res, d.i, "me")), her = days.map(d => priceAt(res, d.i, "her"));
+    const qs = res.quotes.map(q => ({ ...q, i: days.findIndex(d => d.iso === q.start), price: q.price * P.priceScale }));
+    const all = me.concat(her, qs.map(q => q.price), me.map(v => v * Planner.BAND.b / Planner.BASIS[P.fareBasis]), her.map(v => v * Planner.BAND.b / Planner.BASIS[P.fareBasis]));
+    const lo = Math.floor(Math.min(...all) / 100) * 100, hi = Math.ceil(Math.max(...all) / 100) * 100;
+    const x = i => m.l + (i / (N - 1)) * (W - m.l - m.r), y = v => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated fares through the year for each direction">`;
+    for (const o of res.best.trips) s += `<rect x="${x(o.s)}" y="${m.t}" width="${Math.max(2, x(o.e) - x(o.s))}" height="${H - m.t - m.b}" fill="${color(o)}" opacity=".12" rx="3"/>`;
+    for (let v = lo; v <= hi; v += 100) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">€${v}</text>`;
+    for (let mo = 0; mo < 12; mo++) { const i = days.findIndex(d => d.m === mo); s += `<text x="${x(i) + 3}" y="${H - 8}" font-size="11" fill="var(--ink-3)">${MONTHS[mo][0]}</text>`; }
+    const path = arr => arr.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+    const band = (arr, col) => { const hiA = arr.map(v => v * Planner.BAND.b / Planner.BASIS[P.fareBasis]), loA = arr.map(v => v / Planner.BASIS[P.fareBasis]);
+      return `<path d="${path(hiA)}${loA.map((v, i) => `L${x(loA.length - 1 - i).toFixed(1)},${y(loA[loA.length - 1 - i]).toFixed(1)}`).join("")}Z" fill="${col}" opacity=".13" stroke="none"/>`; };
+    s += band(me, "var(--me)") + band(her, "var(--her)");
+    s += `<path d="${path(me)}" fill="none" stroke="var(--me)" stroke-width="2" stroke-linejoin="round"/><path d="${path(her)}" fill="none" stroke="var(--her)" stroke-width="2" stroke-linejoin="round"/>`;
+    for (const q of qs) s += `<circle cx="${x(q.i)}" cy="${y(q.price)}" r="5" fill="var(--${q.dir})" stroke="var(--surface)" stroke-width="2"/><circle cx="${x(q.i)}" cy="${y(q.price)}" r="1.8" fill="var(--ink)"/>`;
+    s += `<line id="xh" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink-3)" stroke-dasharray="3 3" visibility="hidden"/><rect id="hit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/></svg>`;
+    box.innerHTML = s; box.appendChild(tip);
+    const svg = box.querySelector("svg"), hit = svg.querySelector("#hit"), xh = svg.querySelector("#xh");
+    const move = ev => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+      const i = Math.max(0, Math.min(N - 1, Math.round((px - m.l) / (W - m.l - m.r) * (N - 1))));
+      xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("visibility", "visible");
+      tip.innerHTML = `<b>${fmtW(days[i].iso)}</b><br><span style="color:var(--me)">■</span> ${esc(P.nameMe)} ${eur(me[i])}<br><span style="color:var(--her)">■</span> ${esc(P.nameHer)} ${eur(her[i])}`;
+      tip.style.display = "block";
+      const bx = box.getBoundingClientRect();
+      tip.style.left = Math.min(bx.width - tip.offsetWidth - 4, Math.max(4, ev.clientX - bx.left + 12)) + "px"; tip.style.top = "6px";
+    };
+    hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+    hit.addEventListener("pointerleave", () => { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); });
+  }
+
+  /* ---- Method: live results ---- */
+  function renderMethod(res) {
+    document.getElementById("mData").textContent = tr(`${res.quotes.length} quotes, 3 sites`, `${res.quotes.length} precios, 3 sitios`);
+    const A1 = P.leaveMe + 1, G1 = P.leaveHer + 1, R = res.reqs.length + 1;
+    document.getElementById("mStates").textContent = ((res.cal.N + 1) * R * A1 * G1 / 1e6).toFixed(1) + " M";
+    const st = document.getElementById("status").textContent.match(/(\d+) ms/);
+    if (st) document.getElementById("mTime").textContent = st[1] + " ms";
+    setTimeout(() => {
+      const b = {};
+      for (const fb of ["low", "typical", "cautious"]) { const q = { ...P, fareBasis: fb }, r = Planner.solve(q); b[fb] = r.best ? { ev: r.best.ev, sim: Planner.simulate(q, r.best.trips), trips: r.best.trips } : null; }
+      const cur = res.best, ev = cur.ev, days = res.cal.days;
+      const lines = [];
+      lines.push(tr(`<p><b>Our plan:</b> ${ev.days} days together across ${cur.trips.length} trips, about ${eur(ev.price + ev.lodging)} in travel. With real price swings it lands between <b>${eur(SIM.p10)} and ${eur(SIM.p90)}</b> in 80% of cases.</p>`,
+        `<p><b>Nuestro plan:</b> ${ev.days} días juntos en ${cur.trips.length} viajes, unos ${eur(ev.price + ev.lodging)} de viaje. Con las variaciones reales de precio, cae entre <b>${eur(SIM.p10)} y ${eur(SIM.p90)}</b> en el 80% de los casos.</p>`));
+      if (b.low && b.typical && b.low.ev.days !== b.typical.ev.days) {
+        const extra = b.low.trips.filter(o => !b.typical.trips.some(t => t.s === o.s && t.dir === o.dir));
+        const ex = extra.map(o => `${fmtD(days[o.s].iso)}–${fmtD(days[o.e].iso)}`).join(", ");
+        lines.push(tr(`<p><b>Price risk changes the plan.</b> With the cheapest fares seen, the optimiser adds ${ex || "a trip"} (${b.low.ev.days} days). That plan looks like ${eur(b.low.ev.price + b.low.ev.lodging)} on paper, but realistically costs ${eur(b.low.sim.p10)}–${eur(b.low.sim.p90)}. With typical fares it’s ${b.typical.ev.days} days for ${eur(b.typical.sim.p10)}–${eur(b.typical.sim.p90)}. So <b>let’s book that trip only if we catch a fare near the low</b>.</p>`,
+          `<p><b>El riesgo de precio cambia el plan.</b> Con las tarifas más baratas vistas, el optimizador añade ${ex || "un viaje"} (${b.low.ev.days} días). Ese plan parece costar ${eur(b.low.ev.price + b.low.ev.lodging)} sobre el papel, pero en realidad cuesta ${eur(b.low.sim.p10)}–${eur(b.low.sim.p90)}. Con tarifas típicas son ${b.typical.ev.days} días por ${eur(b.typical.sim.p10)}–${eur(b.typical.sim.p90)}. Así que <b>reservemos ese viaje solo si encontramos una tarifa cercana a la más baja</b>.</p>`));
+      } else if (b.low && b.typical) lines.push(tr(`<p><b>The plan is robust to prices.</b> Cheapest, typical and cautious fares all lead to the same ${b.typical.ev.days} days.</p>`, `<p><b>El plan es robusto a los precios.</b> Con tarifas baratas, típicas o prudentes salen los mismos ${b.typical.ev.days} días.</p>`));
+      if (frontierCache && frontierCache.pts.length > 2) {
+        const p = frontierCache.pts.slice().sort((x, y) => x.V - y.V), lo = p[0], hi = p[p.length - 1];
+        if (hi.days > lo.days) lines.push(tr(`<p><b>The trade-off curve:</b> from ${lo.days} to ${hi.days} days together costs ${eur(hi.cost - lo.cost)} more, about ${eur((hi.cost - lo.cost) / (hi.days - lo.days))} per extra day. Fixed trips already account for most of the budget.</p>`, `<p><b>La curva de compromiso:</b> pasar de ${lo.days} a ${hi.days} días juntos cuesta ${eur(hi.cost - lo.cost)} más, unos ${eur((hi.cost - lo.cost) / (hi.days - lo.days))} por día extra. Los viajes fijos ya se llevan la mayor parte del presupuesto.</p>`));
+      }
+      lines.push(tr(`<p><b>Leave is the real currency.</b> ${esc(P.nameHer)}’s ${P.leaveHer} days run out first, so the cheapest extra time comes from her flying in her cheap months (Apr–May, Aug–Oct) while ${esc(P.nameMe)} hosts, or from ${esc(P.nameMe)} flying out while she keeps working.</p>`, `<p><b>Las vacaciones son la verdadera moneda.</b> Los ${P.leaveHer} días de ${esc(P.nameHer)} se acaban primero, así que el tiempo extra más barato viene de que ella vuele en sus meses baratos (abr–may, ago–oct) mientras ${esc(P.nameMe)} la recibe, o de que ${esc(P.nameMe)} vuele mientras ella sigue trabajando.</p>`));
+      document.getElementById("mResults").innerHTML = lines.join("");
+    }, 60);
+  }
+
+  /* ---- Night: countdown to landing in CDMX, 8 Dec 2026 20:50 CST (UTC−6, no DST) ---- */
+  const MEET = new Date(Date.UTC(2026, 11, 9, 2, 50, 0));   // = 20:50 Mexico City, 8 Dec
+  const DEPART = new Date(Date.UTC(2026, 11, 8, 12, 50, 0)); // = 13:50 Paris (CET, UTC+1)
+  (function countdown() {
+    const dEl = document.getElementById("cdDays"), uEl = document.getElementById("cdUnit");
+    const h = document.getElementById("cdH"), mi = document.getElementById("cdM"), se = document.getElementById("cdS");
+    const MX = "America/Mexico_City", PA = "Europe/Paris";
+    document.getElementById("cdDate").textContent = MEET.toLocaleDateString(LOC, { day: "numeric", month: "long", year: "numeric", timeZone: MX });
+    const dow = MEET.toLocaleDateString(LOC, { weekday: "long", timeZone: MX });
+    document.getElementById("cdDow").textContent = tr(`${dow} · the next time we meet`, `${dow} · la próxima vez que nos vemos`);
+    const hm = (d, tz) => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz });
+    document.getElementById("cdFlight").textContent = tr(
+      `✈ Paris ${hm(DEPART, PA)} → CDMX ${hm(MEET, MX)} · local times`,
+      `✈ París ${hm(DEPART, PA)} → CDMX ${hm(MEET, MX)} · horas locales`);
+    const pad = n => String(n).padStart(2, "0");
+    const tick = () => {
+      const ms = MEET - new Date();
+      if (ms <= 0) {
+        const daysSince = Math.floor(-ms / 864e5);
+        dEl.textContent = "♥"; uEl.textContent = daysSince < 1 ? tr("today", "hoy") : tr("together", "juntos");
+        h.textContent = mi.textContent = se.textContent = "00";
+        return;
+      }
+      const d = Math.floor(ms / 864e5), hr = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60, sc = Math.floor(ms / 1e3) % 60;
+      dEl.textContent = d; uEl.textContent = d === 1 ? tr("day", "día") : tr("days", "días");
+      h.textContent = pad(hr); mi.textContent = pad(m); se.textContent = pad(sc);
+    };
+    tick(); setInterval(tick, 1000);
+  })();
+  (function sky() {
+    const cv = document.getElementById("sky"), ctx = cv.getContext("2d"), night = document.getElementById("night"), inner = document.getElementById("nightInner");
+    let W = 0, H = 0, stars = [], shoots = [], dpr = Math.min(2, window.devicePixelRatio || 1);
+    const resize = () => {
+      W = night.clientWidth; H = night.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const n = Math.round(W * H / 2600);
+      stars = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H * 0.92, r: Math.random() * 1.3 + 0.2, a: Math.random() * 0.7 + 0.3, s: Math.random() * 2 + 0.5, p: Math.random() * 6.3, pink: Math.random() < 0.12 }));
+    };
+    resize(); window.addEventListener("resize", resize);
+    let par = 0;
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY; par = y;
+      const f = Math.min(1, y / (H * 0.8 || 1));
+      inner.style.transform = `translateY(${y * 0.35}px)`; inner.style.opacity = String(1 - f * 0.9);
+    }, { passive: true });
+    const draw = t => {
+      ctx.clearRect(0, 0, W, H);
+      for (const st of stars) {
+        const tw = reduceMotion ? 1 : 0.55 + 0.45 * Math.sin(t / 1000 * st.s + st.p);
+        ctx.globalAlpha = st.a * tw;
+        ctx.fillStyle = st.pink ? "#ffc9dc" : "#fff";
+        ctx.beginPath(); ctx.arc(st.x, st.y - par * 0.15 * st.r, st.r, 0, 6.283); ctx.fill();
+      }
+      if (!reduceMotion && Math.random() < 0.006) shoots.push({ x: Math.random() * W * 0.7, y: Math.random() * H * 0.4, l: 0 });
+      ctx.globalAlpha = 1;
+      shoots = shoots.filter(sh => sh.l < 1);
+      for (const sh of shoots) {
+        sh.l += 0.018;
+        const x = sh.x + sh.l * 260, y = sh.y + sh.l * 110;
+        const g = ctx.createLinearGradient(x - 70, y - 30, x, y);
+        g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, `rgba(255,230,240,${1 - sh.l})`);
+        ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x - 70, y - 30); ctx.lineTo(x, y); ctx.stroke();
+      }
+      if (!reduceMotion) requestAnimationFrame(draw);
+    };
+    requestAnimationFrame(draw);
+  })();
+
+  /* ---- Floating hearts: light rose, drifting left to right as you scroll ---- */
+  const heartsBox = document.getElementById("hearts");
+  const HEART_COLORS = ["#f8bbd0", "#f4a6c0", "#fce4ec", "#f9c6d6", "#efb3c8"];
+  let lastY = window.scrollY, budget = 0, live = 0;
+  function spawnHeart() {
+    if (live > 16) return;
+    const size = 10 + Math.random() * 16, dur = 7 + Math.random() * 7, wob = 1.6 + Math.random() * 1.8;
+    const c = HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)];
+    const el = document.createElement("div");
+    el.className = "fh";
+    el.style.top = (8 + Math.random() * 84) + "vh";
+    el.style.animationDuration = dur + "s";
+    el.style.opacity = (0.3 + Math.random() * 0.3).toFixed(2);
+    el.innerHTML = `<i style="animation-duration:${wob}s"><svg width="${size}" height="${size}" viewBox="-16 -14 32 26"><path d="M0,10 C-14,0 -10,-12 0,-5 C10,-12 14,0 0,10 Z" fill="${c}"/></svg></i>`;
+    heartsBox.appendChild(el); live++;
+    el.addEventListener("animationend", e => { if (e.target === el) { el.remove(); live--; } });
+  }
+  if (!reduceMotion) {
+    for (let i = 0; i < 4; i++) setTimeout(spawnHeart, i * 900);
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY; budget += Math.abs(y - lastY); lastY = y;
+      while (budget > 140) { budget -= 140; spawnHeart(); }
+    }, { passive: true });
+    setInterval(() => { if (document.visibilityState === "visible" && Math.random() < 0.5) spawnHeart(); }, 2600);
+  }
+
+  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (last) { renderChart(last); if (frontierCache) drawFrontier(frontierCache.pts); } }, 150); });
+  names();
+  run();
+  onScroll();
+})();
+</script>
+</body>
+</html>
