@@ -193,7 +193,7 @@ def cmd_add_quote(args) -> int:
            f"{args.nonstop:g}" if args.nonstop else "", args.carriers, args.notes]
     with open(path, newline="", encoding="utf-8") as f:
         rows = list(csv.reader(f))
-    key = lambda r: (r[0], r[1], r[2], r[3], r[4], float(r[6]))  # noqa: E731
+    key = lambda r: (r[0], r[1], r[2], r[3], r[4], float(r[6]))
     if any(key(r) == key(row) for r in rows[1:]):
         print("duplicate, skipped:", ",".join(row))
         return 0
