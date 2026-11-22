@@ -1,0 +1,41 @@
+# Test, build and publish the web page whenever the data, the model or the page changes on main.
+name: Build and publish
+
+on:
+  push:
+    branches: [main]
+    paths: ["config/**", "data/**", "src/**", "web/**", "tests/**", "pyproject.toml", "uv.lock", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: uv sync
+      - name: Tests (model, fare model up to date, JS ↔ Python parity)
+        run: uv run pytest -q
+      - name: Build page
+        run: |
+          uv run meetplan build-web -o site/index.html
+          touch site/.nojekyll
+      - name: Publish to gh-pages
+        run: |
+          cd site
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Publish ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
